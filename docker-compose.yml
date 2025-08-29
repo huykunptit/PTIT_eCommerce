@@ -1,0 +1,88 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile   
+    container_name: shop_app
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      DB_HOST: mysql
+      DB_DATABASE: shop
+      DB_USERNAME: shop
+      DB_PASSWORD: secret
+      REDIS_HOST: redis
+      QUEUE_CONNECTION: redis
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - mysql
+      - redis
+    ports:
+      - "9000:9000"  
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: shop_nginx
+    ports:
+      - "8080:80"  
+    volumes:
+      - ./:/var/www/html:ro
+      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+
+  mysql:
+    image: mysql:8.0
+    container_name: shop_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: secret   # Đảm bảo đã cung cấp mật khẩu root
+      MYSQL_DATABASE: shop          # Cơ sở dữ liệu mặc định
+      MYSQL_USER: shop              # Tạo người dùng shop
+      MYSQL_PASSWORD: secret        # Mật khẩu cho người dùng shop
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-u", "root", "-psecret"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+    # Thêm MYSQL_ALLOW_EMPTY_PASSWORD cho phép mật khẩu trống nếu cần
+    # MYSQL_ALLOW_EMPTY_PASSWORD: "yes"  # Chỉ sử dụng nếu bạn muốn cho phép mật khẩu trống.
+
+  redis:
+    image: redis:7-alpine
+    container_name: shop_redis
+
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: shop_queue
+    command: php artisan queue:work --sleep=3 --tries=3
+    environment:
+      QUEUE_CONNECTION: redis
+      REDIS_HOST: redis
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - app
+      - redis
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: shop_scheduler
+    command: sh -c "while :; do php artisan schedule:run --verbose --no-interaction; sleep 60; done"
+    environment:
+      REDIS_HOST: redis
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - app
+
+volumes:
+  mysql_data:
