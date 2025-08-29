@@ -1,3 +1,4 @@
+version: "3.9"
 services:
   app:
     build:
@@ -19,7 +20,7 @@ services:
       - mysql
       - redis
     ports:
-      - "9000:9000"  
+      - "9000:9000"
 
   nginx:
     image: nginx:1.27-alpine
@@ -36,10 +37,10 @@ services:
     image: mysql:8.0
     container_name: shop_mysql
     environment:
-      MYSQL_ROOT_PASSWORD: secret   # Đảm bảo đã cung cấp mật khẩu root
-      MYSQL_DATABASE: shop          # Cơ sở dữ liệu mặc định
-      MYSQL_USER: shop              # Tạo người dùng shop
-      MYSQL_PASSWORD: secret        # Mật khẩu cho người dùng shop
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: shop
+      MYSQL_USER: shop
+      MYSQL_PASSWORD: secret
     ports:
       - "3307:3306"
     volumes:
@@ -49,8 +50,6 @@ services:
       interval: 30s
       retries: 3
       start_period: 10s
-    # Thêm MYSQL_ALLOW_EMPTY_PASSWORD cho phép mật khẩu trống nếu cần
-    # MYSQL_ALLOW_EMPTY_PASSWORD: "yes"  # Chỉ sử dụng nếu bạn muốn cho phép mật khẩu trống.
 
   redis:
     image: redis:7-alpine
@@ -83,6 +82,18 @@ services:
       - ./:/var/www/html
     depends_on:
       - app
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: shop_phpmyadmin
+    environment:
+      PMA_HOST: mysql  
+      PMA_USER: root    
+      PMA_PASSWORD: secret 
+    ports:
+      - "8081:80"   
+    depends_on:
+      - mysql
 
 volumes:
   mysql_data:
