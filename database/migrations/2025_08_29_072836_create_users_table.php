@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->string('phone_number', 15)->nullable();
-            $table->enum('role', ['buyer', 'seller'])->default('buyer');
+            $table->enum('role', ['user', 'admin'])->default('user');
             $table->text('address')->nullable();
             $table->timestamps();
         });
