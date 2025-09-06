@@ -22,9 +22,17 @@
                 <div class="flex items-center space-x-4">
                     @auth
                         <span class="text-gray-700">Xin chào, {{ Auth::user()->name }}</span>
-                        <a href="{{ route('auth.dashboard') }}" class="text-blue-600 hover:text-blue-800 font-medium">
-                            <i class="fas fa-tachometer-alt mr-1"></i>Dashboard
-                        </a>
+                        
+                        @if(Auth::user()->role === 'admin')
+                            <a href="{{ route('admin.dashboard') }}" class="text-red-600 hover:text-red-800 font-medium">
+                                <i class="fas fa-crown mr-1"></i>Admin Panel
+                            </a>
+                        @else
+                            <a href="{{ route('auth.dashboard') }}" class="text-blue-600 hover:text-blue-800 font-medium">
+                                <i class="fas fa-tachometer-alt mr-1"></i>Dashboard
+                            </a>
+                        @endif
+                        
                         <form method="POST" action="{{ route('auth.logout') }}" class="inline">
                             @csrf
                             <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration-200">
