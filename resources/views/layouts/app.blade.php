@@ -1,69 +1,127 @@
+<!-- 
+=========================================================
+ Light Bootstrap Dashboard - v2.0.1
+=========================================================
+
+ Product Page: https://www.creative-tim.com/product/light-bootstrap-dashboard
+ Copyright 2019 Creative Tim (https://www.creative-tim.com) & Updivision (https://www.updivision.com)
+ Licensed under MIT (https://github.com/creativetimofficial/light-bootstrap-dashboard/blob/master/LICENSE)
+
+ Coded by Creative Tim & Updivision
+
+=========================================================
+
+ The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.  -->
 <!DOCTYPE html>
+
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Shop')</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    @stack('styles')
-</head>
-<body class="bg-gray-100 min-h-screen">
-    <!-- Navigation -->
-    <nav class="bg-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <a href="{{ route('home') }}" class="text-xl font-bold text-gray-800 hover:text-blue-600 transition duration-200">
-                        <i class="fas fa-shopping-bag mr-2"></i>Shop
-                    </a>
-                </div>
-                <div class="flex items-center space-x-4">
-                    @auth
-                        <span class="text-gray-700">Xin chào, {{ Auth::user()->name }}</span>
-                        
-                        @if(Auth::user()->role === 'admin')
-                            <a href="{{ route('admin.dashboard') }}" class="text-red-600 hover:text-red-800 font-medium">
-                                <i class="fas fa-crown mr-1"></i>Admin Panel
-                            </a>
-                        @else
-                            <a href="{{ route('auth.dashboard') }}" class="text-blue-600 hover:text-blue-800 font-medium">
-                                <i class="fas fa-tachometer-alt mr-1"></i>Dashboard
-                            </a>
-                        @endif
-                        
-                        <form method="POST" action="{{ route('auth.logout') }}" class="inline">
-                            @csrf
-                            <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration-200">
-                                <i class="fas fa-sign-out-alt mr-2"></i>Đăng xuất
-                            </button>
-                        </form>
-                    @else
-                        <a href="{{ route('auth.login') }}" class="text-blue-600 hover:text-blue-800 font-medium">
-                            <i class="fas fa-sign-in-alt mr-1"></i>Đăng nhập
-                        </a>
-                        <a href="{{ route('auth.register') }}" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-200">
-                            <i class="fas fa-user-plus mr-1"></i>Đăng ký
-                        </a>
-                    @endauth
-                </div>
+    <head>
+        <meta charset="utf-8" />
+        <link rel="apple-touch-icon" sizes="76x76" href="{{ asset('img/apple-icon.png') }}">
+        <link rel="icon" type="image/png" href="{{ asset('img/favicon.ico') }}">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+        <title>{{ $title }}</title>
+        <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport' />
+        <!--     Fonts and icons     -->
+        <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700,200" rel="stylesheet" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" />
+        <!-- CSS Files -->
+        <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet" />
+        <link href="{{ asset('css/light-bootstrap-dashboard.css?v=2.0.0') }} " rel="stylesheet" />
+        <!-- CSS Just for demo purpose, don't include it in your project -->
+        <link href="{{ asset('css/demo.css') }}" rel="stylesheet" />
+    </head>
+
+    <body>
+        <div class="wrapper @if (!auth()->check() || request()->route()->getName() == "") wrapper-full-page @endif">
+
+            @if (auth()->check() && request()->route()->getName() != "")
+                @include('layouts.navbars.sidebar')
+                @include('pages/sidebarstyle')
+            @endif
+
+            <div class="@if (auth()->check() && request()->route()->getName() != "") main-panel @endif">
+                @include('layouts.navbars.navbar')
+                @yield('content')
+                @include('layouts.footer.nav')
             </div>
+
         </div>
-    </nav>
+       
 
-    <!-- Main Content -->
-    <main class="py-6">
-        @yield('content')
-    </main>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 mt-12">
-        <div class="max-w-7xl mx-auto py-4 px-4 text-center text-gray-600">
-            <p>&copy; 2025 Shop. Tất cả quyền được bảo lưu.</p>
-        </div>
-    </footer>
+    </body>
+        <!--   Core JS Files   -->
+    <script src="{{ asset('js/core/jquery.3.2.1.min.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('js/core/popper.min.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('js/core/bootstrap.min.js') }}" type="text/javascript"></script>
 
-    @stack('scripts')
-</body>
-</html> 
+    <script src="{{ asset('js/plugins/jquery.sharrre.js') }}"></script>
+    <!--  Plugin for Switches, full documentation here: http://www.jque.re/plugins/version3/bootstrap.switch/ -->
+    <script src="{{ asset('js/plugins/bootstrap-switch.js') }}"></script>
+    <!--  Google Maps Plugin    -->
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=YOUR_KEY_HERE"></script>
+    <!--  Chartist Plugin  -->
+    <script src="{{ asset('js/plugins/chartist.min.js') }}"></script>
+    <!--  Notifications Plugin    -->
+    <script src="{{ asset('js/plugins/bootstrap-notify.js') }}"></script>
+    <!-- Control Center for Light Bootstrap Dashboard: scripts for the example pages etc -->
+    <script src="{{ asset('js/light-bootstrap-dashboard.js?v=2.0.0') }}" type="text/javascript"></script>
+    <!-- Light Bootstrap Dashboard DEMO methods, don't include it in your project! -->
+    <script src="{{ asset('js/demo.js') }}"></script>
+    @stack('js')
+    <script>
+      $(document).ready(function () {
+        
+        $('#facebook').sharrre({
+          share: {
+            facebook: true
+          },
+          enableHover: false,
+          enableTracking: false,
+          enableCounter: false,
+          click: function(api, options) {
+            api.simulateClick();
+            api.openPopup('facebook');
+          },
+          template: '<i class="fab fa-facebook-f"></i> Facebook',
+          url: 'https://light-bootstrap-dashboard-laravel.creative-tim.com/login'
+        });
+
+        $('#google').sharrre({
+          share: {
+            googlePlus: true
+          },
+          enableCounter: false,
+          enableHover: false,
+          enableTracking: true,
+          click: function(api, options) {
+            api.simulateClick();
+            api.openPopup('googlePlus');
+          },
+          template: '<i class="fab fa-google-plus"></i> Google',
+          url: 'https://light-bootstrap-dashboard-laravel.creative-tim.com/login'
+        });
+
+        $('#twitter').sharrre({
+          share: {
+            twitter: true
+          },
+          enableHover: false,
+          enableTracking: false,
+          enableCounter: false,
+          buttons: {
+            twitter: {
+              via: 'CreativeTim'
+            }
+          },
+          click: function(api, options) {
+            api.simulateClick();
+            api.openPopup('twitter');
+          },
+          template: '<i class="fab fa-twitter"></i> Twitter',
+          url: 'https://light-bootstrap-dashboard-laravel.creative-tim.com/login'
+        });
+      });
+    </script>
+</html>
