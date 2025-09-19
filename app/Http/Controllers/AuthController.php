@@ -9,13 +9,13 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    // Hiển thị form đăng nhập
+   
     public function showLoginForm()
     {
         return view('auth.login');
     }
 
-    // Đăng nhập
+   
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
@@ -33,7 +33,6 @@ class AuthController extends Controller
         ])->withInput($request->only('email'));
     }
 
-    // Đăng xuất
     public function logout(Request $request)
     {
         Auth::logout();
@@ -44,13 +43,13 @@ class AuthController extends Controller
             ->with('success', 'Đăng xuất thành công!');
     }
 
-    // Hiển thị form đăng ký
+
     public function showRegisterForm()
     {
         return view('auth.register');
     }
 
-    // Đăng ký Admin (hoặc người dùng mới)
+
     public function register(Request $request)
     {
         $validated = $request->validate([
@@ -70,14 +69,13 @@ class AuthController extends Controller
             'role' => 'user', // Mặc định là user
         ]);
 
-        // Tự động đăng nhập sau khi đăng ký
         Auth::login($user);
 
         return redirect()->route('auth.dashboard')
             ->with('success', 'Đăng ký tài khoản thành công!');
     }
 
-    // Hiển thị dashboard
+ 
     public function dashboard()
     {
         return view('auth.dashboard');

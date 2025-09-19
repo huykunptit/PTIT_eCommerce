@@ -1,94 +1,79 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập - Shop</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign In</title>
+  <link rel="shortcut icon" type="image/png" href="{{ asset('public/assets/img/logos/favicon.png') }}" />
+  <link rel="stylesheet" href="{{ asset('assets/css/styles.min.css') }}" />
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
-    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">Đăng nhập</h1>
-            <p class="text-gray-600">Chào mừng bạn trở lại!</p>
-        </div>
 
-        @if(session('error'))
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                {{ session('error') }}
-            </div>
-        @endif
-
-        @if(session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        <form method="POST" action="{{ route('auth.login') }}" class="space-y-6">
-            @csrf
-            
-            <div>
-                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i class="fas fa-envelope mr-2"></i>Email
-                </label>
-                <input type="email" 
-                       id="email" 
-                       name="email" 
-                       value="{{ old('email') }}"
-                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                       placeholder="Nhập email của bạn"
-                       required>
-                @error('email')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
-            </div>
-
-            <div>
-                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i class="fas fa-lock mr-2"></i>Mật khẩu
-                </label>
-                <input type="password" 
-                       id="password" 
-                       name="password" 
-                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                       placeholder="Nhập mật khẩu"
-                       required>
-                @error('password')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
-            </div>
-
-            <div class="flex items-center justify-between">
-                <label class="flex items-center">
-                    <input type="checkbox" name="remember" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                    <span class="ml-2 text-sm text-gray-600">Ghi nhớ đăng nhập</span>
-                </label>
-            </div>
-
-            <button type="submit" 
-                    class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
-                <i class="fas fa-sign-in-alt mr-2"></i>Đăng nhập
-            </button>
-        </form>
-
-        <div class="mt-6 text-center">
-            <p class="text-gray-600">
-                Chưa có tài khoản? 
-                <a href="{{ route('auth.register') }}" class="text-blue-600 hover:text-blue-800 font-medium">
-                    Đăng ký ngay
+<body>
+  <!--  Body Wrapper -->
+  <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+    data-sidebar-position="fixed" data-header-position="fixed">
+    <div
+      class="position-relative overflow-hidden text-bg-light min-vh-100 d-flex align-items-center justify-content-center">
+      <div class="d-flex align-items-center justify-content-center w-100">
+        <div class="row justify-content-center w-100">
+          <div class="col-md-8 col-lg-6 col-xxl-3">
+            <div class="card mb-0">
+              <div class="card-body">
+                 <a href="{{ route('home') }}" class="text-nowrap logo-img text-center d-block py-3 w-100">
+                  <img src="{{ asset('assets/img/logos/logo.svg') }}" alt="">
                 </a>
-            </p>
-        </div>
 
-        <div class="mt-6 pt-6 border-t border-gray-200">
-            <div class="text-center">
-                <a href="{{ route('home') }}" class="text-gray-500 hover:text-gray-700 text-sm">
-                    <i class="fas fa-arrow-left mr-1"></i>Về trang chủ
-                </a>
+                <form method="POST" action="{{ url('/auth/login') }}">
+                  @csrf
+
+                  <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control" id="email" value="{{ old('email') }}" required autofocus>
+                    @error('email')
+                      <small class="text-danger">{{ $message }}</small>
+                    @enderror
+                  </div>
+
+                  <div class="mb-4">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" id="password" required>
+                    @error('password')
+                      <small class="text-danger">{{ $message }}</small>
+                    @enderror
+                  </div>
+
+                  <div class="d-flex align-items-center justify-content-between mb-4">
+                    <div class="form-check">
+                      <input class="form-check-input primary" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
+                      <label class="form-check-label text-dark" for="remember">
+                        Remember this Device
+                      </label>
+                    </div>
+                    <!-- adjust href to your password reset route if available -->
+                    <a class="text-primary fw-bold" href="{{ url('/') }}">Forgot Password ?</a>
+                  </div>
+
+                  <button type="submit" class="btn btn-primary w-100 py-2 fs-6 mb-4 rounded-2">Sign In</button>
+
+                  <div class="d-flex align-items-center justify-content-center">
+                    <p class="fs-6 mb-0 fw-bold">New here?</p>
+                    <a class="text-primary fw-bold ms-2" href="{{ url('/auth/register') }}">Create an account</a>
+                  </div>
+                </form>
+
+              </div>
             </div>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
+
+    <script src="{{ asset('assets/libs/jquery/dist/jquery.min.js') }}"></script>
+  <script src="{{ asset('assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
 </body>
-</html> 
+</body>
+
+</html>

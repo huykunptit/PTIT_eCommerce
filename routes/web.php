@@ -30,7 +30,7 @@ Route::group(['prefix' => 'auth', 'as' => 'auth.'], function () {
         Route::post('/register', [AuthController::class, 'register']);
     });
 
-    // Protected routes (chỉ cho user đã đăng nhập)
+   
     Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

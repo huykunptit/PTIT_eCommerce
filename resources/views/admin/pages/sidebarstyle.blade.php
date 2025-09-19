@@ -47,7 +47,7 @@
             </li>
             <li>
                 <a class="img-holder switch-trigger" href="javascript:void(0)">
-                    <img src="{{ asset('img/sidebar-5.jpg') }}" alt="" />
+                    <img src="{{ asset('public/assets/img/sidebar-5.jpg') }}" alt="" />
                 </a>
             </li>
             <li class="button-container">
