@@ -23,9 +23,14 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
-            
-            return redirect()->intended(route('auth.dashboard'))
+            if(Auth::user()->role === 'admin'){
+                return redirect()->intended(route('admin.index'))
                 ->with('success', 'Đăng nhập thành công!');
+            }
+            else {
+                return redirect()->intended(route('home'))
+                ->with('success', 'Đăng nhập thành công!');
+            }
         }
 
         return back()->withErrors([
@@ -78,10 +83,16 @@ class AuthController extends Controller
  
     public function dashboard()
     {
-        return view('auth.dashboard');
+        if(Auth::user()->role === 'admin'){
+            return view('admin.index');
+        }
+        else {
+            return view('user.dashboard');
+        }
+
     }
 
-    // ========== API METHODS ==========
+    // ========== API METHODS = =========
     
     // API Login
     public function apiLogin(Request $request)

@@ -15,14 +15,13 @@ use App\Http\Controllers\AdminController;
 |
 */
 
-// Trang chủ
+
 Route::get('/', function () {
-    return view('welcome');
+    return view('home');
 })->name('home');
 
 // Authentication Routes
 Route::group(['prefix' => 'auth', 'as' => 'auth.'], function () {
-    // Guest routes (chỉ cho user chưa đăng nhập)
     Route::middleware('guest')->group(function () {
         Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
         Route::post('/login', [AuthController::class, 'login']);
@@ -32,7 +31,7 @@ Route::group(['prefix' => 'auth', 'as' => 'auth.'], function () {
 
    
     Route::middleware('auth')->group(function () {
-        Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
+        Route::get('/', [AuthController::class, 'dashboard'])->name('index');
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     });
 });
@@ -42,16 +41,16 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth', 'a
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     
     // Users Management
-    Route::resource('users', AdminController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
-    Route::get('/users', [AdminController::class, 'users'])->name('users');
+    // Route::resource('users', AdminController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
+    Route::get('/users', [AdminController::class, 'users'])->name('users.index');
     Route::get('/users/create', [AdminController::class, 'createUser'])->name('users.create');
     Route::post('/users', [AdminController::class, 'storeUser'])->name('users.store');
     Route::get('/users/{id}/edit', [AdminController::class, 'editUser'])->name('users.edit');
-    Route::put('/users/{id}', [AdminController::class, 'updateUser'])->name('users.update');
-    Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('users.delete');
+    Route::match(['put','patch'], '/users/{id}', [AdminController::class, 'updateUser'])->name('users.update');
+    Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('users.destroy');
     
     // Categories Management
-    Route::get('/categories', [AdminController::class, 'categories'])->name('categories');
+    Route::get('/categories', [AdminController::class, 'categories'])->name('categories.index');
     Route::get('/categories/create', [AdminController::class, 'createCategory'])->name('categories.create');
     Route::post('/categories', [AdminController::class, 'storeCategory'])->name('categories.store');
     Route::get('/categories/{id}/edit', [AdminController::class, 'editCategory'])->name('categories.edit');

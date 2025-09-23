@@ -1,79 +1,83 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sign In</title>
-  <link rel="shortcut icon" type="image/png" href="{{ asset('public/assets/img/logos/favicon.png') }}" />
-  <link rel="stylesheet" href="{{ asset('assets/css/styles.min.css') }}" />
+  <title>PTIT  || Login Page</title>
+  @include('backend.layouts.head')
+
 </head>
 
-<body>
-  <!--  Body Wrapper -->
-  <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
-    data-sidebar-position="fixed" data-header-position="fixed">
-    <div
-      class="position-relative overflow-hidden text-bg-light min-vh-100 d-flex align-items-center justify-content-center">
-      <div class="d-flex align-items-center justify-content-center w-100">
-        <div class="row justify-content-center w-100">
-          <div class="col-md-8 col-lg-6 col-xxl-3">
-            <div class="card mb-0">
-              <div class="card-body">
-                 <a href="{{ route('home') }}" class="text-nowrap logo-img text-center d-block py-3 w-100">
-                  <img src="{{ asset('assets/img/logos/logo.svg') }}" alt="">
-                </a>
+<body class="bg-gradient-primary">
 
-                <form method="POST" action="{{ url('/auth/login') }}">
-                  @csrf
+  <div class="container">
 
-                  <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" name="email" class="form-control" id="email" value="{{ old('email') }}" required autofocus>
-                    @error('email')
-                      <small class="text-danger">{{ $message }}</small>
-                    @enderror
+    <!-- Outer Row -->
+    <div class="row justify-content-center">
+
+      <div class="col-xl-10 col-lg-12 col-md-9 mt-5">
+
+        <div class="card o-hidden border-0 shadow-lg my-5">
+          <div class="card-body p-0">
+            <!-- Nested Row within Card Body -->
+            <div class="row">
+              <div class="col-lg-6 d-none d-lg-block bg-login-image"></div>
+              <div class="col-lg-6">
+                <div class="p-5">
+                  <div class="text-center">
+                    <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
                   </div>
-
-                  <div class="mb-4">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" name="password" class="form-control" id="password" required>
-                    @error('password')
-                      <small class="text-danger">{{ $message }}</small>
-                    @enderror
-                  </div>
-
-                  <div class="d-flex align-items-center justify-content-between mb-4">
-                    <div class="form-check">
-                      <input class="form-check-input primary" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
-                      <label class="form-check-label text-dark" for="remember">
-                        Remember this Device
-                      </label>
+                  <form class="user"  method="POST" action="{{ route('auth.login') }}">
+                    @csrf
+                    <div class="form-group">
+                      <input type="email" class="form-control form-control-user @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" id="exampleInputEmail" aria-describedby="emailHelp" placeholder="Enter Email Address..."  required autocomplete="email" autofocus>
+                        @error('email')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
                     </div>
-                    <!-- adjust href to your password reset route if available -->
-                    <a class="text-primary fw-bold" href="{{ url('/') }}">Forgot Password ?</a>
+                    <div class="form-group">
+                      <input type="password" class="form-control form-control-user @error('password') is-invalid @enderror" id="exampleInputPassword" placeholder="Password"  name="password" required autocomplete="current-password">
+                         @error('password')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
+                    
+                    </div>
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
+
+                            <label class="form-check-label" for="remember">
+                                {{ __('Remember Me') }}
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-user btn-block">
+                      Login
+                    </button>
+                  </form>
+                  <hr>
+                   
+                  <div class="text-center">
+                    @if (Route::has('password.request'))
+                        <a class="btn btn-link small" href="{{ route('password.request') }}">
+                            {{ __('Forgot Your Password?') }}
+                        </a>
+                    @endif
                   </div>
-
-                  <button type="submit" class="btn btn-primary w-100 py-2 fs-6 mb-4 rounded-2">Sign In</button>
-
-                  <div class="d-flex align-items-center justify-content-center">
-                    <p class="fs-6 mb-0 fw-bold">New here?</p>
-                    <a class="text-primary fw-bold ms-2" href="{{ url('/auth/register') }}">Create an account</a>
-                  </div>
-                </form>
-
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
 
-    <script src="{{ asset('assets/libs/jquery/dist/jquery.min.js') }}"></script>
-  <script src="{{ asset('assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
-  <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
-</body>
+      </div>
+
+    </div>
+
+  </div>
 </body>
 
 </html>

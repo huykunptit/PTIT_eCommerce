@@ -1,0 +1,142 @@
+/* Theme Overrides - Primary Blue and Deep Yellow */
+:root{
+  --color-primary:#134686;      /* Blue */
+  --color-orange:#ED3F27;       /* Orange */
+  --color-yellow:#FEB21A;       /* Deep Yellow */
+  --color-cream:#FDF4E3;        /* Light Cream/Pinkish */
+}
+
+/* Primary backgrounds and text */
+.bg-primary{background-color:var(--color-primary)!important;}
+.text-primary{color:var(--color-primary)!important;}
+.border-left-primary{border-left:.25rem solid var(--color-primary)!important;}
+
+/* Gradient primary used by sidebar/header blocks */
+.bg-gradient-primary{
+  background-color:var(--color-primary)!important;
+  background-image:linear-gradient(180deg, rgba(19,70,134,0.95) 10%, rgba(19,70,134,0.7) 100%)!important;
+  background-size:cover!important;
+}
+
+/* Buttons - primary, warning (deep yellow), danger mapped to orange */
+.btn-primary{
+  color:#fff!important;
+  background-color:var(--color-primary)!important;
+  border-color:var(--color-primary)!important;
+}
+.btn-primary:hover,.btn-primary:focus{
+  background-color:#0f3a6f!important;
+  border-color:#0f3a6f!important;
+}
+
+.btn-warning{
+  color:#212529!important;
+  background-color:var(--color-yellow)!important;
+  border-color:var(--color-yellow)!important;
+}
+.btn-warning:hover,.btn-warning:focus{
+  background-color:#e3a216!important;
+  border-color:#e3a216!important;
+}
+
+/* DataTables Buttons and length select */
+.dt-buttons .btn,
+div.dataTables_wrapper div.dataTables_length select{
+  padding:.25rem .5rem;
+}
+/* Buttons: deep yellow with left dividers */
+.dt-buttons .btn{
+  background-color:var(--color-yellow)!important;
+  border-color:var(--color-yellow)!important;
+  color:#212529!important;
+  border-left:1px solid #000!important;
+}
+.dt-buttons .btn:first-child{border-left:0!important;}
+.dt-buttons .btn:hover,.dt-buttons .btn:focus{
+  background-color:#e3a216!important;
+  border-color:#e3a216!important;
+}
+
+/* Keep search box white */
+div.dataTables_wrapper div.dataTables_filter input{
+  background-color:#fff!important;
+  border:1px solid #ced4da!important;
+  color:#212529!important;
+}
+
+.btn-danger{
+  color:#fff!important;
+  background-color:var(--color-orange)!important;
+  border-color:var(--color-orange)!important;
+}
+.btn-danger:hover,.btn-danger:focus{
+  background-color:#cf381f!important;
+  border-color:#cf381f!important;
+}
+
+/* Badges */
+.badge-primary{background-color:var(--color-primary)!important;}
+.badge-warning{background-color:var(--color-yellow)!important;color:#212529!important;}
+.badge-danger{background-color:var(--color-orange)!important;}
+
+/* Alerts */
+.alert-primary{color:#0b2e5a;background-color:#d7e2f2;border-color:#c7d6ec;}
+.alert-warning{color:#5c4810;background-color:#fff3cd;border-color:#ffe9a6;}
+.alert-danger{color:#842029;background-color:#f8d7da;border-color:#f5c2c7;}
+
+/* Links */
+a{color:var(--color-primary);} 
+a:hover,a:focus{color:#0f3a6f;}
+
+/* Sidebar overrides */
+.sidebar .nav-item .nav-link{color:#fff;}
+.sidebar .nav-item .nav-link i{color:#fff;}
+.sidebar .sidebar-brand-text{color:#fff;}
+
+/* Table header accent */
+table.dataTable thead th{background-color:var(--color-cream); color:#2d2d2d;}
+
+/* Highlight elements using deep yellow accent */
+.text-accent{color:var(--color-yellow)!important;}
+.bg-accent{background-color:var(--color-yellow)!important;}
+.btn-accent{color:#212529!important;background-color:var(--color-yellow)!important;border-color:var(--color-yellow)!important;}
+
+/* Modern floating inputs (square, clean) */
+.modern-input{
+  border-radius:6px!important;
+  padding:0.75rem 0.75rem 0.5rem!important;
+  border:1px solid #ced4da!important;
+  transition:all .2s ease;
+}
+.modern-input:focus{
+  border-color:var(--color-primary)!important;
+  box-shadow:0 0 0 .2rem rgba(19,70,134,.15)!important;
+}
+.floating-group{position:relative;}
+.floating-group label{
+  position:absolute;
+  top:0;
+  left:12px;
+  transform:translateY(-50%);
+  margin:0;
+  padding:0 6px;
+  background:#fff;
+  color:#6c757d;
+  pointer-events:none;
+  transition:all .15s ease;
+}
+.modern-input + label{
+  transform:translateY(-60%) scale(.9);
+  color:var(--color-primary);
+}
+
+/* layout tweaks for create form */
+.create-user-wrapper{margin-top:50px;}
+.form-half{margin-left:0;}
+
+/* FilePond sizing */
+.filepond--root{max-width:260px;margin-top:.25rem;}
+.filepond--panel-root{border-radius:8px;}
+.filepond--item-panel{border-radius:8px;}
+
+

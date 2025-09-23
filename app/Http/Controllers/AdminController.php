@@ -29,10 +29,10 @@ class AdminController extends Controller
             'recent_users' => User::where('role', 'user')->latest()->take(5)->get(),
         ];
 
-        return view('admin.dashboard', compact('stats'));
+        return view('admin.index', compact('stats'));
     }
 
-    // Quản lý Users
+
     public function users()
     {
         $users = User::where('role', 'user')->paginate(10);
@@ -50,20 +50,36 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:4096',
             'phone_number' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
         ]);
+
+        $photoPath = null;
+        if ($request->hasFile('photo')) {
+            $datePrefix = now()->format('Ymd');
+            $file = $request->file('photo');
+            $filename = $datePrefix.'_'.$file->getClientOriginalName();
+            $destination = public_path('uploads/img/user');
+            if (!is_dir($destination)) {
+                mkdir($destination, 0755, true);
+            }
+            $file->move($destination, $filename);
+            $photoPath = 'uploads/img/user/'.$filename;
+        }
 
         User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => bcrypt($validated['password']),
+            'photo' => $photoPath,
             'phone_number' => $validated['phone_number'] ?? null,
             'address' => $validated['address'] ?? null,
-            'role' => 'user',
+            'role' => $request->input('role', 'user'),
+            'status' => $request->input('status', 'active'),
         ]);
 
-        return redirect()->route('admin.users')->with('success', 'User created successfully!');
+        return redirect()->route('admin.users.index')->with('success', 'User created successfully!');
     }
 
     public function editUser($id)
@@ -79,13 +95,40 @@ class AdminController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $id,
+            'password' => 'nullable|string|min:8|confirmed',
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:4096',
+            'role' => 'nullable|in:admin,user',
+            'status' => 'nullable|in:active,inactive',
             'phone_number' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
         ]);
 
-        $user->update($validated);
+        $data = [
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'role' => $request->input('role', $user->role),
+            'status' => $request->input('status', $user->status),
+            'phone_number' => $validated['phone_number'] ?? $user->phone_number,
+            'address' => $validated['address'] ?? $user->address,
+        ];
 
-        return redirect()->route('admin.users')->with('success', 'User updated successfully!');
+        if (!empty($validated['password'])) {
+            $data['password'] = bcrypt($validated['password']);
+        }
+
+        if ($request->hasFile('photo')) {
+            $datePrefix = now()->format('Ymd');
+            $file = $request->file('photo');
+            $filename = $datePrefix.'_'.$file->getClientOriginalName();
+            $destination = public_path('uploads/img/user');
+            if (!is_dir($destination)) { mkdir($destination, 0755, true); }
+            $file->move($destination, $filename);
+            $data['photo'] = 'uploads/img/user/'.$filename;
+        }
+
+        $user->update($data);
+
+        return redirect()->route('admin.users.index')->with('success', 'Cập nhật người dùng '.$user->name.' thành công!');
     }
 
     public function deleteUser($id)
@@ -93,19 +136,19 @@ class AdminController extends Controller
         $user = User::findOrFail($id);
         $user->delete();
 
-        return redirect()->route('admin.users')->with('success', 'User deleted successfully!');
+        return redirect()->route('admin.users.index')->with('success', 'Xoá người dùng '.$user->name.' thành công!');
     }
 
-    // Quản lý Categories
+    //Management Categories
     public function categories()
     {
         $categories = Category::paginate(10);
-        return view('admin.categories.index', compact('categories'));
+        return view('admin.category.index', compact('categories'));
     }
 
     public function createCategory()
     {
-        return view('admin.categories.create');
+        return view('admin.category.create');
     }
 
     public function storeCategory(Request $request)
@@ -113,17 +156,18 @@ class AdminController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'parent_category_id' => 'nullable|exists:categories,id',
         ]);
 
         Category::create($validated);
 
-        return redirect()->route('admin.categories')->with('success', 'Category created successfully!');
+        return redirect()->route('admin.categories.index')->with('success', 'Category created successfully!');
     }
 
     public function editCategory($id)
     {
         $category = Category::findOrFail($id);
-        return view('admin.categories.edit', compact('category'));
+        return view('admin.category.edit', compact('category'));
     }
 
     public function updateCategory(Request $request, $id)
@@ -133,11 +177,12 @@ class AdminController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'parent_category_id' => 'nullable|exists:categories,id',
         ]);
 
         $category->update($validated);
 
-        return redirect()->route('admin.categories')->with('success', 'Category updated successfully!');
+        return redirect()->route('admin.categories.index')->with('success', 'Category updated successfully!');
     }
 
     public function deleteCategory($id)
@@ -145,10 +190,10 @@ class AdminController extends Controller
         $category = Category::findOrFail($id);
         $category->delete();
 
-        return redirect()->route('admin.categories')->with('success', 'Category deleted successfully!');
+        return redirect()->route('admin.categories.index')->with('success', 'Category deleted successfully!');
     }
 
-    // Quản lý Products
+    // Management Products
     public function products()
     {
         $products = Product::with('category')->paginate(10);
@@ -230,7 +275,7 @@ class AdminController extends Controller
         return redirect()->route('admin.products')->with('success', 'Product deleted successfully!');
     }
 
-    // Quản lý Orders
+    // Management Orders
     public function orders()
     {
         $orders = Order::with(['user', 'items.product'])->paginate(10);
