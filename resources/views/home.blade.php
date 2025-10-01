@@ -10,16 +10,9 @@
           (object) ['title' => 'Winter Collection', 'description' => 'Warm & Cozy outfits for winter.', 'photo' => 'https://picsum.photos/1200/550?random=13'],
       ]);
   }
-  if (!isset($product_lists) || !count($product_lists)) {
-      $product_lists = collect([
-          (object) [ 'id'=>1,'cat_id'=>101,'slug'=>'sample-product-1','title'=>'Stylish Jacket','price'=>129.99,'discount'=>20,'stock'=>25,'condition'=>'new','photo'=>'https://picsum.photos/600/600?random=201,https://picsum.photos/600/600?random=211' ],
-          (object) [ 'id'=>2,'cat_id'=>102,'slug'=>'sample-product-2','title'=>'Casual T-Shirt','price'=>89.50,'discount'=>10,'stock'=>0,'condition'=>'hot','photo'=>'https://picsum.photos/600/600?random=202,https://picsum.photos/600/600?random=212' ],
-          (object) [ 'id'=>3,'cat_id'=>101,'slug'=>'sample-product-3','title'=>'Denim Jeans','price'=>59.00,'discount'=>0,'stock'=>12,'condition'=>'new','photo'=>'https://picsum.photos/600/600?random=203,https://picsum.photos/600/600?random=213' ],
-          (object) [ 'id'=>4,'cat_id'=>103,'slug'=>'sample-product-4','title'=>'Leather Shoes','price'=>199.00,'discount'=>15,'stock'=>6,'condition'=>'hot','photo'=>'https://picsum.photos/600/600?random=204,https://picsum.photos/600/600?random=214' ],
-          (object) [ 'id'=>5,'cat_id'=>102,'slug'=>'sample-product-5','title'=>'Summer Dress','price'=>75.00,'discount'=>25,'stock'=>15,'condition'=>'hot','photo'=>'https://picsum.photos/600/600?random=205,https://picsum.photos/600/600?random=215' ],
-          (object) [ 'id'=>6,'cat_id'=>103,'slug'=>'sample-product-6','title'=>'Sports Watch','price'=>299.00,'discount'=>30,'stock'=>8,'condition'=>'new','photo'=>'https://picsum.photos/600/600?random=206,https://picsum.photos/600/600?random=216' ],
-      ]);
-  }
+
+    $product_lists = DB::table('products')->get();
+  
   if (!isset($featured) || !count($featured)) {
       $featured = collect([
           (object) [ 'id'=>10,'slug'=>'featured-1','title'=>'Featured Jacket','discount'=>30,'photo'=>'https://picsum.photos/800/500?random=301,https://picsum.photos/800/500?random=311', 'cat_info'=>['title'=>'Winter Collection'] ],
@@ -86,22 +79,21 @@
     <div class="container-fluid">
         <div class="row">
             {{-- Comment DB query tạm thời --}}
-            {{-- @php
-            $category_lists=DB::table('categories')->where('status','active')->limit(3)->get();
-            @endphp --}}
+            @php
+            $category_lists=DB::table('categories')->limit(4)->get();
+            @endphp
             @if($category_lists)
                 @foreach($category_lists as $cat)
-                    @if($cat->is_parent==1)
+                    @if($cat->parent_category_id==null)
                         <!-- Single Banner  -->
                         <div class="col-lg-4 col-md-6 col-12">
                             <div class="single-banner">
-                                @if($cat->photo)
-                                    <img src="{{$cat->photo}}" alt="{{$cat->photo}}">
-                                @else
-                                    <img src="https://via.placeholder.com/600x370" alt="#">
-                                @endif
-                                <div class="content">
-                                    <h3>{{$cat->title}}</h3>
+                              
+                                <img src="{{ asset($cat->image ?? 'backend/img/thumbnail-default.jpg') }}" width="250" height="250" alt="{{$cat->name}}">                                
+                                <div class="content text-primary">
+                                        
+                                    
+                                    <h3>{{$cat->name}}</h3>
                                         <a href="#">Discover Now</a>
                                 </div>
                             </div>
@@ -132,17 +124,17 @@
                             <!-- Tab Nav -->
                             <ul class="nav nav-tabs filter-tope-group" id="myTab" role="tablist">
                                 {{-- Comment DB query tạm thời --}}
-                                {{-- @php
-                                    $categories=DB::table('categories')->where('status','active')->where('is_parent',1)->get();
+                                @php
+                                    $categories=DB::table('categories')->get();
                                     // dd($categories);
-                                @endphp --}}
+                                @endphp
                                 @if($categories)
                                 <button class="btn" style="background:black"data-filter="*">
                                     All Products
                                 </button>
                                     @foreach($categories as $key=>$cat)
                                     <button class="btn" style="background:none;color:black;"data-filter=".{{$cat->id}}">
-                                        {{$cat->title}}
+                                        {{$cat->name}}
                                     </button>
                                     @endforeach
                                 @endif
@@ -153,24 +145,21 @@
                              <!-- Start Single Tab -->
                             @if($product_lists)
                                 @foreach($product_lists as $key=>$product)
-                                <div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item {{$product->cat_id}}">
+                                <div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item {{$product->category_id}}">
                                     <div class="single-product">
                                         <div class="product-img">
                                             <a href="#">
                                                 @php
-                                                    $photo=explode(',',$product->photo);
+                                                    $photo=explode(',',$product->image_url);
                                                 // dd($photo);
                                                 @endphp
                                                 <img class="default-img" src="{{$photo[0]}}" alt="{{$photo[0]}}">
                                                 <img class="hover-img" src="{{$photo[0]}}" alt="{{$photo[0]}}">
-                                                @if($product->stock<=0)
+                                                @if($product->quantity<=0)
                                                     <span class="out-of-stock">Sale out</span>
-                                                @elseif($product->condition=='new')
-                                                    <span class="new">New</span>
-                                                @elseif($product->condition=='hot')
-                                                    <span class="hot">Hot</span>
                                                 @else
-                                                    <span class="price-dec">{{$product->discount}}% Off</span>
+                                                    <span class="new">New</span>
+                                        
                                                 @endif
                                             </a>
                                             <div class="button-head">
@@ -183,8 +172,8 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="product-content">
-                                            <h3><a href="#">{{$product->title}}</a></h3>
+                                        {{-- <div class="product-content">
+                                            <h3><a href="#">{{$product->name}}</a></h3>
                                             <div class="product-price">
                                                 @php
                                                     $after_discount=($product->price-($product->price*$product->discount)/100);
@@ -192,7 +181,7 @@
                                                 <span>${{number_format($after_discount,2)}}</span>
                                                 <del style="padding-left:4%;">${{number_format($product->price,2)}}</del>
                                             </div>
-                                        </div>
+                                        </div> --}}
                                     </div>
                                 </div>
                                 @endforeach
@@ -249,13 +238,13 @@
             <div class="col-12">
                 <div class="owl-carousel popular-slider">
                     @foreach($product_lists as $product)
-                        @if($product->condition=='hot')
+                        {{-- @if($product->condition=='hot') --}}
                             <!-- Start Single Product -->
                         <div class="single-product">
                             <div class="product-img">
                                 <a href="#">
                                     @php
-                                        $photo=explode(',',$product->photo);
+                                        $photo=explode(',',$product->image_url);
                                     // dd($photo);
                                     @endphp
                                     <img class="default-img" src="{{$photo[0]}}" alt="{{$photo[0]}}">
@@ -273,18 +262,18 @@
                                 </div>
                             </div>
                             <div class="product-content">
-                                <h3><a href="#">{{$product->title}}</a></h3>
-                                <div class="product-price">
+                                <h3><a href="#">{{$product->name}}</a></h3>
+                                {{-- <div class="product-price">
                                     <span class="old">${{number_format($product->price,2)}}</span>
                                     @php
                                     $after_discount=($product->price-($product->price*$product->discount)/100)
                                     @endphp
                                     <span>${{number_format($after_discount,2)}}</span>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                         <!-- End Single Product -->
-                        @endif
+                        {{-- @endif --}}
                     @endforeach
                 </div>
             </div>
@@ -318,7 +307,7 @@
                                 <div class="col-lg-6 col-md-6 col-12">
                                     <div class="list-image overlay">
                                         @php
-                                            $photo=explode(',',$product->photo);
+                                            $photo=explode(',',$product->image_url);
                                             // dd($photo);
                                         @endphp
                                         <img src="{{$photo[0]}}" alt="{{$photo[0]}}">
@@ -327,7 +316,7 @@
                                 </div>
                                 <div class="col-lg-6 col-md-6 col-12 no-padding">
                                     <div class="content">
-                                        <h4 class="title"><a href="#">{{$product->title}}</a></h4>
+                                        <h4 class="title"><a href="#">{{$product->name}}</a></h4>
                                         <p class="price with-discount">${{number_format($product->price,2)}}</p>
                                     </div>
                                 </div>
@@ -438,7 +427,7 @@
                                         <div class="product-gallery">
                                             <div class="quickview-slider-active">
                                                 @php
-                                                    $photo=explode(',',$product->photo);
+                                                    $photo=explode(',',$product->image_url);
                                                 // dd($photo);
                                                 @endphp
                                                 @foreach($photo as $data)
@@ -452,7 +441,7 @@
                                 </div>
                                 <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12">
                                     <div class="quickview-content">
-                                        <h2>{{$product->title}}</h2>
+                                        <h2>{{$product->name}}</h2>
                                         <div class="quickview-ratting-review">
                                             <div class="quickview-ratting-wrap">
                                                 <div class="quickview-ratting">
@@ -476,17 +465,17 @@
                                                 <a href="#"> ({{$rate_count}} customer review)</a>
                                             </div>
                                             <div class="quickview-stock">
-                                                @if($product->stock >0)
-                                                <span><i class="fa fa-check-circle-o"></i> {{$product->stock}} in stock</span>
+                                                @if($product->quantity >0)
+                                                <span><i class="fa fa-check-circle-o"></i> {{$product->quantity}} in stock</span>
                                                 @else
-                                                <span><i class="fa fa-times-circle-o text-danger"></i> {{$product->stock}} out stock</span>
+                                                <span><i class="fa fa-times-circle-o text-danger"></i> {{$product->quantity}} out stock</span>
                                                 @endif
                                             </div>
                                         </div>
-                                        @php
+                                        {{-- @php
                                             $after_discount=($product->price-($product->price*$product->discount)/100);
-                                        @endphp
-                                        <h3><small><del class="text-muted">${{number_format($product->price,2)}}</del></small>    ${{number_format($after_discount,2)}}  </h3>
+                                        @endphp --}}
+                                        {{-- <h3><small><del class="text-muted">${{number_format($product->price,2)}}</del></small>    ${{number_format($after_discount,2)}}  </h3> --}}
                                         <div class="quickview-peragraph">
                                             <p>This is a sample product description. High quality materials and excellent craftsmanship make this item perfect for everyday use.</p>
                                         </div>
@@ -517,7 +506,7 @@
                                                             <i class="ti-minus"></i>
                                                         </button>
                                                     </div>
-													<input type="hidden" name="slug" value="{{$product->slug}}">
+													{{-- <input type="hidden" name="slug" value="{{$product->slug}}"> --}}
                                                     <input type="text" name="quant[1]" class="input-number"  data-min="1" data-max="1000" value="1">
                                                     <div class="button plus">
                                                         <button type="button" class="btn btn-primary btn-number" data-type="plus" data-field="quant[1]">

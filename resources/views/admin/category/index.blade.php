@@ -20,6 +20,7 @@
             <tr>
               <th>ID</th>
               <th>Tên danh mục</th>
+              <th>Ảnh</th>
               <th>Mô tả</th>
               <th>Danh mục cha</th>
               <th>Ngày tạo</th>
@@ -35,6 +36,13 @@
                 <tr>
                     <td>{{$category->id}}</td>
                     <td>{{$category->name}}</td>
+                    <td>
+                        @if($category->image)
+                            <img src="{{asset($category->image)}}" class="img-fluid zoom" style="max-width:80px" alt="{{$category->name}}">
+                        @else
+                            <img src="{{asset('backend/img/thumbnail-default.jpg')}}" class="img-fluid zoom" style="max-width:80px" alt="default">
+                        @endif
+                    </td>
                     <td>{{$category->description}}</td>
                     <td>{{$category->parent_category_id ? optional($categories->firstWhere('id',$category->parent_category_id))->name : ''}}</td>
                     <td>{{$category->created_at}}</td>
@@ -113,7 +121,7 @@
           { extend: 'colvis', className: 'btn btn-sm btn-warning' }
         ],
         language: { url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/vi.json' },
-        columnDefs: [ { orderable:false, targets:[6] } ]
+            columnDefs: [ { orderable:false, targets:[7] } ]
       });
   </script>
 @endpush

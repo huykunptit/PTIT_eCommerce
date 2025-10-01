@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Brand;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -157,9 +158,25 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'parent_category_id' => 'nullable|exists:categories,id',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:4096',
         ]);
 
-        Category::create($validated);
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = now()->format('YmdHis') . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
+            $destination = public_path('uploads/img/category');
+            if (!is_dir($destination)) { mkdir($destination, 0755, true); }
+            $file->move($destination, $filename);
+            $imagePath = 'uploads/img/category/' . $filename;
+        }
+
+        Category::create([
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
+            'parent_category_id' => $validated['parent_category_id'] ?? null,
+            'image' => $imagePath,
+        ]);
 
         return redirect()->route('admin.categories.index')->with('success', 'Category created successfully!');
     }
@@ -178,9 +195,25 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'parent_category_id' => 'nullable|exists:categories,id',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:4096',
         ]);
 
-        $category->update($validated);
+        $data = [
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? $category->description,
+            'parent_category_id' => $validated['parent_category_id'] ?? $category->parent_category_id,
+        ];
+
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = now()->format('YmdHis') . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
+            $destination = public_path('uploads/img/category');
+            if (!is_dir($destination)) { mkdir($destination, 0755, true); }
+            $file->move($destination, $filename);
+            $data['image'] = 'uploads/img/category/' . $filename;
+        }
+
+        $category->update($data);
 
         return redirect()->route('admin.categories.index')->with('success', 'Category updated successfully!');
     }
@@ -197,13 +230,16 @@ class AdminController extends Controller
     public function products()
     {
         $products = Product::with('category')->paginate(10);
-        return view('admin.products.index', compact('products'));
+        $brands  = Brand::all();
+        return view('backend.product.index', compact('products', 'brands'));
     }
 
-    public function createProduct()
+        public function createProduct()
     {
         $categories = Category::all();
-        return view('admin.products.create', compact('categories'));
+        $brands = Brand::all();
+        $sellers = User::where('role', 'user')->get();
+        return view('backend.product.create', compact('categories','brands','sellers'));
     }
 
     public function storeProduct(Request $request)
@@ -212,59 +248,92 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
+            'quantity' => 'required|integer|min:0',
             'category_id' => 'required|exists:categories,id',
-            'image' => 'nullable|string',
+            'image_url' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:4096',
+            'seller_id' => 'required|exists:users,id',
+            'status' => 'required|in:active,inactive',
         ]);
+
+        $imagePath = null;
+        if ($request->hasFile('image_url')) {
+            $file = $request->file('image_url');
+            $filename = now()->format('YmdHis') . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
+            $destination = public_path('uploads/img/product');
+            if (!is_dir($destination)) {
+                mkdir($destination, 0755, true);
+            }
+            $file->move($destination, $filename);
+            $imagePath = 'uploads/img/product/' . $filename;
+        }
 
         $data = [
             'name' => $validated['name'],
             'description' => $validated['description'] ?? '',
             'price' => $validated['price'],
-            'quantity' => $validated['stock'],
-            'seller_id' => Auth::id(),
+            'quantity' => $validated['quantity'],
             'category_id' => $validated['category_id'],
-            'image_url' => $validated['image'] ?? null,
-            'status' => 'active',
+            'image_url' => $imagePath,
+            'seller_id' => $validated['seller_id'],
+            'status' => $validated['status'],
         ];
 
         Product::create($data);
 
-        return redirect()->route('admin.products')->with('success', 'Product created successfully!');
+        return redirect()->route('admin.products.index')->with('success', 'Product created successfully!');
     }
 
     public function editProduct($id)
     {
         $product = Product::findOrFail($id);
         $categories = Category::all();
-        return view('admin.products.edit', compact('product', 'categories'));
+        $brands = Brand::all();
+        $sellers = User::where('role', 'user')->get();
+        return view('backend.product.edit', compact('product', 'categories','brands','sellers'));
     }
 
     public function updateProduct(Request $request, $id)
     {
         $product = Product::findOrFail($id);
-        
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
+            'quantity' => 'required|integer|min:0', // fixed: use quantity
             'category_id' => 'required|exists:categories,id',
-            'image' => 'nullable|string',
+            'image_url' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:4096',
+            'status' => 'required|in:active,inactive',
         ]);
+
+        $imagePath = $product->image_url; // keep existing by default
+        if ($request->hasFile('image_url')) {
+            $file = $request->file('image_url');
+            $filename = now()->format('YmdHis') . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
+            $destination = public_path('uploads/img/product');
+            if (!is_dir($destination)) {
+                mkdir($destination, 0755, true);
+            }
+            $file->move($destination, $filename);
+            $imagePath = 'uploads/img/product/' . $filename;
+
+            // optional: delete old file
+            // if ($product->image_url && file_exists(public_path($product->image_url))) { unlink(public_path($product->image_url)); }
+        }
 
         $data = [
             'name' => $validated['name'],
             'description' => $validated['description'] ?? '',
             'price' => $validated['price'],
-            'quantity' => $validated['stock'],
+            'quantity' => $validated['quantity'],
             'category_id' => $validated['category_id'],
-            'image_url' => $validated['image'] ?? null,
+            'image_url' => $imagePath,
+            'status' => $validated['status'],
         ];
 
         $product->update($data);
 
-        return redirect()->route('admin.products')->with('success', 'Product updated successfully!');
+        return redirect()->route('admin.products.index')->with('success', 'Product updated successfully!');
     }
 
     public function deleteProduct($id)
@@ -272,7 +341,7 @@ class AdminController extends Controller
         $product = Product::findOrFail($id);
         $product->delete();
 
-        return redirect()->route('admin.products')->with('success', 'Product deleted successfully!');
+        return redirect()->route('admin.products.index')->with('success', 'Product deleted  '.$product->name.' successfully!');
     }
 
     // Management Orders

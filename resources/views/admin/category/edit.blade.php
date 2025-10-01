@@ -5,7 +5,7 @@
 <div class="card">
     <h5 class="card-header">Cập nhật danh mục</h5>
     <div class="card-body">
-      <form method="post" action="{{route('admin.categories.update',$category->id)}}">
+      <form method="post" action="{{route('admin.categories.update',$category->id)}}" enctype="multipart/form-data">
         @csrf 
         @method('PUT')
 
@@ -13,6 +13,19 @@
           <input id="name" type="text" name="name" placeholder=" "  value="{{$category->name}}" class="form-control modern-input">
           <label for="name" class="col-form-label">Tên danh mục <span class="text-danger">*</span></label>
           @error('name')
+          <span class="text-danger">{{$message}}</span>
+          @enderror
+        </div>
+
+        <div class="form-group floating-group">
+          <input id="image" type="file" name="image" class="form-control modern-input">
+          <label for="image" class="col-form-label">Ảnh danh mục</label>
+          @if($category->image)
+            <div class="mt-2">
+              <img src="{{$category->image}}" alt="{{$category->name}}" style="max-height:80px"/>
+            </div>
+          @endif
+          @error('image')
           <span class="text-danger">{{$message}}</span>
           @enderror
         </div>

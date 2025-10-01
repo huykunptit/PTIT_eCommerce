@@ -3,6 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\BannerController;
+use App\Http\Controllers\CouponController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\CommentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,7 +36,7 @@ Route::group(['prefix' => 'auth', 'as' => 'auth.'], function () {
    
     Route::middleware('auth')->group(function () {
         Route::get('/', [AuthController::class, 'dashboard'])->name('index');
-        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+        Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
     });
 });
 
@@ -58,15 +62,34 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth', 'a
     Route::delete('/categories/{id}', [AdminController::class, 'deleteCategory'])->name('categories.delete');
     
     // Products Management
-    Route::get('/products', [AdminController::class, 'products'])->name('products');
-    Route::get('/products/create', [AdminController::class, 'createProduct'])->name('products.create');
-    Route::post('/products', [AdminController::class, 'storeProduct'])->name('products.store');
-    Route::get('/products/{id}/edit', [AdminController::class, 'editProduct'])->name('products.edit');
-    Route::put('/products/{id}', [AdminController::class, 'updateProduct'])->name('products.update');
-    Route::delete('/products/{id}', [AdminController::class, 'deleteProduct'])->name('products.delete');
+    Route::get('/product', [AdminController::class, 'products'])->name('products.index');
+    Route::get('/product/create', [AdminController::class, 'createProduct'])->name('products.create');
+    Route::post('/product', [AdminController::class, 'storeProduct'])->name('products.store');
+    Route::get('/product/{id}/edit', [AdminController::class, 'editProduct'])->name('products.edit');
+    Route::put('/product/{id}', [AdminController::class, 'updateProduct'])->name('products.update');
+    Route::delete('/product/{id}', [AdminController::class, 'deleteProduct'])->name('products.delete');
+    
+
+    //Brands Management
+    Route::get('/brands', [AdminController::class, 'brands'])->name('brands.index');
+    Route::get('/brands/create', [AdminController::class, 'createBrand'])->name('brands.create');
+    Route::post('/brands', [AdminController::class, 'storeBrand'])->name('brands.store');
+    Route::get('/brands/{id}/edit', [AdminController::class, 'editBrand'])->name('brands.edit');
+    Route::put('/brands/{id}', [AdminController::class, 'updateBrand'])->name('brands.update');
+    Route::delete('/brands/{id}', [AdminController::class, 'deleteBrand'])->name('brands.delete');
     
     // Orders Management
     Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
     Route::get('/orders/{id}', [AdminController::class, 'showOrder'])->name('orders.show');
     Route::put('/orders/{id}/status', [AdminController::class, 'updateOrderStatus'])->name('orders.update-status');
+
+    Route::resource('banner', BannerController::class)->except(['show']);
+    Route::resource('coupon', CouponController::class)->except(['show']);
+    Route::resource('post', PostController::class)->except(['show']);
+    Route::resource('comment', CommentController::class)->only(['index','edit','update','destroy']);
 });
+
+// // Admin resource routes for banners, coupons, posts, comments
+// Route::middleware(['auth','admin'])->group(function () {
+    
+// });

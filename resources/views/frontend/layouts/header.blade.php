@@ -28,7 +28,7 @@
                                 <li><i class="ti-power-off"></i> <a href="#">Logout</a></li>
 
                             @else
-                                <li><i class="ti-power-off"></i><a href="#">Login /</a> <a href="#">Register</a></li>
+                                <li><i class="ti-power-off"></i><a href="auth/login">Login /</a> <a href="auth/register">Register</a></li>
                             @endauth
                         </ul>
                     </div>

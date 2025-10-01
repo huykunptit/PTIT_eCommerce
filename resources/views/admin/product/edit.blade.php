@@ -5,7 +5,7 @@
 <div class="card">
     <h5 class="card-header">Edit Product</h5>
     <div class="card-body">
-      <form method="post" action="{{route('product.update',$product->id)}}">
+      <form method="post" action="{{route('admin.products.update',$product->id)}}">
         @csrf 
         @method('PATCH')
         <div class="form-group">
@@ -49,7 +49,7 @@
           </select>
         </div>
         @php 
-          $sub_cat_info=DB::table('categories')->select('title')->where('id',$product->child_cat_id)->get();
+          $sub_cat_info=DB::table('categories')->select('name')->where('id',$product->child_cat_id)->get();
         // dd($sub_cat_info);
 
         @endphp

@@ -5,13 +5,21 @@
 <div class="card">
     <h5 class="card-header">Thêm danh mục</h5>
     <div class="card-body">
-      <form method="post" action="{{route('admin.categories.store')}}">
+      <form method="post" action="{{route('admin.categories.store')}}" enctype="multipart/form-data">
         {{csrf_field()}}
 
         <div class="form-group floating-group">
           <input id="name" type="text" name="name" placeholder=" " value="{{old('name')}}" class="form-control modern-input">
           <label for="name" class="col-form-label">Tên danh mục <span class="text-danger">*</span></label>
           @error('name')
+          <span class="text-danger">{{$message}}</span>
+          @enderror
+        </div>
+
+        <div class="form-group floating-group">
+          <input id="image" type="file" name="image" class="form-control modern-input">
+          <label for="image" class="col-form-label">Ảnh danh mục</label>
+          @error('image')
           <span class="text-danger">{{$message}}</span>
           @enderror
         </div>

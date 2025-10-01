@@ -9,16 +9,7 @@ class Product extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'name',
-        'description',
-        'price',
-        'quantity',
-        'seller_id',
-        'category_id',
-        'image_url',
-        'status',
-    ];
+    protected $fillable = ['name','description','price','quantity','category_id','image_url','seller_id','status'];
 
     protected $casts = [
         'price' => 'decimal:2',
@@ -31,7 +22,7 @@ class Product extends Model
 
     public function category()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Category::class, 'category_id');
     }
 
     public function orderItems()
@@ -48,4 +39,6 @@ class Product extends Model
     {
         return $this->hasMany(ShoppingCart::class);
     }
+
+    
 } 

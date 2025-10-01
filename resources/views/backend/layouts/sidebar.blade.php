@@ -42,8 +42,8 @@
       <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
         <div class="bg-white py-2 collapse-inner rounded">
           <h6 class="collapse-header">Banner Options:</h6>
-          <a class="collapse-item" href="#">Banners</a>
-          <a class="collapse-item" href="#">Add Banners</a>
+          <a class="collapse-item" href="{{route('admin.banner.index')}}">Banners</a>
+          <a class="collapse-item" href="{{route('admin.banner.create')}}">Add Banners</a>
         </div>
       </div>
     </li>
@@ -78,8 +78,8 @@
         <div id="brandCollapse" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
             <h6 class="collapse-header">Brand Options:</h6>
-            <a class="collapse-item" href="#">Brands</a>
-            <a class="collapse-item" href="#">Add Brand</a>
+            <a class="collapse-item" href="{{route('admin.brands.index')}}">Brands</a>
+            <a class="collapse-item" href="{{route('admin.brands.create')}}">Add Brand</a>
           </div>
         </div>
     </li>
@@ -95,8 +95,8 @@
         <div id="productCollapse" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
             <h6 class="collapse-header">Product Options:</h6>
-            <a class="collapse-item" href="#">Products</a>
-            <a class="collapse-item" href="#">Add Product</a>
+            <a class="collapse-item" href="{{route('admin.products.index')}}">Products</a>
+            <a class="collapse-item" href="{{route('admin.products.create')}}">Add Product</a>
           </div>
         </div>
     </li>
@@ -119,7 +119,7 @@
 
     <!--Orders -->
     <li class="nav-item">
-        <a class="nav-link" href="#">
+        <a class="nav-link" href="{{route('admin.orders')}}">
             <i class="fas fa-hammer fa-chart-area"></i>
             <span>Orders</span>
         </a>
@@ -127,7 +127,7 @@
 
     <!-- Reviews -->
     <li class="nav-item">
-        <a class="nav-link" href="#">
+        <a class="nav-link" href="{{route('admin.comment.index')}}">
             <i class="fas fa-comments"></i>
             <span>Reviews</span></a>
     </li>
@@ -150,8 +150,8 @@
       <div id="postCollapse" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
         <div class="bg-white py-2 collapse-inner rounded">
           <h6 class="collapse-header">Post Options:</h6>
-          <a class="collapse-item" href="#">Posts</a>
-          <a class="collapse-item" href="#">Add Post</a>
+          <a class="collapse-item" href="{{route('admin.post.index')}}">Posts</a>
+          <a class="collapse-item" href="{{route('admin.post.create')}}">Add Post</a>
         </div>
       </div>
     </li>
@@ -188,7 +188,7 @@
 
       <!-- Comments -->
       <li class="nav-item">
-        <a class="nav-link" href="#">
+        <a class="nav-link" href="{{route('admin.comment.index')}}">
             <i class="fas fa-comments fa-chart-area"></i>
             <span>Comments</span>
         </a>
@@ -202,7 +202,7 @@
         General Settings
     </div>
     <li class="nav-item">
-      <a class="nav-link" href="#">
+      <a class="nav-link" href="{{route('admin.coupon.index')}}">
           <i class="fas fa-table"></i>
           <span>Coupon</span></a>
     </li>
