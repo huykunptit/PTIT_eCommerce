@@ -1,0 +1,162 @@
+@extends('backend.layouts.master')
+
+@section('main-content')
+
+<div class="row create-user-wrapper">
+  <div class="col-lg-6">
+    <div class="card form-half">
+        <h5 class="card-header">Cập nhật người dùng</h5>
+        <div class="card-body">
+          <form method="post" action="{{route('admin.users.update',$user->id)}}" enctype="multipart/form-data">
+            @csrf 
+            @method('PUT')
+            <div class="form-group floating-group">
+              <input id="inputTitle" type="text" name="name" placeholder=" "  value="{{$user->name}}" class="form-control modern-input preview-name">
+              <label for="inputTitle" class="col-form-label">Họ và tên</label>
+            @error('name')
+            <span class="text-danger">{{$message}}</span>
+            @enderror
+            </div>
+
+            <div class="form-group floating-group">
+              <input id="inputEmail" type="email" name="email" placeholder=" "  value="{{$user->email}}" class="form-control modern-input preview-email">
+              <label for="inputEmail" class="col-form-label">Email</label>
+              @error('email')
+              <span class="text-danger">{{$message}}</span>
+              @enderror
+            </div>
+
+            <div class="form-group floating-group">
+              <input id="inputPassword" type="password" name="password" placeholder=" " class="form-control modern-input">
+              <label for="inputPassword" class="col-form-label">Mật khẩu mới (tuỳ chọn)</label>
+              @error('password')
+              <span class="text-danger">{{$message}}</span>
+              @enderror
+            </div>
+            <div class="form-group floating-group">
+              <input id="inputPasswordConfirm" type="password" name="password_confirmation" placeholder=" " class="form-control modern-input">
+              <label for="inputPasswordConfirm" class="col-form-label">Xác nhận mật khẩu</label>
+              @error('password_confirmation')
+              <span class="text-danger">{{$message}}</span>
+              @enderror
+            </div>
+
+            <div class="form-group">
+            <label for="inputPhoto" class="col-form-label">Avatar</label>
+            <input id="inputPhoto" type="file" name="photo" class="filepond" accept="image/*" />
+              @error('photo')
+              <span class="text-danger">{{$message}}</span>
+              @enderror
+            </div>
+       
+            <div class="form-group">
+             <label for="role_id" class="col-form-label">Vai trò</label>
+                <select name="role_id" class="form-control preview-role">
+                    <option value="">-----Select Role-----</option>
+                    @foreach($roles as $role)
+                        <option value="{{ $role->id }}" 
+                            {{ old('role_id', $user->role_id ?? '') == $role->id ? 'selected' : '' }}>
+                            {{ $role->role_name }}
+                        </option>
+                    @endforeach
+                </select>
+
+              @error('role')
+              <span class="text-danger">{{$message}}</span>
+              @enderror
+              </div>
+              <div class="form-group">
+                <label for="status" class="col-form-label">Trạng thái</label>
+                <select name="status" class="form-control preview-status">
+                    <option value="active" {{(($user->status=='active') ? 'selected' : '')}}>Hoạt động</option>
+                    <option value="inactive" {{(($user->status=='inactive') ? 'selected' : '')}}>Dừng hoạt động</option>
+                </select>
+              @error('status')
+              <span class="text-danger">{{$message}}</span>
+              @enderror
+              </div>
+            <div class="form-group mb-3">
+               <button class="btn btn-success" type="submit">Lưu</button>
+            </div>
+          </form>
+        </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card mb-4 profile-preview-card">
+      <div class="card-body text-center">
+        <img src="{{ $user->photo ? asset($user->photo) : asset('backend/img/avatar.png') }}" alt="avatar" class="rounded-circle img-fluid preview-avatar" style="width: 150px;">
+        <h5 class="my-3 preview-name-text">{{$user->name}}</h5>
+        <p class="text-muted mb-1 preview-role-text">{{$user->role}}</p>
+        <p class="text-muted mb-4 preview-email-text">{{$user->email}}</p>
+        <div class="d-flex justify-content-center mb-2">
+          <button type="button" class="btn btn-primary">Follow</button>
+          <button type="button" class="btn btn-outline-primary ms-1">Message</button>
+        </div>
+      </div>
+    </div>
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-sm-3"><p class="mb-0">Họ và tên</p></div>
+          <div class="col-sm-9"><p class="text-muted mb-0 preview-name-text">{{$user->name}}</p></div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-sm-3"><p class="mb-0">Email</p></div>
+          <div class="col-sm-9"><p class="text-muted mb-0 preview-email-text">{{$user->email}}</p></div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-sm-3"><p class="mb-0">Vai trò</p></div>
+          <div class="col-sm-9"><p class="text-muted mb-0 preview-role-text">{{$user->role}}</p></div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-sm-3"><p class="mb-0">Trạng thái</p></div>
+          <div class="col-sm-9"><p class="text-muted mb-0 preview-status-text">{{$user->status}}</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+@endsection
+
+@push('scripts')
+<script>
+  // Update preview when editing
+  $(function(){
+    const sync = function(){
+      $('.preview-name-text').text($('#inputTitle').val()||'');
+      $('.preview-email-text').text($('#inputEmail').val()||'');
+      $('.preview-role-text').text($('select[name="role"]').val()||'');
+      $('.preview-status-text').text($('select[name="status"]').val()||'');
+    };
+    $('#inputTitle,#inputEmail,select[name="role"],select[name="status"]').on('input change', sync);
+    sync();
+  });
+</script>
+<script src="https://unpkg.com/filepond-plugin-image-preview@4.6.11/dist/filepond-plugin-image-preview.min.js"></script>
+<script src="https://unpkg.com/filepond@4.30.6/dist/filepond.min.js"></script>
+<script>
+  FilePond.registerPlugin(FilePondPluginImagePreview);
+  const inputElement = document.querySelector('input.filepond');
+  if(inputElement){
+    const pond = FilePond.create(inputElement, {
+      allowMultiple: false,
+      stylePanelAspectRatio: 1,
+      imagePreviewHeight: 120,
+      instantUpload: false,
+      storeAsFile: true,
+      labelIdle: 'Kéo & thả ảnh hoặc <span class="filepond--label-action">Chọn ảnh</span>',
+    });
+    pond.on('addfile', (error, fileItem) => {
+      if (!error && fileItem && fileItem.file) {
+        const url = URL.createObjectURL(fileItem.file);
+        document.querySelector('.preview-avatar').src = url;
+      }
+    });
+  }
+</script>
+@endpush
