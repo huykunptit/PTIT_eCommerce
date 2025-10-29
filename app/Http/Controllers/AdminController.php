@@ -9,7 +9,7 @@ use App\Models\Brand;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use App\Http\Controllers\BannerController;
 class AdminController extends Controller
 {
     public function __construct()

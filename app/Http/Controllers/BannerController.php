@@ -23,16 +23,35 @@ class BannerController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'photo' => 'nullable|string|max:2048',
+            'image' => 'required|image|mimes:jpg,jpeg,png,webp,gif|max:4096',
             'status' => 'required|in:active,inactive',
         ]);
 
         $slug = str()->slug($validated['title']);
         $validated['slug'] = $slug.'-'.uniqid();
 
-        Banner::create($validated);
+        // Handle image upload
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = now()->format('YmdHis') . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
+            $destination = public_path('uploads/img/banner');
+            if (!is_dir($destination)) {
+                mkdir($destination, 0755, true);
+            }
+            $file->move($destination, $filename);
+            $imagePath = 'uploads/img/banner/' . $filename;
+        }
 
-        return redirect()->route('banner.index')->with('success', 'Banner created successfully!');
+        Banner::create([
+            'title' => $validated['title'],
+            'description' => $validated['description'] ?? null,
+            'slug' => $validated['slug'],
+            'photo' => $imagePath,
+            'status' => $validated['status'],
+        ]);
+
+        return redirect()->route('admin.banner.index')->with('success', 'Banner created successfully!');
     }
 
     public function edit(Banner $banner)
@@ -45,23 +64,46 @@ class BannerController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'photo' => 'nullable|string|max:2048',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:4096',
             'status' => 'required|in:active,inactive',
         ]);
 
+        $data = [
+            'title' => $validated['title'],
+            'description' => $validated['description'] ?? $banner->description,
+            'status' => $validated['status'],
+        ];
+
         if (!isset($banner->slug) || empty($banner->slug)) {
-            $validated['slug'] = str()->slug($validated['title']).'-'.uniqid();
+            $data['slug'] = str()->slug($validated['title']).'-'.uniqid();
         }
 
-        $banner->update($validated);
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = now()->format('YmdHis') . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
+            $destination = public_path('uploads/img/banner');
+            if (!is_dir($destination)) {
+                mkdir($destination, 0755, true);
+            }
+            $file->move($destination, $filename);
+            $data['photo'] = 'uploads/img/banner/' . $filename;
 
-        return redirect()->route('banner.index')->with('success', 'Banner updated successfully!');
+            // Optional: delete old image
+            if ($banner->photo && file_exists(public_path($banner->photo))) {
+                unlink(public_path($banner->photo));
+            }
+        }
+
+        $banner->update($data);
+
+        return redirect()->route('admin.banner.index')->with('success', 'Banner updated successfully!');
     }
 
     public function destroy(Banner $banner)
     {
         $banner->delete();
-        return redirect()->route('banner.index')->with('success', 'Banner deleted successfully!');
+        return redirect()->route('admin.banner.index')->with('success', 'Banner deleted successfully!');
     }
 }
 

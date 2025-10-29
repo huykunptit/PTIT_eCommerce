@@ -56,6 +56,7 @@
                 <select name="role" class="form-control preview-role">
                     <option value="">-----Select Role-----</option>
                     @foreach($roles as $role)
+                    @foreach($roles as $role) {{-- Giả sử $roles được truyền từ Controller --}}
                         <option value="{{$role->role}}">{{$role->role}}</option>
                     @endforeach
                 </select>

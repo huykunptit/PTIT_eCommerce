@@ -5,9 +5,9 @@
 <div class="card">
     <h5 class="card-header">Edit Banner</h5>
     <div class="card-body">
-      <form method="post" action="{{route('admin.banner.update',$banner->id)}}">
-        @csrf 
-        @method('PATCH')
+      <form method="post" action="{{ route('admin.banner.update', $banner->id) }}" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
         <div class="form-group">
           <label for="inputTitle" class="col-form-label">Title <span class="text-danger">*</span></label>
         <input id="inputTitle" type="text" name="title" placeholder="Enter title"  value="{{$banner->title}}" class="form-control">
@@ -25,21 +25,19 @@
         </div>
 
         <div class="form-group">
-        <label for="inputPhoto" class="col-form-label">Photo <span class="text-danger">*</span></label>
-        <div class="input-group">
-            <span class="input-group-btn">
-                <a id="lfm" data-input="thumbnail" data-preview="holder" class="btn btn-primary">
-                <i class="fa fa-picture-o"></i> Choose
-                </a>
-            </span>
-          <input id="thumbnail" class="form-control" type="text" name="photo" value="{{$banner->photo}}">
-        </div>
-        <div id="holder" style="margin-top:15px;max-height:100px;"></div>
-          @error('photo')
-          <span class="text-danger">{{$message}}</span>
+          <label for="image" class="col-form-label">Hình ảnh banner</label>
+          <input type="file" class="form-control" id="image" name="image" accept="image/*">
+          @if($banner->photo)
+              <div class="mt-2">
+                <img src="{{ asset($banner->photo) }}" alt="{{ $banner->title }}" style="max-height:100px; max-width:200px;">
+                <small class="text-muted d-block">Ảnh hiện tại</small>
+              </div>
+          @endif
+          @error('image')
+              <span class="text-danger">{{ $message }}</span>
           @enderror
         </div>
-        
+
         <div class="form-group">
           <label for="status" class="col-form-label">Status <span class="text-danger">*</span></label>
           <select name="status" class="form-control">
