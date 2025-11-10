@@ -442,12 +442,10 @@
             </form>
 
             <div class="forgot-password">
-              @if (Route::has('password.request'))
-                  <a href="{{ route('password.request') }}">
-                      <i class="fas fa-key me-1"></i>
-                      Forgot your password?
-                  </a>
-              @endif
+              <a href="{{ route('password.request') }}">
+                  <i class="fas fa-key me-1"></i>
+                  Quên mật khẩu?
+              </a>
             </div>
           </div>
         </div>

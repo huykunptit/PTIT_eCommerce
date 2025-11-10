@@ -5,7 +5,7 @@
 <div class="card">
     <h5 class="card-header">Edit Post</h5>
     <div class="card-body">
-      <form method="post" action="{{route('post.update',$post->id)}}">
+      <form method="post" action="{{route('admin.post.update',$post->id)}}" enctype="multipart/form-data">
         @csrf 
         @method('PATCH')
         <div class="form-group">
@@ -42,12 +42,15 @@
 
         <div class="form-group">
           <label for="post_cat_id">Category <span class="text-danger">*</span></label>
-          <select name="post_cat_id" class="form-control">
-              <option value="">--Select any category--</option>
-              @foreach($categories as $key=>$data)
-                  <option value='{{$data->id}}' {{(($data->id==$post->post_cat_id)? 'selected' : '')}}>{{$data->title}}</option>
+          <select name="post_cat_id" class="form-control" required>
+              <option value="">--Chọn danh mục--</option>
+              @foreach($categories as $category)
+                  <option value='{{$category->id}}' {{($category->id == $post->post_cat_id) ? 'selected' : ''}}>{{$category->name}}</option>
               @endforeach
           </select>
+          @error('post_cat_id')
+          <span class="text-danger">{{$message}}</span>
+          @enderror
         </div>
         {{-- {{$post->tags}} --}}
         @php 
@@ -74,20 +77,22 @@
           </select>
         </div>
         <div class="form-group">
-          <label for="inputPhoto" class="col-form-label">Photo <span class="text-danger">*</span></label>
-          <div class="input-group">
-              <span class="input-group-btn">
-                  <a id="lfm" data-input="thumbnail" data-preview="holder" class="btn btn-primary">
-                  <i class="fa fa-picture-o"></i> Choose
-                  </a>
-              </span>
-          <input id="thumbnail" class="form-control" type="text" name="photo" value="{{$post->photo}}">
-        </div>
-        <div id="holder" style="margin-top:15px;max-height:100px;"></div>
-
+          <label for="inputPhoto" class="col-form-label">Photo</label>
+          @if($post->photo)
+          <div style="margin-bottom:15px;">
+            <p>Ảnh hiện tại:</p>
+            <img src="{{ asset($post->photo) }}" alt="Current photo" style="max-width:200px;max-height:200px;border:1px solid #ddd;border-radius:4px;padding:5px;">
+          </div>
+          @endif
+          <input type="file" class="form-control" id="inputPhoto" name="photo" accept="image/*">
           @error('photo')
           <span class="text-danger">{{$message}}</span>
           @enderror
+          <small class="form-text text-muted">Chọn ảnh mới từ máy tính của bạn (JPG, PNG, GIF - tối đa 2MB). Để trống nếu giữ nguyên ảnh cũ.</small>
+          <div id="photoPreview" style="margin-top:15px;display:none;">
+            <p>Ảnh mới:</p>
+            <img id="previewImg" src="" alt="Preview" style="max-width:200px;max-height:200px;border:1px solid #ddd;border-radius:4px;padding:5px;">
+          </div>
         </div>
         
         <div class="form-group">
@@ -115,12 +120,24 @@
 
 @endpush
 @push('scripts')
-<script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
 <script src="{{asset('backend/summernote/summernote.min.js')}}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/js/bootstrap-select.min.js"></script>
 
 <script>
-    $('#lfm').filemanager('image');
+    // Photo preview
+    document.getElementById('inputPhoto').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('previewImg').src = e.target.result;
+                document.getElementById('photoPreview').style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        } else {
+            document.getElementById('photoPreview').style.display = 'none';
+        }
+    });
 
     $(document).ready(function() {
     $('#summary').summernote({

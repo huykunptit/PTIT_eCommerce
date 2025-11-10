@@ -36,6 +36,11 @@
 <link rel="stylesheet" href="{{asset('frontend/css/reset.css')}}">
 <link rel="stylesheet" href="{{asset('frontend/css/style.css')}}">
 <link rel="stylesheet" href="{{asset('frontend/css/responsive.css')}}">
+<!-- Theme Colors -->
+<link rel="stylesheet" href="{{asset('css/theme.css')}}">
+@if(file_exists(public_path('css/theme-colors.css')))
+<link rel="stylesheet" href="{{asset('css/theme-colors.css')}}">
+@endif
 <script type='text/javascript' src='https://platform-api.sharethis.com/js/sharethis.js#property=5f2e5abf393162001291e431&product=inline-share-buttons' async='async'></script>
 <style>
     /* Multilevel dropdown */

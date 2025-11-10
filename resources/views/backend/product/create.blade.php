@@ -100,6 +100,14 @@
                         @enderror
                     </div>
 
+                    <hr>
+                    <h5 class="mb-3">Biến thể (Size/Option/Price)</h5>
+                    <div class="alert alert-info" id="stock-warning" style="display:none;">
+                        <strong>Cảnh báo:</strong> Tổng số lượng các biến thể (<span id="total-variant-stock">0</span>) không được vượt quá số lượng sản phẩm (<span id="product-quantity">0</span>)
+                    </div>
+                    <div id="variant-rows"></div>
+                    <button id="add-variant" class="btn btn-outline-primary btn-sm mb-3">+ Thêm biến thể</button>
+
                     <div class="form-group mb-3">
                         <button type="reset" class="btn btn-warning">Đặt lại</button>
                         <button class="btn btn-success" type="submit">Thêm sản phẩm</button>
@@ -176,6 +184,386 @@ $(document).ready(function() {
         const url = $(this).val();
         if (url) { $('#imagePreview').attr('src', url); }
     });
+});
+</script>
+<script>
+// Variants repeater (create)
+document.addEventListener('DOMContentLoaded', function(){
+  const container = document.getElementById('variant-rows');
+  const addBtn = document.getElementById('add-variant');
+  const stockWarning = document.getElementById('stock-warning');
+  const totalStockSpan = document.getElementById('total-variant-stock');
+  const productQuantitySpan = document.getElementById('product-quantity');
+  const productQuantityInput = document.getElementById('quantity');
+  
+  // Dữ liệu động: thu thập từ các hàng đã nhập
+  let sizeOptionMap = {}; // Map Size -> [Options]
+  let variantPriceMap = {}; // Map "Size|Option" -> Price
+  let allSizes = [];
+  
+  if (!container || !addBtn) return;
+  
+  // Thu thập tất cả Size và Option từ các hàng hiện có
+  function collectVariantData() {
+    sizeOptionMap = {};
+    variantPriceMap = {};
+    allSizes = [];
+    
+    container.querySelectorAll('.variant-row').forEach(row => {
+      const sizeInput = row.querySelector('.variant-size-select');
+      const optionInput = row.querySelector('.variant-option-select');
+      const priceInput = row.querySelector('.variant-price-input');
+      
+      if (sizeInput && optionInput && priceInput) {
+        const size = sizeInput.value;
+        const option = optionInput.value;
+        const price = parseFloat(priceInput.value) || 0;
+        
+        if (size && option && price > 0) {
+          if (!sizeOptionMap[size]) {
+            sizeOptionMap[size] = [];
+            allSizes.push(size);
+          }
+          if (!sizeOptionMap[size].includes(option)) {
+            sizeOptionMap[size].push(option);
+          }
+          variantPriceMap[size + '|' + option] = price;
+        }
+      }
+    });
+  }
+  
+  // Cập nhật tất cả Size dropdowns
+  function updateAllSizeDropdowns() {
+    collectVariantData();
+    container.querySelectorAll('.variant-size-select').forEach(select => {
+      const currentValue = select.value;
+      const existingOptions = Array.from(select.options).map(opt => opt.value);
+      const hasNewOption = existingOptions.includes('__new__');
+      
+      // Xóa tất cả options trừ option đầu tiên (placeholder)
+      select.innerHTML = '<option value="">-- Chọn Size --</option>';
+      
+      // Thêm các Size mới
+      allSizes.forEach(size => {
+        const option = document.createElement('option');
+        option.value = size;
+        option.textContent = size;
+        select.appendChild(option);
+      });
+      
+      // Thêm option "Thêm mới..." vào cuối
+      const newOption = document.createElement('option');
+      newOption.value = '__new__';
+      newOption.textContent = '+ Thêm Size mới...';
+      select.appendChild(newOption);
+      
+      // Khôi phục giá trị đã chọn
+      if (currentValue && currentValue !== '__new__') {
+        select.value = currentValue;
+      }
+    });
+  }
+  
+  // Cập nhật Option dropdown khi chọn Size
+  function updateOptionDropdown(sizeSelect, optionSelect) {
+    const selectedSize = sizeSelect.value;
+    const currentOption = optionSelect.value;
+    
+    // Xóa tất cả options trừ option đầu tiên (placeholder)
+    optionSelect.innerHTML = '<option value="">-- Chọn Option --</option>';
+    
+    if (selectedSize && sizeOptionMap[selectedSize]) {
+      const availableOptions = sizeOptionMap[selectedSize];
+      availableOptions.forEach(option => {
+        const optionElement = document.createElement('option');
+        optionElement.value = option;
+        optionElement.textContent = option;
+        if (option === currentOption) {
+          optionElement.selected = true;
+        }
+        optionSelect.appendChild(optionElement);
+      });
+    }
+    
+    // Thêm option "Thêm mới..." vào cuối
+    const newOption = document.createElement('option');
+    newOption.value = '__new__';
+    newOption.textContent = '+ Thêm Option mới...';
+    optionSelect.appendChild(newOption);
+    
+    // Nếu option hiện tại không còn trong danh sách, reset
+    if (currentOption && currentOption !== '__new__' && (!selectedSize || !sizeOptionMap[selectedSize] || !sizeOptionMap[selectedSize].includes(currentOption))) {
+      optionSelect.value = '';
+    }
+    
+    // Tự động cập nhật giá
+    updatePriceFromVariant(sizeSelect, optionSelect);
+  }
+  
+  // Tự động cập nhật giá từ Size/Option
+  function updatePriceFromVariant(sizeSelect, optionSelect) {
+    const row = sizeSelect.closest('.variant-row');
+    const priceInput = row.querySelector('.variant-price-input');
+    const selectedSize = sizeSelect.value;
+    const selectedOption = optionSelect.value;
+    
+    if (selectedSize && selectedOption && variantPriceMap[selectedSize + '|' + selectedOption]) {
+      priceInput.value = variantPriceMap[selectedSize + '|' + selectedOption];
+    }
+  }
+  
+  // Setup event listeners cho Size và Option selects
+  function setupVariantSelects(row) {
+    const sizeSelect = row.querySelector('.variant-size-select');
+    const optionSelect = row.querySelector('.variant-option-select');
+    const priceInput = row.querySelector('.variant-price-input');
+    
+    if (sizeSelect) {
+      sizeSelect.addEventListener('change', function() {
+        if (this.value === '__new__') {
+          const newSize = prompt('Nhập Size mới:');
+          if (newSize && newSize.trim()) {
+            const trimmedSize = newSize.trim();
+            // Thêm Size mới vào dropdown
+            const option = document.createElement('option');
+            option.value = trimmedSize;
+            option.textContent = trimmedSize;
+            option.selected = true;
+            this.insertBefore(option, this.querySelector('option[value="__new__"]'));
+            this.value = trimmedSize;
+            
+            if (!allSizes.includes(trimmedSize)) {
+              allSizes.push(trimmedSize);
+              updateAllSizeDropdowns();
+            }
+          } else {
+            this.value = '';
+          }
+        } else {
+          updateOptionDropdown(this, optionSelect);
+        }
+      });
+    }
+    
+    if (optionSelect) {
+      optionSelect.addEventListener('change', function() {
+        if (this.value === '__new__') {
+          const selectedSize = sizeSelect.value;
+          if (!selectedSize) {
+            alert('Vui lòng chọn Size trước!');
+            this.value = '';
+            return;
+          }
+          const newOption = prompt('Nhập Option mới:');
+          if (newOption && newOption.trim()) {
+            const trimmedOption = newOption.trim();
+            // Thêm Option mới vào dropdown
+            const option = document.createElement('option');
+            option.value = trimmedOption;
+            option.textContent = trimmedOption;
+            option.selected = true;
+            this.insertBefore(option, this.querySelector('option[value="__new__"]'));
+            this.value = trimmedOption;
+            
+            if (!sizeOptionMap[selectedSize]) {
+              sizeOptionMap[selectedSize] = [];
+            }
+            if (!sizeOptionMap[selectedSize].includes(trimmedOption)) {
+              sizeOptionMap[selectedSize].push(trimmedOption);
+              // Cập nhật Option dropdown cho các hàng khác có cùng Size
+              container.querySelectorAll('.variant-row').forEach(otherRow => {
+                if (otherRow !== row) {
+                  const otherSizeSelect = otherRow.querySelector('.variant-size-select');
+                  const otherOptionSelect = otherRow.querySelector('.variant-option-select');
+                  if (otherSizeSelect && otherSizeSelect.value === selectedSize) {
+                    updateOptionDropdown(otherSizeSelect, otherOptionSelect);
+                  }
+                }
+              });
+            }
+          } else {
+            this.value = '';
+          }
+        } else {
+          updatePriceFromVariant(sizeSelect, this);
+        }
+      });
+    }
+    
+    // Khi nhập giá, cập nhật variantPriceMap
+    if (priceInput) {
+      priceInput.addEventListener('blur', function() {
+        const size = sizeSelect.value;
+        const option = optionSelect.value;
+        const price = parseFloat(this.value) || 0;
+        
+        if (size && option && price > 0 && size !== '__new__' && option !== '__new__') {
+          variantPriceMap[size + '|' + option] = price;
+          
+          // Cập nhật sizeOptionMap
+          if (!sizeOptionMap[size]) {
+            sizeOptionMap[size] = [];
+            if (!allSizes.includes(size)) {
+              allSizes.push(size);
+              updateAllSizeDropdowns();
+            }
+          }
+          if (!sizeOptionMap[size].includes(option)) {
+            sizeOptionMap[size].push(option);
+            // Cập nhật Option dropdown cho các hàng khác có cùng Size
+            container.querySelectorAll('.variant-row').forEach(otherRow => {
+              if (otherRow !== row) {
+                const otherSizeSelect = otherRow.querySelector('.variant-size-select');
+                const otherOptionSelect = otherRow.querySelector('.variant-option-select');
+                if (otherSizeSelect && otherSizeSelect.value === size) {
+                  updateOptionDropdown(otherSizeSelect, otherOptionSelect);
+                }
+              }
+            });
+          }
+        }
+      });
+    }
+  }
+  
+  // Calculate total stock
+  function calculateTotalStock() {
+    const productQty = parseInt(productQuantityInput?.value) || 0;
+    const stockInputs = container.querySelectorAll('.variant-stock-input');
+    let total = 0;
+    stockInputs.forEach(input => {
+      const val = parseInt(input.value) || 0;
+      total += val;
+    });
+    totalStockSpan.textContent = total;
+    productQuantitySpan.textContent = productQty;
+    
+    if (total > productQty && productQty > 0) {
+      stockWarning.style.display = 'block';
+      stockWarning.className = 'alert alert-danger';
+      return false;
+    } else {
+      stockWarning.style.display = 'none';
+      return true;
+    }
+  }
+  
+  // Image preview
+  function setupImagePreview(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      const preview = input.closest('.variant-row').querySelector('.variant-image-preview');
+      const img = preview.querySelector('img');
+      reader.onload = function(e) {
+        img.src = e.target.result;
+        preview.style.display = 'block';
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+  
+  // Monitor product quantity changes
+  if (productQuantityInput) {
+    productQuantityInput.addEventListener('input', calculateTotalStock);
+  }
+  
+  function makeRow() {
+    const row = document.createElement('div');
+    row.className = 'form-row align-items-end mb-3 variant-row';
+    row.style.border = '1px solid #ddd';
+    row.style.padding = '15px';
+    row.style.borderRadius = '5px';
+    row.innerHTML = `
+      <div class="col-md-12 mb-3">
+        <label><strong>Ảnh biến thể</strong></label>
+        <input type="file" name="variant_image[]" class="form-control variant-image" accept="image/*">
+        <div class="variant-image-preview mt-2" style="display:none;">
+          <img src="" alt="Preview" style="max-width: 80px; max-height: 80px; border: 1px solid #ddd; border-radius: 4px; object-fit: cover;">
+          <br><small class="text-muted">Ảnh mới</small>
+        </div>
+      </div>
+      <div class="col-md-2 col-6 mb-2"><label>SKU</label><input name="variant_sku[]" class="form-control"></div>
+      <div class="col-md-2 col-6 mb-2">
+        <label>Size</label>
+        <select name="variant_size[]" class="form-control variant-size-select">
+          <option value="">-- Chọn Size --</option>
+        </select>
+      </div>
+      <div class="col-md-2 col-6 mb-2">
+        <label>Option</label>
+        <select name="variant_option[]" class="form-control variant-option-select">
+          <option value="">-- Chọn Option --</option>
+        </select>
+      </div>
+      <div class="col-md-2 col-6 mb-2"><label>Giá</label><input name="variant_price[]" type="number" step="0.01" min="0" class="form-control variant-price-input" required></div>
+      <div class="col-md-2 col-6 mb-2"><label>Tồn kho</label><input name="variant_stock[]" type="number" min="0" class="form-control variant-stock-input" value="0"></div>
+      <div class="col-md-2 col-6 mb-2"><label>&nbsp;</label><button type="button" class="btn btn-outline-danger btn-sm btn-block remove-variant">Xóa</button></div>
+    `;
+    
+    // Populate Size dropdown với các Size đã có
+    collectVariantData();
+    const sizeSelect = row.querySelector('.variant-size-select');
+    allSizes.forEach(size => {
+      const option = document.createElement('option');
+      option.value = size;
+      option.textContent = size;
+      sizeSelect.appendChild(option);
+    });
+    
+    // Thêm option "Thêm mới..." vào cuối Size dropdown
+    const newSizeOption = document.createElement('option');
+    newSizeOption.value = '__new__';
+    newSizeOption.textContent = '+ Thêm Size mới...';
+    sizeSelect.appendChild(newSizeOption);
+    
+    // Thêm option "Thêm mới..." vào Option dropdown
+    const optionSelect = row.querySelector('.variant-option-select');
+    const newOptionOption = document.createElement('option');
+    newOptionOption.value = '__new__';
+    newOptionOption.textContent = '+ Thêm Option mới...';
+    optionSelect.appendChild(newOptionOption);
+    
+    // Setup event listeners
+    const imageInput = row.querySelector('.variant-image');
+    imageInput.addEventListener('change', function() {
+      setupImagePreview(this);
+    });
+    
+    const stockInput = row.querySelector('.variant-stock-input');
+    stockInput.addEventListener('input', calculateTotalStock);
+    stockInput.addEventListener('blur', function() {
+      const val = parseInt(this.value) || 0;
+      if (val < 0) this.value = 0;
+      calculateTotalStock();
+    });
+    
+    // Setup variant selects
+    setupVariantSelects(row);
+    
+    row.querySelector('.remove-variant').addEventListener('click', function(ev){ 
+      ev.preventDefault(); 
+      row.remove(); 
+      calculateTotalStock();
+      collectVariantData(); // Cập nhật lại dữ liệu sau khi xóa
+    });
+    
+    return row;
+  }
+  
+  addBtn.addEventListener('click', function(e){ 
+    e.preventDefault(); 
+    container.appendChild(makeRow());
+  });
+  
+  // Form submission validation
+  document.querySelector('form').addEventListener('submit', function(e) {
+    if (!calculateTotalStock()) {
+      e.preventDefault();
+      alert('Tổng số lượng các biến thể không được vượt quá số lượng sản phẩm!');
+      return false;
+    }
+  });
 });
 </script>
 @endpush

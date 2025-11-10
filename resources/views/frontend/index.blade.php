@@ -54,7 +54,7 @@
                                     <img src="https://via.placeholder.com/600x370" alt="#">
                                 @endif
                                 <div class="content">
-                                    <h3>{{$cat->title}}</h3>
+                                    <h3>{{$cat->name}}</h3>
                                         <a href="{{route('product-cat',$cat->slug)}}">Discover Now</a>
                                 </div>
                             </div>
@@ -95,7 +95,7 @@
                                     @foreach($categories as $key=>$cat)
 
                                     <button class="btn" style="background:none;color:black;"data-filter=".{{$cat->id}}">
-                                        {{$cat->title}}
+                                        {{$cat->name}}
                                     </button>
                                     @endforeach
                                 @endif

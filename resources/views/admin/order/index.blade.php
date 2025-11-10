@@ -18,61 +18,62 @@
           <thead>
             <tr>
               <th>S.N.</th>
-              <th>Order No.</th>
-              <th>Name</th>
+              <th>Mã đơn</th>
+              <th>Khách hàng</th>
               <th>Email</th>
-              <th>Quantity</th>
-              <th>Charge</th>
-              <th>Total Amount</th>
-              <th>Status</th>
-              <th>Action</th>
+              <th>Số lượng SP</th>
+              <th>Tổng tiền</th>
+              <th>Thanh toán</th>
+              <th>Vận chuyển</th>
+              <th>Thao tác</th>
             </tr>
           </thead>
           <tfoot>
             <tr>
               <th>S.N.</th>
-              <th>Order No.</th>
-              <th>Name</th>
+              <th>Mã đơn</th>
+              <th>Khách hàng</th>
               <th>Email</th>
-              <th>Quantity</th>
-              <th>Charge</th>
-              <th>Total Amount</th>
-              <th>Status</th>
-              <th>Action</th>
+              <th>Số lượng SP</th>
+              <th>Tổng tiền</th>
+              <th>Thanh toán</th>
+              <th>Vận chuyển</th>
+              <th>Thao tác</th>
               </tr>
           </tfoot>
           <tbody>
             @foreach($orders as $order)  
-            @php
-                $shipping_charge=DB::table('shippings')->where('id',$order->shipping_id)->pluck('price');
-            @endphp 
                 <tr>
                     <td>{{$order->id}}</td>
-                    <td>{{$order->order_number}}</td>
-                    <td>{{$order->first_name}} {{$order->last_name}}</td>
-                    <td>{{$order->email}}</td>
-                    <td>{{$order->quantity}}</td>
-                    <td>@foreach($shipping_charge as $data) $ {{number_format($data,2)}} @endforeach</td>
-                    <td>${{number_format($order->total_amount,2)}}</td>
+                    <td>#{{$order->id}}</td>
+                    <td>{{$order->user->name ?? 'N/A'}}</td>
+                    <td>{{$order->user->email ?? 'N/A'}}</td>
+                    <td>{{$order->items->sum('quantity')}}</td>
+                    <td>{{number_format($order->total_amount, 0, ',', '.')}}₫</td>
                     <td>
-                        @if($order->status=='new')
-                          <span class="badge badge-primary">{{$order->status}}</span>
-                        @elseif($order->status=='process')
-                          <span class="badge badge-warning">{{$order->status}}</span>
-                        @elseif($order->status=='delivered')
-                          <span class="badge badge-success">{{$order->status}}</span>
+                        @if($order->status == 'paid')
+                          <span class="badge badge-success">Đã thanh toán</span>
+                        @elseif($order->status == 'pending_payment')
+                          <span class="badge badge-warning">Chờ thanh toán</span>
                         @else
-                          <span class="badge badge-danger">{{$order->status}}</span>
+                          <span class="badge badge-secondary">Chưa thanh toán</span>
                         @endif
                     </td>
                     <td>
-                        <a href="{{route('order.show',$order->id)}}" class="btn btn-warning btn-sm float-left mr-1" style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" title="view" data-placement="bottom"><i class="fas fa-eye"></i></a>
-                        <a href="{{route('order.edit',$order->id)}}" class="btn btn-primary btn-sm float-left mr-1" style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" title="edit" data-placement="bottom"><i class="fas fa-edit"></i></a>
-                        <form method="POST" action="{{route('order.destroy',[$order->id])}}">
-                          @csrf 
-                          @method('delete')
-                              <button class="btn btn-danger btn-sm dltBtn" data-id={{$order->id}} style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" data-placement="bottom" title="Delete"><i class="fas fa-trash-alt"></i></button>
-                        </form>
+                        @php
+                            $shippingStatusMap = [
+                                'pending_pickup' => ['text' => 'Chờ lấy hàng', 'class' => 'warning'],
+                                'in_transit' => ['text' => 'Đang vận chuyển', 'class' => 'info'],
+                                'delivered' => ['text' => 'Đã nhận hàng', 'class' => 'success'],
+                                'cancelled' => ['text' => 'Đã hủy', 'class' => 'danger'],
+                                'returned' => ['text' => 'Đã hoàn trả', 'class' => 'secondary'],
+                            ];
+                            $shippingStatus = $shippingStatusMap[$order->shipping_status ?? 'pending_pickup'] ?? ['text' => 'Chờ lấy hàng', 'class' => 'warning'];
+                        @endphp
+                        <span class="badge badge-{{ $shippingStatus['class'] }}">{{ $shippingStatus['text'] }}</span>
+                    </td>
+                    <td>
+                        <a href="{{route('admin.orders.show',$order->id)}}" class="btn btn-warning btn-sm float-left mr-1" style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" title="view" data-placement="bottom"><i class="fas fa-eye"></i></a>
                     </td>
                 </tr>  
             @endforeach

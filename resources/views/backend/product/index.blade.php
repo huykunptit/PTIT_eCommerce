@@ -38,7 +38,12 @@
                     <td>{{$product->description}}</td>
                     <td>
                         @if($product->image_url)
-                            <img src="{{ asset($product->image_url) }}" class="img-fluid rounded-circle" style="max-width:50px" alt="{{$product->name}}">
+                            @php
+                                $src = \Illuminate\Support\Str::startsWith($product->image_url, ['http://','https://'])
+                                    ? $product->image_url
+                                    : asset($product->image_url);
+                            @endphp
+                            <img src="{{ $src }}" referrerpolicy="no-referrer" class="img-fluid rounded-circle" style="max-width:50px" alt="{{$product->name}}">
                         @else
                             <img src="{{asset('backend/img/avatar.png')}}" class="img-fluid rounded-circle" style="max-width:50px" alt="avatar.png">
                         @endif

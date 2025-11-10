@@ -13,6 +13,13 @@ class Order extends Model
         'user_id',
         'total_amount',
         'status',
+        'shipping_status',
+        'shipping_name',
+        'shipping_phone',
+        'shipping_address',
+        'shipping_email',
+        'notes',
+        'payment_method',
     ];
 
     protected $casts = [
@@ -32,5 +39,15 @@ class Order extends Model
     public function payments()
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function cancellation()
+    {
+        return $this->hasOne(OrderCancellation::class);
+    }
+
+    public function return()
+    {
+        return $this->hasOne(OrderReturn::class);
     }
 } 

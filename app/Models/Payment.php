@@ -15,6 +15,11 @@ class Payment extends Model
         'payment_status',
         'payment_date',
         'amount',
+        'status',
+        'transaction_no',
+        'transaction_data',
+        'bank_code',
+        'pay_date',
     ];
 
     protected $casts = [

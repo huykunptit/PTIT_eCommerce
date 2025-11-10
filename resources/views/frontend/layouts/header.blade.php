@@ -21,14 +21,12 @@
                             {{-- <li><i class="ti-alarm-clock"></i> <a href="#">Daily deal</a></li> --}}
                             @auth 
                                 @if(Auth::user()->role=='admin')
-                                    <li><i class="ti-user"></i> <a href="#"  target="_blank">Dashboard</a></li>
-                                @else 
-                                    <li><i class="ti-user"></i> <a href="#"  target="_blank">Dashboard</a></li>
+                                    <li><i class="ti-user"></i> <a href="{{ route('admin.dashboard') }}"  target="_blank">Dashboard</a></li>
                                 @endif
-                                <li><i class="ti-power-off"></i> <a href="#">Logout</a></li>
+                                <li><i class="ti-power-off"></i> <a href="{{ route('auth.logout') }}">Logout</a></li>
 
                             @else
-                                <li><i class="ti-power-off"></i><a href="auth/login">Login /</a> <a href="auth/register">Register</a></li>
+                                <li><i class="ti-power-off"></i><a href="{{ route('auth.login') }}">Login /</a> <a href="{{ route('auth.register') }}">Register</a></li>
                             @endauth
                         </ul>
                     </div>
@@ -44,7 +42,7 @@
                 <div class="col-lg-2 col-md-2 col-12">
                     <!-- Logo -->
                     <div class="logo">
-                        <a href="#"><img src="/images/logo-removebg-preview.png" alt="logo"></a>
+                        <a href="{{ route('home') }}"><img src="/images/logo-removebg-preview.png" alt="logo"></a>
                     </div>
                     <!--/ End Logo -->
                     <!-- Search Form -->
@@ -64,80 +62,153 @@
                 </div>
                 <div class="col-lg-8 col-md-7 col-12">
                     <div class="search-bar-top">
-                        <div class="search-bar">
-                            <select>
-                                <option >All Category</option>
-                                <option>Men</option>
-                                <option>Women</option>
-                                <option>Accessories</option>
+                        <div class="search-bar" style="position:relative;">
+                            <select id="search-category" style="display:none;">
+                                <option value="">All Category</option>
+                                @php
+                                    $categories = DB::table('categories')->get();
+                                @endphp
+                                @foreach($categories as $cat)
+                                <option value="{{$cat->id}}">{{$cat->name}}</option>
+                                @endforeach
                             </select>
-                            <form method="POST" action="#">
-                                @csrf
-                                <input name="search" placeholder="Search Products Here....." type="search">
+                            <form id="search-form" method="GET" action="{{ route('home') }}" style="position:relative;">
+                                <input id="search-input" name="search" placeholder="Search Products Here....." type="search" autocomplete="off">
                                 <button class="btnn" type="submit"><i class="ti-search"></i></button>
                             </form>
+                            <div id="search-results" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #ddd;border-radius:4px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:1000;max-height:500px;overflow-y:auto;margin-top:5px;">
+                                <div class="search-results-content"></div>
+                                <div class="search-results-footer" style="padding:10px;border-top:1px solid #eee;text-align:center;">
+                                    <a href="#" id="search-view-all" style="color:#D4AF37;text-decoration:none;font-weight:600;">Xem tất cả kết quả</a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="col-lg-2 col-md-3 col-12">
                     <div class="right-bar">
-                        <!-- Search Form -->
-                        <div class="sinlge-bar shopping">
-                           
-                            <a href="#" class="single-icon"><i class="fa fa-heart-o"></i> <span class="total-count"></span></a>
+                        <!-- Wishlist -->
+                        <div class="sinlge-bar shopping wishlist-dropdown">
+                            <a href="{{ route('wishlist.index') }}" class="single-icon">
+                                <i class="fa fa-heart-o"></i> 
+                                <span class="total-count wishlist-count">0</span>
+                            </a>
                             <!-- Shopping Item -->
-                            <div class="shopping-item">
+                            <div class="shopping-item wishlist-preview">
                                 <div class="dropdown-cart-header">
-                                    <span>2 Items</span>
-                                    <a href="#">View Wishlist</a>
+                                    <span class="wishlist-items-count">0 Sản phẩm</span>
+                                    <a href="{{ route('wishlist.index') }}">Xem tất cả</a>
                                 </div>
-                                <ul class="shopping-list">
-                                    <li>
-                                        <a href="#" class="remove" title="Remove this item"><i class="fa fa-remove"></i></a>
-                                        <a class="cart-img" href="#"><img src="https://picsum.photos/80/80?random=1" alt="prod"></a>
-                                        <h4><a href="#" target="_blank">Sample Product</a></h4>
-                                        <p class="quantity">1 x - <span class="amount">$49.00</span></p>
-                                    </li>
+                                <ul class="shopping-list wishlist-items-list">
+                                    <li class="empty-message">Danh sách yêu thích trống</li>
                                 </ul>
                                 <div class="bottom">
-                                    <div class="total">
-                                        <span>Total</span>
-                                        <span class="total-amount">$49.00</span>
-                                    </div>
-                                    <a href="#" class="btn animate">Cart</a>
+                                    <a href="{{ route('wishlist.index') }}" class="btn animate">Xem yêu thích</a>
                                 </div>
                             </div>
                             <!--/ End Shopping Item -->
                         </div>
-                        {{-- <div class="sinlge-bar">
-                            <a href="{{route('wishlist')}}" class="single-icon"><i class="fa fa-heart-o" aria-hidden="true"></i></a>
-                        </div> --}}
-                        <div class="sinlge-bar shopping">
-                            <a href="#" class="single-icon"><i class="ti-bag"></i> <span class="total-count"></span></a>
+                        
+                        <!-- Cart -->
+                        <div class="sinlge-bar shopping cart-dropdown">
+                            <a href="{{ route('cart.index') }}" class="single-icon">
+                                <i class="ti-bag"></i> 
+                                <span class="total-count cart-count">0</span>
+                            </a>
                             <!-- Shopping Item -->
-                            <div class="shopping-item">
+                            <div class="shopping-item cart-preview">
                                 <div class="dropdown-cart-header">
-                                    <span>1 Item</span>
-                                    <a href="#">View Cart</a>
+                                    <span class="cart-items-count">0 Sản phẩm</span>
+                                    <a href="{{ route('cart.index') }}">Xem giỏ hàng</a>
                                 </div>
-                                <ul class="shopping-list">
-                                    <li>
-                                        <a href="#" class="remove" title="Remove this item"><i class="fa fa-remove"></i></a>
-                                        <a class="cart-img" href="#"><img src="https://picsum.photos/80/80?random=2" alt="prod"></a>
-                                        <h4><a href="#" target="_blank">Another Product</a></h4>
-                                        <p class="quantity">1 x - <span class="amount">$19.00</span></p>
-                                    </li>
+                                <ul class="shopping-list cart-items-list">
+                                    <li class="empty-message">Giỏ hàng trống</li>
                                 </ul>
                                 <div class="bottom">
                                     <div class="total">
-                                        <span>Total</span>
-                                        <span class="total-amount">$19.00</span>
+                                        <span>Tổng cộng</span>
+                                        <span class="total-amount cart-total">0₫</span>
                                     </div>
-                                    <a href="#" class="btn animate">Checkout</a>
+                                    <a href="{{ route('cart.index') }}" class="btn animate">Thanh toán</a>
                                 </div>
                             </div>
                             <!--/ End Shopping Item -->
                         </div>
+                        
+                        <!-- User Avatar Dropdown -->
+                        @auth
+                        <div class="sinlge-bar user-dropdown">
+                            <a href="#" class="single-icon user-avatar-toggle" style="position:relative;">
+                                @if(Auth::user()->avatar)
+                                    <img src="{{ asset(Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">
+                                @else
+                                    <i class="ti-user" style="font-size:20px;"></i>
+                                @endif
+                            </a>
+                            <!-- User Dropdown -->
+                            <div class="shopping-item user-menu" style="display:none;position:absolute;right:0;top:100%;background:#fff;border:1px solid #ddd;border-radius:4px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:1000;min-width:200px;margin-top:10px;">
+                                <div class="dropdown-cart-header" style="padding:15px;border-bottom:1px solid #eee;">
+                                    <div style="display:flex;align-items:center;gap:10px;">
+                                        @if(Auth::user()->avatar)
+                                            <img src="{{ asset(Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
+                                        @else
+                                            <div style="width:40px;height:40px;border-radius:50%;background:var(--primary-color, #667eea);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;">
+                                                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                                            </div>
+                                        @endif
+                                        <div>
+                                            <div style="font-weight:600;color:#333;">{{ Auth::user()->name }}</div>
+                                            <div style="font-size:12px;color:#666;">{{ Auth::user()->email }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <ul class="shopping-list" style="list-style:none;padding:0;margin:0;">
+                                    <li style="border-bottom:1px solid #eee;">
+                                        <a href="#" class="orders-dropdown-toggle" style="display:flex;align-items:center;padding:12px 15px;color:#333;text-decoration:none;transition:background 0.3s;">
+                                            <i class="ti-shopping-cart" style="margin-right:10px;color:var(--primary-color, #667eea);"></i>
+                                            <span>Đơn hàng của tôi</span>
+                                            <i class="ti-angle-down" style="margin-left:auto;font-size:12px;"></i>
+                                        </a>
+                                        <!-- Orders Dropdown -->
+                                        <div class="orders-dropdown" style="display:none;background:#fff;border-top:1px solid #eee;max-height:400px;overflow-y:auto;">
+                                            <div class="orders-dropdown-header" style="padding:10px 15px;background:#f8f9fa;border-bottom:1px solid #eee;font-weight:600;font-size:14px;">
+                                                Đơn hàng gần đây
+                                            </div>
+                                            <div class="orders-dropdown-content" style="padding:0;">
+                                                <div class="orders-loading" style="padding:20px;text-align:center;color:#666;">
+                                                    <i class="ti-reload"></i> Đang tải...
+                                                </div>
+                                                <div class="orders-list" style="display:none;"></div>
+                                                <div class="orders-empty" style="display:none;padding:20px;text-align:center;color:#666;">
+                                                    Chưa có đơn hàng nào
+                                                </div>
+                                            </div>
+                                            <div class="orders-dropdown-footer" style="padding:10px 15px;border-top:1px solid #eee;text-align:center;">
+                                                <a href="{{ route('user.orders') }}" style="color:#D4AF37;text-decoration:none;font-weight:600;font-size:14px;">
+                                                    Xem tất cả đơn hàng <i class="ti-arrow-right"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li style="border-bottom:1px solid #eee;">
+                                        <a href="{{ route('user.profile') }}" style="display:flex;align-items:center;padding:12px 15px;color:#333;text-decoration:none;transition:background 0.3s;">
+                                            <i class="ti-user" style="margin-right:10px;color:var(--primary-color, #667eea);"></i>
+                                            <span>Chỉnh sửa trang cá nhân</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('auth.logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form-frontend').submit();" style="display:flex;align-items:center;padding:12px 15px;color:#e53e3e;text-decoration:none;transition:background 0.3s;">
+                                            <i class="ti-power-off" style="margin-right:10px;"></i>
+                                            <span>Đăng xuất</span>
+                                        </a>
+                                        <form id="logout-form-frontend" action="{{ route('auth.logout') }}" method="POST" style="display: none;">
+                                            @csrf
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        @endauth
                     </div>
                 </div>
             </div>
@@ -155,13 +226,14 @@
                                 <div class="navbar-collapse">	
                                     <div class="nav-inner">	
                                         <ul class="nav main-menu menu navbar-nav">
-                                            <li class="{{Request::path()=='home' ? 'active' : ''}}"><a href="#">Home</a></li>
-                                            <li class="{{Request::path()=='about-us' ? 'active' : ''}}"><a href="#">About Us</a></li>
-                                            <li class="@if(Request::path()=='product-grids'||Request::path()=='product-lists')  active  @endif"><a href="#">Products</a><span class="new">New</span></li>
-                                               
-                                            <li class="{{Request::path()=='blog' ? 'active' : ''}}"><a href="#">Blog</a></li>
-                                               
-                                            <li class="{{Request::path()=='contact' ? 'active' : ''}}"><a href="#">Contact Us</a></li>
+                                            <li class="{{Request::path()=='' || Request::path()=='home' ? 'active' : ''}}"><a href="{{ route('home') }}">Home</a></li>
+                                            <li class="{{Request::path()=='about' ? 'active' : ''}}"><a href="{{ route('about') }}">About Us</a></li>
+                                            <li class="@if(Request::path()=='product-grids'||Request::path()=='product-lists'||Request::is('product*'))  active  @endif"><a href="{{ route('home') }}#products">Products</a><span class="new">New</span></li>
+                                            <li class="{{Request::path()=='blog' ? 'active' : ''}}"><a href="{{ route('home') }}#blog">Blog</a></li>
+                                            <li class="{{Request::path()=='contact' ? 'active' : ''}}"><a href="{{ route('contact') }}">Contact Us</a></li>
+                                            @guest
+                                            <li><a href="{{ route('auth.login') }}"><i class="ti-user"></i> Login</a></li>
+                                            @endguest
                                         </ul>
                                     </div>
                                 </div>

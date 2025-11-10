@@ -20,7 +20,7 @@ class AdminMiddleware
         if (!Auth::check()) {
             return redirect()->route('auth.login');
         }
-
+        // dd(Auth::user())->role_id;
         if (Auth::user()->role_id !== 1) {
             return redirect()->route('home')->with('error', 'Access denied. Admin privileges required.');
         }

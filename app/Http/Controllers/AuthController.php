@@ -86,10 +86,6 @@ class AuthController extends Controller
         if(Auth::user()->role === 'admin'){
             return view('admin.index');
         }
-        else {
-            return view('user.dashboard');
-        }
-
     }
 
     // ========== API METHODS = =========

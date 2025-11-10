@@ -150,8 +150,8 @@
       <div id="postCollapse" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
         <div class="bg-white py-2 collapse-inner rounded">
           <h6 class="collapse-header">Post Options:</h6>
-          <a class="collapse-item" href="{{route('post.index')}}">Posts</a>
-          <a class="collapse-item" href="{{route('post.create')}}">Add Post</a>
+          <a class="collapse-item" href="{{route('admin.post.index')}}">Posts</a>
+          <a class="collapse-item" href="{{route('admin.post.create')}}">Add Post</a>
         </div>
       </div>
     </li>
@@ -202,7 +202,7 @@
         General Settings
     </div>
     <li class="nav-item">
-      <a class="nav-link" href="{{route('coupon.index')}}">
+      <a class="nav-link" href="{{route('admin.coupon.index')}}">
           <i class="fas fa-table"></i>
           <span>Coupon</span></a>
     </li>

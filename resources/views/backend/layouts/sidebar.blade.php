@@ -206,6 +206,11 @@
           <i class="fas fa-table"></i>
           <span>Coupon</span></a>
     </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{{ route('admin.system_settings.edit') }}">
+          <i class="fas fa-sliders-h"></i>
+          <span>System Settings</span></a>
+    </li>
      <!-- Users -->
      <li class="nav-item">
         <a class="nav-link" href="{{route('admin.users.index')}}">

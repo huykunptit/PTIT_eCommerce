@@ -15,15 +15,16 @@ class AdminSeeder extends Seeder
     {
         User::create([
             'name' => 'Admin',
-            'email' => 'admin@shop.com',
-            'password' => Hash::make('admin123'),
+            'email' => 'admin@ptit.com',
+            'password' => Hash::make('Demo@1234'),
             'phone_number' => '0123456789',
             'address' => '123 Admin Street, Admin City',
-            'role' => 'admin',
+            'role_id' => '1',
+            'status' => 'active',
         ]);
 
         $this->command->info('Admin account created successfully!');
-        $this->command->info('Email: admin@shop.com');
-        $this->command->info('Password: admin123');
+        $this->command->info('Email: admin@ptit.com');
+        $this->command->info('Password: Demo@1234');
     }
 } 

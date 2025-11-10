@@ -5,7 +5,7 @@
 <div class="card">
     <h5 class="card-header">Edit Coupon</h5>
     <div class="card-body">
-      <form method="post" action="{{route('coupon.update',$coupon->id)}}">
+      <form method="post" action="{{route('admin.coupon.update',$coupon->id)}}">
         @csrf 
         @method('PATCH')
         <div class="form-group">

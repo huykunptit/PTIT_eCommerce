@@ -5,7 +5,7 @@
 <div class="card">
     <h5 class="card-header">Add Post</h5>
     <div class="card-body">
-      <form method="post" action="{{route('post.store')}}">
+      <form method="post" action="{{route('admin.post.store')}}">
         {{csrf_field()}}
         <div class="form-group">
           <label for="inputTitle" class="col-form-label">Title <span class="text-danger">*</span></label>

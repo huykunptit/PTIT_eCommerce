@@ -15,6 +15,11 @@
     <!-- Custom styles for this template-->
     <link href="{{asset('backend/css/sb-admin-2.min.css')}}" rel="stylesheet">
     <link href="{{asset('css/theme-overrides.css')}}" rel="stylesheet">
+    <!-- Theme Colors -->
+    <link href="{{asset('css/theme.css')}}" rel="stylesheet">
+    @if(file_exists(public_path('css/theme-colors.css')))
+    <link href="{{asset('css/theme-colors.css')}}" rel="stylesheet">
+    @endif
     <link href="https://unpkg.com/filepond@4.30.6/dist/filepond.min.css" rel="stylesheet" />
     <link href="https://unpkg.com/filepond-plugin-image-preview@4.6.11/dist/filepond-plugin-image-preview.min.css" rel="stylesheet" />
     @stack('styles')

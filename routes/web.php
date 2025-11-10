@@ -11,7 +11,13 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\SystemSettingController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\VNPayController;
+use App\Http\Controllers\CheckoutController;
+use Illuminate\Support\Facades\DB;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -27,6 +33,70 @@ use App\Http\Controllers\ProductController;
 Route::get('/', function () {
     return view('home');
 })->name('home');
+
+// Static pages
+Route::get('/about', function(){
+    return view('about');
+})->name('about');
+
+Route::get('/contact', function(){
+    return view('contact');
+})->name('contact');
+
+// Search
+Route::get('/search', function (\Illuminate\Http\Request $request) {
+    $query = $request->get('q', '');
+    $categoryId = $request->get('category', '');
+    
+    $products = DB::table('products')
+        ->where('status', 'active')
+        ->where(function($q) use ($query) {
+            if ($query) {
+                $q->where('name', 'like', "%{$query}%")
+                  ->orWhere('description', 'like', "%{$query}%");
+            }
+        });
+    
+    if ($categoryId) {
+        $products->where('category_id', $categoryId);
+    }
+    
+    $products = $products->limit(10)->get();
+    
+    return response()->json($products);
+})->name('search');
+
+// Product detail
+Route::get('/product/{id}', function ($id) {
+    return view('product.show', ['id' => $id]);
+})->name('product.show');
+
+// Cart Routes
+Route::prefix('cart')->name('cart.')->group(function () {
+    Route::get('/', [CartController::class, 'index'])->name('index');
+    Route::post('/add', [CartController::class, 'add'])->name('add');
+    Route::put('/update/{key}', [CartController::class, 'update'])->name('update');
+    Route::delete('/remove/{key}', [CartController::class, 'remove'])->name('remove');
+    Route::delete('/clear', [CartController::class, 'clear'])->name('clear');
+    Route::get('/data', [CartController::class, 'getCartData'])->name('data');
+});
+
+// Wishlist Routes
+Route::prefix('wishlist')->name('wishlist.')->group(function () {
+    Route::get('/', [WishlistController::class, 'index'])->name('index');
+    Route::post('/add', [WishlistController::class, 'add'])->name('add');
+    Route::delete('/remove/{productId}', [WishlistController::class, 'remove'])->name('remove');
+    Route::delete('/clear', [WishlistController::class, 'clear'])->name('clear');
+    Route::get('/data', [WishlistController::class, 'getWishlistData'])->name('data');
+});
+
+// Password Reset Routes (outside auth group for simpler route names)
+Route::middleware('guest')->group(function () {
+    Route::get('/forgot-password', [\App\Http\Controllers\PasswordResetController::class, 'showForgotPasswordForm'])->name('password.request');
+    Route::post('/forgot-password', [\App\Http\Controllers\PasswordResetController::class, 'sendResetLink'])->name('password.email');
+    Route::get('/reset-password', [\App\Http\Controllers\PasswordResetController::class, 'showResetPasswordForm'])->name('password.reset');
+    Route::post('/reset-password', [\App\Http\Controllers\PasswordResetController::class, 'resetPassword'])->name('password.update');
+});
 
 // Authentication Routes
 Route::group(['prefix' => 'auth', 'as' => 'auth.'], function () {
@@ -44,9 +114,46 @@ Route::group(['prefix' => 'auth', 'as' => 'auth.'], function () {
     });
 });
 
+// User Profile Routes
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'showUserProfile'])->name('user.profile');
+    Route::put('/profile', [\App\Http\Controllers\ProfileController::class, 'updateUserProfile'])->name('user.profile.update');
+    Route::get('/orders', [\App\Http\Controllers\ProfileController::class, 'showUserOrders'])->name('user.orders');
+    
+    // Order Routes
+    Route::prefix('orders')->name('orders.')->group(function () {
+        Route::get('/recent', [\App\Http\Controllers\OrderController::class, 'getRecentOrders'])->name('recent');
+        Route::get('/{id}', [\App\Http\Controllers\OrderController::class, 'show'])->name('show');
+        Route::post('/{id}/cancel', [\App\Http\Controllers\OrderController::class, 'cancel'])->name('cancel');
+        Route::post('/{id}/return', [\App\Http\Controllers\OrderController::class, 'return'])->name('return');
+    });
+});
+
+// Checkout Routes
+Route::middleware('auth')->prefix('checkout')->name('checkout.')->group(function () {
+    Route::get('/', [CheckoutController::class, 'index'])->name('index');
+    Route::post('/', [CheckoutController::class, 'store'])->name('store');
+    Route::get('/success', [CheckoutController::class, 'success'])->name('success');
+});
+
+// Payment Routes
+Route::prefix('payment')->name('payment.')->group(function () {
+    // VNPay Routes
+    Route::prefix('vnpay')->name('vnpay.')->group(function () {
+        Route::match(['get', 'post'], '/create', [VNPayController::class, 'createPayment'])->name('create');
+        Route::get('/return', [VNPayController::class, 'return'])->name('return');
+        Route::post('/ipn', [VNPayController::class, 'ipn'])->name('ipn');
+        Route::get('/ipn', [VNPayController::class, 'ipn'])->name('ipn.get'); // VNPay có thể gọi GET hoặc POST
+    });
+});
+
 // Admin Routes
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth', 'admin']], function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    
+    // Admin Profile
+    Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'showAdminProfile'])->name('profile');
+    Route::put('/profile', [\App\Http\Controllers\ProfileController::class, 'updateAdminProfile'])->name('profile.update');
     
     // Users Management
     // Route::resource('users', AdminController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
@@ -82,17 +189,24 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth', 'a
     Route::get('/brands/{id}/edit', [BrandController::class, 'edit'])->name('brands.edit');
     Route::put('/brands/{id}', [BrandController::class, 'update'])->name('brands.update');
     Route::delete('/brands/{id}', [BrandController::class, 'destroy'])->name('brands.destroy');
-
+    
     // Orders Management
     Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
     Route::get('/orders/{id}', [AdminController::class, 'showOrder'])->name('orders.show');
     Route::put('/orders/{id}/status', [AdminController::class, 'updateOrderStatus'])->name('orders.update-status');
+    Route::put('/orders/{id}/shipping-status', [AdminController::class, 'updateShippingStatus'])->name('orders.update-shipping-status');
+    Route::post('/orders/{id}/cancellation', [AdminController::class, 'handleCancellation'])->name('orders.handle-cancellation');
+    Route::post('/orders/{id}/return', [AdminController::class, 'handleReturn'])->name('orders.handle-return');
 
     Route::resource('banner', BannerController::class)->except(['show']);
     Route::resource('coupon', CouponController::class)->except(['show']);
     Route::resource('post', PostController::class)->except(['show']);
     Route::resource('comment', CommentController::class)->only(['index','edit','update','destroy']);
     Route::resource('roles', RoleController::class)->except(['show'])->names('roles');
+
+    // System Settings
+    Route::get('/settings/system', [SystemSettingController::class, 'edit'])->name('system_settings.edit');
+    Route::post('/settings/system', [SystemSettingController::class, 'update'])->name('system_settings.update');
 });
 
 // Admin Brand routes with URL prefix but route names without the admin. prefix to match existing views

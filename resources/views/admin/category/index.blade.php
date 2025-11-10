@@ -38,7 +38,12 @@
                     <td>{{$category->name}}</td>
                     <td>
                         @if($category->image)
-                            <img src="{{asset($category->image)}}" class="img-fluid zoom" style="max-width:80px" alt="{{$category->name}}">
+                            @php
+                                $src = \Illuminate\Support\Str::startsWith($category->image, ['http://','https://'])
+                                    ? $category->image
+                                    : asset($category->image);
+                            @endphp
+                            <img src="{{$src}}" referrerpolicy="no-referrer" class="img-fluid zoom" style="max-width:80px" alt="{{$category->name}}">
                         @else
                             <img src="{{asset('backend/img/thumbnail-default.jpg')}}" class="img-fluid zoom" style="max-width:80px" alt="default">
                         @endif

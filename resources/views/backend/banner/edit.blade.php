@@ -28,8 +28,13 @@
           <label for="image" class="col-form-label">Hình ảnh banner</label>
           <input type="file" class="form-control" id="image" name="image" accept="image/*">
           @if($banner->photo)
+              @php
+                  $src = \Illuminate\Support\Str::startsWith($banner->photo, ['http://','https://'])
+                      ? $banner->photo
+                      : asset($banner->photo);
+              @endphp
               <div class="mt-2">
-                <img src="{{ asset($banner->photo) }}" alt="{{ $banner->title }}" style="max-height:100px; max-width:200px;">
+                <img src="{{ $src }}" alt="{{ $banner->title }}" style="max-height:100px; max-width:200px;">
                 <small class="text-muted d-block">Ảnh hiện tại</small>
               </div>
           @endif

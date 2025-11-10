@@ -1,0 +1,75 @@
+/* Theme Colors - Đồng bộ màu cho toàn hệ thống */
+:root {
+    --primary-color: #667eea;
+    --secondary-color: #764ba2;
+    --accent-color: #f093fb;
+    --success-color: #28a745;
+    --danger-color: #e53e3e;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    --gold-color: #D4AF37;
+    --text-dark: #2d3748;
+    --text-light: #718096;
+    --text-muted: #6c757d;
+    --white: #ffffff;
+    --light-gray: #f8f9fa;
+    --border-color: #e2e8f0;
+    --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-heavy: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    
+    /* Gradient */
+    --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #C4A037 100%);
+}
+
+/* Common Button Styles */
+.btn-primary {
+    background: var(--gradient-primary);
+    border: none;
+    color: var(--white);
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+    color: var(--white);
+}
+
+.btn-gold {
+    background: var(--gradient-gold);
+    border: none;
+    color: var(--text-dark);
+}
+
+.btn-gold:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+    color: var(--text-dark);
+}
+
+/* Card Header Gradient */
+.card-header-gradient {
+    background: var(--gradient-primary);
+    color: var(--white);
+}
+
+/* Text Colors */
+.text-primary-custom {
+    color: var(--primary-color);
+}
+
+.text-gold {
+    color: var(--gold-color);
+}
+
+/* Background Colors */
+.bg-primary-custom {
+    background: var(--gradient-primary);
+}
+
+.bg-light-custom {
+    background: var(--light-gray);
+}
+
