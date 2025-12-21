@@ -53,12 +53,38 @@
                 <select name="role_id" class="form-control preview-role">
                     <option value="">-----Select Role-----</option>
                     @foreach($roles as $role) 
-                        <option old_value="{{$user->role_id}}">{{$role->role_name}}</option>
+                        <option value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'selected' : '' }}>
+                            {{ $role->role_name }} @if($role->role_code) ({{ $role->role_code }}) @endif
+                        </option>
                     @endforeach
                 </select>
-              @error('role')
+              @error('role_id')
               <span class="text-danger">{{$message}}</span>
               @enderror
+              </div>
+
+              <div class="form-group">
+                <label class="col-form-label">Phân quyền nhân viên</label>
+                @php
+                  $permissionOptions = [
+                    'employee.access' => 'Truy cập dashboard nhân viên',
+                    'orders.manage' => 'Quản lý / cập nhật đơn hàng',
+                    'shipping.update' => 'Cập nhật giao hàng (shipper)',
+                    'inventory.view' => 'Xem tồn kho',
+                  ];
+                  $oldPermissions = old('permissions', []);
+                @endphp
+                <div class="row">
+                  @foreach($permissionOptions as $key => $label)
+                  <div class="col-md-6">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" name="permissions[]" value="{{ $key }}"
+                        {{ in_array($key, $oldPermissions) ? 'checked' : '' }}>
+                      <label class="form-check-label">{{ $label }}</label>
+                    </div>
+                  </div>
+                  @endforeach
+                </div>
               </div>
               <div class="form-group">
                 <label for="status" class="col-form-label">Trạng thái</label>
@@ -124,12 +150,13 @@
     // Live preview bindings
     $(function(){
       const update = function(){
+        const roleText = $('select[name="role_id"] option:selected').text().trim() || 'Role';
         $('.preview-name-text').text($('.preview-name').val()||'Your Name');
         $('.preview-email-text').text($('.preview-email').val()||'email@example.com');
-        $('.preview-role-text').text($('.preview-role').val()||'Role');
+        $('.preview-role-text').text(roleText);
         $('.preview-status-text').text($('.preview-status').val()||'Active');
       };
-      $('.preview-name, .preview-email, .preview-role, .preview-status, .preview-photo').on('input change', update);
+      $('.preview-name, .preview-email, select[name="role_id"], .preview-status, .preview-photo').on('input change', update);
       update();
     });
 </script>

@@ -11,6 +11,9 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
+        'assigned_to',
+        'assigned_shipper',
+        'assigned_packer',
         'total_amount',
         'status',
         'shipping_status',
@@ -49,5 +52,20 @@ class Order extends Model
     public function return()
     {
         return $this->hasOne(OrderReturn::class);
+    }
+
+    public function assignedSales()
+    {
+        return $this->belongsTo(User::class, 'assigned_to');
+    }
+
+    public function assignedShipper()
+    {
+        return $this->belongsTo(User::class, 'assigned_shipper');
+    }
+
+    public function assignedPacker()
+    {
+        return $this->belongsTo(User::class, 'assigned_packer');
     }
 } 

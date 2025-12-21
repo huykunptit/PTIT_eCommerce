@@ -21,11 +21,11 @@
       <div class="card-body p-0">
         <ul class="list-group list-group-flush rounded-3">
           <li class="list-group-item d-flex justify-content-between align-items-center p-3">
-            <i class="fas fa-envelope text-primary"></i>
+            <i class="fa fa-envelope text-primary"></i>
             <p class="mb-0">{{$profile->email}}</p>
           </li>
           <li class="list-group-item d-flex justify-content-between align-items-center p-3">
-            <i class="fas fa-user text-secondary"></i>
+            <i class="fa fa-user text-secondary"></i>
             <p class="mb-0">{{$profile->role}}</p>
           </li>
         </ul>

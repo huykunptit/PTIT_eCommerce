@@ -607,7 +607,7 @@
 	position: relative;
 }
 .header.shop .search-bar {
-	width: 535px;
+	width: 414px;
 	height: 50px;
 	display: inline-block;
 	background: #fff;
@@ -702,6 +702,7 @@
 }
 .header.shop .middle-inner {
 	padding: 20px 0;
+	height: 100px;
 	background: #fff;
 	border-top: 1px solid #eee;
 }

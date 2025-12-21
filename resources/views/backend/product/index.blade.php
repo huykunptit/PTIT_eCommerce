@@ -10,7 +10,7 @@
      </div>
     <div class="card-header py-3">
       <h6 class="m-0 font-weight-bold text-primary float-left">Danh sách sản phẩm</h6>
-      <a href="{{route('admin.products.create')}}" class="btn btn-primary btn-sm float-right" data-toggle="tooltip" data-placement="bottom" title="Thêm sản phẩm"><i class="fas fa-plus"></i> Thêm sản phẩm</a>
+      <a href="{{route('admin.products.create')}}" class="btn btn-primary btn-sm float-right" data-toggle="tooltip" data-placement="bottom" title="Thêm sản phẩm"><i class="fa fa-plus"></i> Thêm sản phẩm</a>
     </div>
     <div class="card-body">
       <div class="table-responsive">
@@ -60,8 +60,8 @@
                         @endif
                     </td>
                     <td>
-                        <a href="{{route('admin.products.edit',$product->id)}}" class="btn btn-primary btn-sm float-left mr-1" style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" title="edit" data-placement="bottom"><i class="fas fa-edit"></i></a>
-                        <button type="button" class="btn btn-danger btn-sm" style="height:30px; width:30px;border-radius:50%" data-toggle="modal" data-target="#confirmDelete{{$product->id}}" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                        <a href="{{route('admin.products.edit',$product->id)}}" class="btn btn-primary btn-sm float-left mr-1" style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" title="edit" data-placement="bottom"><i class="fa fa-edit"></i></a>
+                        <button type="button" class="btn btn-danger btn-sm" style="height:30px; width:30px;border-radius:50%" data-toggle="modal" data-target="#confirmDelete{{$product->id}}" title="Delete"><i class="fa fa-trash-alt"></i></button>
                         <!-- Delete Confirm Modal -->
                         <div class="modal fade" id="confirmDelete{{$product->id}}" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteLabel{{$product->id}}" aria-hidden="true">
                           <div class="modal-dialog" role="document">
@@ -137,7 +137,36 @@
           { extend: 'colvis', className: 'btn btn-sm btn-warning' }
         ],
         language: {
-          url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/vi.json'
+          decimal:        ",",
+          thousands:      ".",
+          processing:     "Đang xử lý...",
+          search:         "Tìm:",
+          lengthMenu:     "Hiển thị _MENU_ dòng",
+          info:           "Hiển thị _START_ tới _END_ của _TOTAL_ dòng",
+          infoEmpty:      "Không có dữ liệu",
+          infoFiltered:   "(lọc từ _MAX_ dòng)",
+          infoPostFix:    "",
+          loadingRecords: "Đang tải...",
+          zeroRecords:    "Không tìm thấy dữ liệu phù hợp",
+          emptyTable:     "Không có dữ liệu trong bảng",
+          paginate: {
+              first:      "Đầu",
+              previous:   "Trước",
+              next:       "Sau",
+              last:       "Cuối"
+          },
+          aria: {
+              sortAscending:  ": sắp xếp tăng dần",
+              sortDescending: ": sắp xếp giảm dần"
+          },
+          buttons: {
+            copy: "Sao chép",
+            csv: "Xuất CSV",
+            excel: "Xuất Excel",
+            pdf: "Xuất PDF",
+            print: "In",
+            colvis: "Ẩn/Hiện cột"
+          }
         },
         columnDefs: [
           { orderable: false, targets: [6,7] }

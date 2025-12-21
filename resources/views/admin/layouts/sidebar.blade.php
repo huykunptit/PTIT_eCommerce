@@ -3,7 +3,7 @@
     <!-- Sidebar - Brand -->
     <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{route('admin.dashboard')}}">
       <div class="sidebar-brand-icon rotate-n-15">
-        <i class="fas fa-laugh-wink"></i>
+        <i class="fa fa-laugh-wink"></i>
       </div>
       <div class="sidebar-brand-text mx-3">Admin</div>
     </a>
@@ -14,7 +14,7 @@
     <!-- Nav Item - Dashboard -->
     <li class="nav-item active">
       <a class="nav-link" href="{{route('admin.dashboard')}}">
-        <i class="fas fa-fw fa-tachometer-alt"></i>
+        <i class="fa fa-fw fa-tachometer-alt"></i>
         <span>Dashboard</span></a>
     </li>
 
@@ -30,13 +30,13 @@
     <!-- Nav Item - Charts -->
     <li class="nav-item">
         <a class="nav-link" href="{{route('file-manager')}}">
-            <i class="fas fa-fw fa-chart-area"></i>
+            <i class="fa fa-fw fa-chart-area"></i>
             <span>Media Manager</span></a>
     </li>
 
     <li class="nav-item">
       <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
-        <i class="fas fa-image"></i>
+        <i class="fa fa-image"></i>
         <span>Banners</span>
       </a>
       <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
@@ -57,7 +57,7 @@
     <!-- Categories -->
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#categoryCollapse" aria-expanded="true" aria-controls="categoryCollapse">
-          <i class="fas fa-sitemap"></i>
+          <i class="fa fa-sitemap"></i>
           <span>Category</span>
         </a>
         <div id="categoryCollapse" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
@@ -72,7 +72,7 @@
      {{-- Brands --}}
      <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#brandCollapse" aria-expanded="true" aria-controls="brandCollapse">
-          <i class="fas fa-table"></i>
+          <i class="fa fa-table"></i>
           <span>Brands</span>
         </a>
         <div id="brandCollapse" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
@@ -89,7 +89,7 @@
     {{-- Products --}}
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#productCollapse" aria-expanded="true" aria-controls="productCollapse">
-          <i class="fas fa-cubes"></i>
+          <i class="fa fa-cubes"></i>
           <span>Products</span>
         </a>
         <div id="productCollapse" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
@@ -105,7 +105,7 @@
     {{-- Shipping --}}
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#shippingCollapse" aria-expanded="true" aria-controls="shippingCollapse">
-          <i class="fas fa-truck"></i>
+          <i class="fa fa-truck"></i>
           <span>Shipping</span>
         </a>
         <div id="shippingCollapse" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
@@ -120,7 +120,7 @@
     <!--Orders -->
     <li class="nav-item">
         <a class="nav-link" href="{{route('order.index')}}">
-            <i class="fas fa-hammer fa-chart-area"></i>
+            <i class="fa fa-hammer fa-chart-area"></i>
             <span>Orders</span>
         </a>
     </li>
@@ -128,7 +128,7 @@
     <!-- Reviews -->
     <li class="nav-item">
         <a class="nav-link" href="{{route('review.index')}}">
-            <i class="fas fa-comments"></i>
+            <i class="fa fa-comments"></i>
             <span>Reviews</span></a>
     </li>
     
@@ -144,7 +144,7 @@
     <!-- Posts -->
     <li class="nav-item">
       <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#postCollapse" aria-expanded="true" aria-controls="postCollapse">
-        <i class="fas fa-fw fa-folder"></i>
+        <i class="fa fa-fw fa-folder"></i>
         <span>Posts</span>
       </a>
       <div id="postCollapse" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
@@ -159,7 +159,7 @@
      <!-- Category -->
      <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#postCategoryCollapse" aria-expanded="true" aria-controls="postCategoryCollapse">
-          <i class="fas fa-sitemap fa-folder"></i>
+          <i class="fa fa-sitemap fa-folder"></i>
           <span>Category</span>
         </a>
         <div id="postCategoryCollapse" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
@@ -174,7 +174,7 @@
       <!-- Tags -->
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#tagCollapse" aria-expanded="true" aria-controls="tagCollapse">
-            <i class="fas fa-tags fa-folder"></i>
+            <i class="fa fa-tags fa-folder"></i>
             <span>Tags</span>
         </a>
         <div id="tagCollapse" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
@@ -189,7 +189,7 @@
       <!-- Comments -->
       <li class="nav-item">
         <a class="nav-link" href="{{route('comment.index')}}">
-            <i class="fas fa-comments fa-chart-area"></i>
+            <i class="fa fa-comments fa-chart-area"></i>
             <span>Comments</span>
         </a>
       </li>
@@ -203,19 +203,26 @@
     </div>
     <li class="nav-item">
       <a class="nav-link" href="{{route('admin.coupon.index')}}">
-          <i class="fas fa-table"></i>
+          <i class="fa fa-table"></i>
           <span>Coupon</span></a>
     </li>
      <!-- Users -->
      <li class="nav-item">
      <a class="nav-link" href="{{route('admin.users.index')}}">
-            <i class="fas fa-users"></i>
+            <i class="fa fa-users"></i>
             <span>Users</span></a>
     </li>
+     <!-- Tags -->
+     <li class="nav-item">
+        <a class="nav-link" href="{{route('admin.tags.index')}}">
+            <i class="fa fa-tags"></i>
+            <span>Tags</span></a>
+    </li>
+
      <!-- General settings -->
      <li class="nav-item">
         <a class="nav-link" href="{{route('settings')}}">
-            <i class="fas fa-cog"></i>
+            <i class="fa fa-cog"></i>
             <span>Settings</span></a>
     </li>
 

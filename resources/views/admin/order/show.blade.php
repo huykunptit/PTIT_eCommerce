@@ -7,7 +7,7 @@
     <h5 class="card-header">
         Chi Tiết Đơn Hàng #{{ $order->id }}
         <a href="{{ route('admin.orders') }}" class="btn btn-sm btn-secondary shadow-sm float-right">
-            <i class="fas fa-arrow-left"></i> Quay lại
+            <i class="fa fa-arrow-left"></i> Quay lại
         </a>
     </h5>
     <div class="card-body">
@@ -192,6 +192,25 @@
                             @endforeach
                             @endif
                         </table>
+
+                        @if($order->status === 'pending_payment')
+                            <div class="mt-3">
+                                <form action="{{ route('admin.orders.confirm-payment', $order->id) }}" method="POST"
+                                      onsubmit="return confirm('Xác nhận đã nhận đủ tiền cho đơn hàng này?');">
+                                    @csrf
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        <i class="fa fa-check-circle mr-1"></i> Xác nhận đã thanh toán
+                                    </button>
+                                </form>
+                                <small class="text-muted d-block mt-2">
+                                    Trạng thái hiện tại: <strong>Đang chờ thanh toán</strong>. Sau khi xác nhận, trạng thái đơn sẽ chuyển sang <strong>paid</strong>.
+                                </small>
+                            </div>
+                        @elseif($order->status === 'paid')
+                            <div class="mt-3">
+                                <span class="badge badge-success"><i class="fa fa-check mr-1"></i>Đã thanh toán</span>
+                            </div>
+                        @endif
                     </div>
                 </div>
 

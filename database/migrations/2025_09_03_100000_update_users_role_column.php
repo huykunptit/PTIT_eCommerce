@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up()
     {
+        // Skip on sqlite (test env) to avoid DBAL requirement and unsupported enum alteration
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
         Schema::table('users', function (Blueprint $table) {
             // Thay đổi enum values của cột role từ ['buyer', 'seller'] thành ['user', 'admin']
             $table->enum('role', ['user', 'admin'])->default('user')->change();
@@ -22,6 +26,9 @@ return new class extends Migration
      */
     public function down()
     {
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
         Schema::table('users', function (Blueprint $table) {
             // Rollback về enum values cũ
             $table->enum('role', ['buyer', 'seller'])->default('buyer')->change();

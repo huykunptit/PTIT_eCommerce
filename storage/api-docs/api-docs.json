@@ -1,0 +1,1834 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "PTIT eCommerce API",
+        "description": "Tài liệu API cho PTIT eCommerce, bao gồm các luồng của Admin, Nhân viên và Khách hàng.",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://my-default-host.com",
+            "description": "Current host"
+        }
+    ],
+    "paths": {
+        "/api/admin/dashboard": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Tổng quan dashboard admin",
+                "operationId": "a4e953abeda97cdeaa1c2af786aea1f3",
+                "responses": {
+                    "200": {
+                        "description": "Thống kê tổng quan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/users": {
+            "get": {
+                "tags": [
+                    "Admin - Users"
+                ],
+                "summary": "Danh sách người dùng (role=user)",
+                "operationId": "856970fa5fec51a8e7e9f6f35977523e",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Tìm theo tên hoặc email",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Users"
+                ],
+                "summary": "Tạo mới người dùng",
+                "operationId": "b350ff381bd394706e418a5a5b508eba",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Nguyễn Văn A"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password"
+                                    },
+                                    "phone_number": {
+                                        "type": "string",
+                                        "example": "0123456789"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "Hà Nội"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Tạo thành công"
+                    },
+                    "422": {
+                        "description": "Dữ liệu không hợp lệ"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/users/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Users"
+                ],
+                "summary": "Chi tiết người dùng",
+                "operationId": "b0b09652e48564d6080a6a32efa33d75",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID người dùng",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "404": {
+                        "description": "Không tìm thấy"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Admin - Users"
+                ],
+                "summary": "Cập nhật người dùng",
+                "operationId": "741c594a357d2b27c639b221d66ad330",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID người dùng",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Nguyễn Văn B"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "new@example.com"
+                                    },
+                                    "phone_number": {
+                                        "type": "string",
+                                        "example": "0987654321"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "TP.HCM"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Cập nhật thành công"
+                    },
+                    "404": {
+                        "description": "Không tìm thấy"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Users"
+                ],
+                "summary": "Xóa người dùng",
+                "operationId": "44eee40ddd4c6892e817da79193968d2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID người dùng",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Xóa thành công"
+                    },
+                    "404": {
+                        "description": "Không tìm thấy"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/categories": {
+            "get": {
+                "tags": [
+                    "Admin - Categories"
+                ],
+                "summary": "Danh sách danh mục sản phẩm",
+                "operationId": "ff93805a1d31d40769c51c13fa5922fa",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Tìm theo tên danh mục",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Categories"
+                ],
+                "summary": "Tạo danh mục mới",
+                "operationId": "e8a4cf45fb16b8be762efc6c94fda115",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Điện thoại"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Danh mục điện thoại"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Tạo thành công"
+                    },
+                    "422": {
+                        "description": "Dữ liệu không hợp lệ"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/categories/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Categories"
+                ],
+                "summary": "Chi tiết danh mục",
+                "operationId": "593d495aeda2670322c155dcad2b5900",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID danh mục",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "404": {
+                        "description": "Không tìm thấy"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Admin - Categories"
+                ],
+                "summary": "Cập nhật danh mục",
+                "operationId": "3700185539168d3f044db50bfca1e208",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID danh mục",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Điện thoại - cập nhật"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Mô tả mới"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Cập nhật thành công"
+                    },
+                    "404": {
+                        "description": "Không tìm thấy"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Categories"
+                ],
+                "summary": "Xóa danh mục",
+                "operationId": "22613b751bede8a750c65d003204ccb1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID danh mục",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Xóa thành công"
+                    },
+                    "404": {
+                        "description": "Không tìm thấy"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/products": {
+            "get": {
+                "tags": [
+                    "Admin - Products"
+                ],
+                "summary": "Danh sách sản phẩm (quản trị)",
+                "operationId": "0eee49e9e79b845d58a0e0bcc8ac6356",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Tìm theo tên sản phẩm",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "category_id",
+                        "in": "query",
+                        "description": "Lọc theo danh mục",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Products"
+                ],
+                "summary": "Tạo sản phẩm mới",
+                "operationId": "d273f00d5123cd03ca716661a7ce8cc0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "price",
+                                    "stock",
+                                    "category_id"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "iPhone 16"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Mô tả sản phẩm"
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 19990000
+                                    },
+                                    "stock": {
+                                        "type": "integer",
+                                        "example": 10
+                                    },
+                                    "category_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "image": {
+                                        "type": "string",
+                                        "example": "uploads/products/iphone16.jpg"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Tạo thành công"
+                    },
+                    "422": {
+                        "description": "Dữ liệu không hợp lệ"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/products/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Products"
+                ],
+                "summary": "Chi tiết sản phẩm",
+                "operationId": "c0a90cb21572de90c33d04649f8d181b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID sản phẩm",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "404": {
+                        "description": "Không tìm thấy"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Admin - Products"
+                ],
+                "summary": "Cập nhật sản phẩm",
+                "operationId": "ba1b0266eb818ff3f2a195017c406f10",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID sản phẩm",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "price",
+                                    "stock",
+                                    "category_id"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "iPhone 16 Pro"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Mô tả mới"
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 25990000
+                                    },
+                                    "stock": {
+                                        "type": "integer",
+                                        "example": 5
+                                    },
+                                    "category_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "image": {
+                                        "type": "string",
+                                        "example": "uploads/products/iphone16-pro.jpg"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Cập nhật thành công"
+                    },
+                    "404": {
+                        "description": "Không tìm thấy"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Products"
+                ],
+                "summary": "Xóa sản phẩm",
+                "operationId": "2a5333810944f87e376708b813b29620",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID sản phẩm",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Xóa thành công"
+                    },
+                    "404": {
+                        "description": "Không tìm thấy"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/orders": {
+            "get": {
+                "tags": [
+                    "Admin - Orders"
+                ],
+                "summary": "Danh sách đơn hàng",
+                "operationId": "224906df29d4c715d1b2238037a17f7c",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Lọc trạng thái đơn hàng",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "processing",
+                                "shipped",
+                                "delivered",
+                                "cancelled"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/orders/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Orders"
+                ],
+                "summary": "Chi tiết đơn hàng",
+                "operationId": "d616b6e04c0493d4be87ccda227c68c7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID đơn hàng",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "404": {
+                        "description": "Không tìm thấy"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/orders/{id}/status": {
+            "put": {
+                "tags": [
+                    "Admin - Orders"
+                ],
+                "summary": "Cập nhật trạng thái đơn hàng",
+                "operationId": "bd25b7f1c990df534f560539901183a6",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID đơn hàng",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "pending",
+                                            "processing",
+                                            "shipped",
+                                            "delivered",
+                                            "cancelled"
+                                        ],
+                                        "example": "processing"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Cập nhật thành công"
+                    },
+                    "404": {
+                        "description": "Không tìm thấy"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/statistics": {
+            "get": {
+                "tags": [
+                    "Admin - Orders"
+                ],
+                "summary": "Thống kê đơn hàng & người dùng",
+                "operationId": "64f665383c6d993348f7550928990bcf",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/employees/{id}/permissions": {
+            "get": {
+                "tags": [
+                    "Admin - Permissions"
+                ],
+                "summary": "Xem danh sách quyền chi tiết của một nhân viên",
+                "operationId": "c6d9d19d8c811b2914f356ec62b7bdae",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID người dùng (nhân viên)",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "example": "orders.manage"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Không tìm thấy người dùng"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Admin - Permissions"
+                ],
+                "summary": "Cập nhật quyền chi tiết cho một nhân viên",
+                "description": "Ví dụ các quyền: employee.access, orders.manage, shipping.update, categories.manage, banners.manage, posts.manage, coupons.manage, system.settings",
+                "operationId": "a7b9353651047699a8dddc2a3f123b6b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID người dùng (nhân viên)",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "permissions"
+                                ],
+                                "properties": {
+                                    "permissions": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "example": "orders.manage"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Cập nhật thành công",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Không tìm thấy người dùng"
+                    },
+                    "422": {
+                        "description": "Dữ liệu không hợp lệ"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/homepage": {
+            "get": {
+                "tags": [
+                    "Homepage"
+                ],
+                "summary": "Cấu hình & dữ liệu hiển thị trang chủ",
+                "operationId": "267955b8f46a9e15b7df298181c89851",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "title": {
+                                            "type": "string"
+                                        },
+                                        "subtitle": {
+                                            "type": "string"
+                                        },
+                                        "hero_image": {
+                                            "type": "string"
+                                        },
+                                        "banner_image": {
+                                            "type": "string"
+                                        },
+                                        "banners": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "featured_categories": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "featured_products": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "featured_posts": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/orders": {
+            "get": {
+                "tags": [
+                    "User - Orders (REST)"
+                ],
+                "summary": "Danh sách đơn hàng của người dùng (REST)",
+                "operationId": "d68c0ba9a85b1d31f583d2464f378c59",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "User - Orders (REST)"
+                ],
+                "summary": "Tạo đơn hàng mới từ giỏ hàng hiện tại",
+                "description": "Sử dụng giỏ hàng session hiện tại (giống web), trả về chi tiết đơn và URL thanh toán nếu là VNPay hoặc Sepay.",
+                "operationId": "e7be4cae1f1a994f1c7a58881f487441",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "payment_method",
+                                    "shipping_name",
+                                    "shipping_phone",
+                                    "shipping_address"
+                                ],
+                                "properties": {
+                                    "payment_method": {
+                                        "type": "string",
+                                        "enum": [
+                                            "vnpay",
+                                            "cod",
+                                            "sepay"
+                                        ],
+                                        "example": "cod"
+                                    },
+                                    "shipping_name": {
+                                        "type": "string",
+                                        "example": "Nguyễn Văn A"
+                                    },
+                                    "shipping_phone": {
+                                        "type": "string",
+                                        "example": "0123456789"
+                                    },
+                                    "shipping_address": {
+                                        "type": "string",
+                                        "example": "Số 1 Trần Duy Hưng, Hà Nội"
+                                    },
+                                    "shipping_email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "example": "Giao trong giờ hành chính"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Tạo đơn hàng thành công"
+                    },
+                    "400": {
+                        "description": "Giỏ hàng trống hoặc tổng tiền không hợp lệ"
+                    },
+                    "422": {
+                        "description": "Dữ liệu không hợp lệ"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/orders/{id}": {
+            "get": {
+                "tags": [
+                    "User - Orders (REST)"
+                ],
+                "summary": "Chi tiết đơn hàng (REST)",
+                "operationId": "cfd1afa799955a7b7dd65623ba6e1492",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "404": {
+                        "description": "Không tìm thấy"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "User - Orders (REST)"
+                ],
+                "summary": "Hủy đơn hàng (REST)",
+                "description": "Chỉ cho phép hủy khi shipping_status đang 'pending_pickup'.",
+                "operationId": "8e52fa726568e7a2e91e00580aa8e89c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Hủy thành công"
+                    },
+                    "400": {
+                        "description": "Không thể hủy trong trạng thái hiện tại"
+                    },
+                    "404": {
+                        "description": "Không tìm thấy"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Đăng nhập người dùng",
+                "operationId": "e88eaf0147ba9543c44def77f2700931",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Đăng nhập thành công",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Login successful"
+                                        },
+                                        "user": {
+                                            "type": "object"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|xxxxxxxxxxxx"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Thông tin đăng nhập không hợp lệ"
+                    }
+                }
+            }
+        },
+        "/api/auth/register": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Đăng ký tài khoản mới",
+                "operationId": "4dfff80339730430b0a89ddc9f3389b5",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Nguyễn Văn A"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "phone_number": {
+                                        "type": "string",
+                                        "example": "0123456789",
+                                        "nullable": true
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "123 Đường ABC",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Đăng ký thành công",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User registered successfully"
+                                        },
+                                        "user": {
+                                            "type": "object"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|xxxxxxxxxxxx"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Lỗi validation"
+                    }
+                }
+            }
+        },
+        "/api/auth/logout": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Đăng xuất",
+                "operationId": "b80dce9cabd3153bdd38a6f8743fbe93",
+                "responses": {
+                    "200": {
+                        "description": "Đăng xuất thành công",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Logged out successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/profile": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Lấy thông tin profile người dùng",
+                "operationId": "b70772ad1bb405cd5657bfefc25d31b2",
+                "responses": {
+                    "200": {
+                        "description": "Thông tin người dùng",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "user": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/chatbot/message": {
+            "post": {
+                "tags": [
+                    "Chatbot"
+                ],
+                "summary": "Gửi tin nhắn đến chatbot AI",
+                "operationId": "d41ec291d89fd716998005e846ce8418",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "message"
+                                ],
+                                "properties": {
+                                    "message": {
+                                        "type": "string",
+                                        "example": "Có bao nhiêu sản phẩm đang có sẵn?"
+                                    },
+                                    "conversation_id": {
+                                        "type": "string",
+                                        "example": "conv_123",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Phản hồi từ chatbot",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "response": {
+                                            "type": "string",
+                                            "example": "Hiện tại có 150 sản phẩm đang có sẵn."
+                                        },
+                                        "conversation_id": {
+                                            "type": "string",
+                                            "example": "conv_123"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/chatbot/token": {
+            "get": {
+                "tags": [
+                    "Chatbot"
+                ],
+                "summary": "Lấy token để sử dụng chatbot",
+                "operationId": "a8c92fb8e16b11c85a2414e78de4be4b",
+                "responses": {
+                    "200": {
+                        "description": "Token thành công",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|xxxxxxxxxxxx"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/chatbot/system-data": {
+            "get": {
+                "tags": [
+                    "Chatbot"
+                ],
+                "summary": "Lấy dữ liệu hệ thống (số lượng, giá) cho chatbot",
+                "operationId": "1e05d5cad84a37ef568c9f44e176121c",
+                "responses": {
+                    "200": {
+                        "description": "Dữ liệu hệ thống",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "total_products": {
+                                            "type": "integer",
+                                            "example": 150
+                                        },
+                                        "available_products": {
+                                            "type": "integer",
+                                            "example": 120
+                                        },
+                                        "total_orders": {
+                                            "type": "integer",
+                                            "example": 500
+                                        },
+                                        "user_orders": {
+                                            "type": "integer",
+                                            "example": 5
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/orders/recent": {
+            "get": {
+                "tags": [
+                    "User - Orders"
+                ],
+                "summary": "Lấy danh sách đơn hàng gần đây của người dùng",
+                "description": "Trả về tối đa 5 đơn gần nhất cho người dùng đang đăng nhập.",
+                "operationId": "b8d1b7bbdf68935aa904b91f273eb8fa",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/profile": {
+            "get": {
+                "tags": [
+                    "User - Profile"
+                ],
+                "summary": "Xem thông tin tài khoản (web)",
+                "description": "Yêu cầu phiên đăng nhập web. Endpoint chủ yếu để mô tả luồng người dùng trên Swagger.",
+                "operationId": "90bc1ecd527a0d8c54f074880c21ccbb",
+                "responses": {
+                    "200": {
+                        "description": "Trang profile người dùng"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "User - Profile"
+                ],
+                "summary": "Cập nhật thông tin người dùng",
+                "description": "Cập nhật tên, email, số điện thoại, địa chỉ, mật khẩu và avatar cho người dùng hiện tại.",
+                "operationId": "2f80a564eef93f304c6dc0377da44e46",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Nguyễn Văn A"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@example.com"
+                                    },
+                                    "phone_number": {
+                                        "type": "string",
+                                        "example": "0123456789"
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "Hà Nội"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "new-password"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "new-password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Redirect sau khi cập nhật thành công"
+                    },
+                    "422": {
+                        "description": "Dữ liệu không hợp lệ"
+                    }
+                }
+            }
+        },
+        "/payment/vnpay/create": {
+            "post": {
+                "tags": [
+                    "User - Payments"
+                ],
+                "summary": "Tạo giao dịch thanh toán VNPay cho đơn hàng",
+                "description": "Nhận order_id và amount, kiểm tra hợp lệ và redirect sang cổng VNPay.",
+                "operationId": "1c43ef02832f964835645325a3924a37",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "order_id",
+                                    "amount"
+                                ],
+                                "properties": {
+                                    "order_id": {
+                                        "type": "integer",
+                                        "example": 123
+                                    },
+                                    "amount": {
+                                        "type": "number",
+                                        "example": 1500000
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "302": {
+                        "description": "Redirect sang VNPay hoặc quay lại trang checkout khi lỗi"
+                    },
+                    "400": {
+                        "description": "Thông tin không hợp lệ"
+                    }
+                }
+            }
+        },
+        "/wishlist/add": {
+            "post": {
+                "tags": [
+                    "User - Wishlist"
+                ],
+                "summary": "Thêm sản phẩm vào danh sách yêu thích (session-based)",
+                "operationId": "859cae0e9eeb292b412200544044c208",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "product_id"
+                                ],
+                                "properties": {
+                                    "product_id": {
+                                        "type": "integer",
+                                        "example": 19
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Đã thêm vào yêu thích"
+                    },
+                    "422": {
+                        "description": "Dữ liệu không hợp lệ"
+                    }
+                }
+            }
+        },
+        "/wishlist/remove/{productId}": {
+            "delete": {
+                "tags": [
+                    "User - Wishlist"
+                ],
+                "summary": "Xóa một sản phẩm khỏi danh sách yêu thích",
+                "operationId": "e724e1d8662e4a746a7e19e8a51f394a",
+                "parameters": [
+                    {
+                        "name": "productId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Đã xóa khỏi yêu thích"
+                    }
+                }
+            }
+        },
+        "/wishlist/clear": {
+            "delete": {
+                "tags": [
+                    "User - Wishlist"
+                ],
+                "summary": "Xóa toàn bộ danh sách yêu thích",
+                "operationId": "2a97b8f037b7ae56bfc12f0acbf1a9b2",
+                "responses": {
+                    "200": {
+                        "description": "Đã xóa toàn bộ yêu thích"
+                    }
+                }
+            }
+        },
+        "/wishlist/data": {
+            "get": {
+                "tags": [
+                    "User - Wishlist"
+                ],
+                "summary": "Lấy dữ liệu danh sách yêu thích hiện tại",
+                "operationId": "41f390a6a87b011a0048842d03b95577",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/ping": {
+            "get": {
+                "summary": "Health check",
+                "operationId": "26dab68cb818b5c37b4878b5e2d31530",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Admin",
+            "description": "Admin"
+        },
+        {
+            "name": "Admin - Users",
+            "description": "Admin - Users"
+        },
+        {
+            "name": "Admin - Categories",
+            "description": "Admin - Categories"
+        },
+        {
+            "name": "Admin - Products",
+            "description": "Admin - Products"
+        },
+        {
+            "name": "Admin - Orders",
+            "description": "Admin - Orders"
+        },
+        {
+            "name": "Admin - Permissions",
+            "description": "Admin - Permissions"
+        },
+        {
+            "name": "Homepage",
+            "description": "Homepage"
+        },
+        {
+            "name": "User - Orders (REST)",
+            "description": "User - Orders (REST)"
+        },
+        {
+            "name": "Authentication",
+            "description": "Authentication"
+        },
+        {
+            "name": "Chatbot",
+            "description": "Chatbot"
+        },
+        {
+            "name": "User - Orders",
+            "description": "User - Orders"
+        },
+        {
+            "name": "User - Profile",
+            "description": "User - Profile"
+        },
+        {
+            "name": "User - Payments",
+            "description": "User - Payments"
+        },
+        {
+            "name": "User - Wishlist",
+            "description": "User - Wishlist"
+        }
+    ]
+}

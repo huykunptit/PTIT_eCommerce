@@ -8,7 +8,7 @@
             <div class="col-lg-8">
                 <div class="success-content">
                     <div class="success-icon">
-                        <i class="fas fa-check-circle"></i>
+                        <i class="fa fa-check-circle"></i>
                     </div>
                     <h1 class="success-title">Thanh toán thành công!</h1>
                     <p class="success-message">
@@ -69,10 +69,10 @@
 
                     <div class="success-actions">
                         <a href="{{ route('user.orders') }}" class="btn-view-orders">
-                            <i class="fas fa-list mr-2"></i>Xem đơn hàng của tôi
+                            <i class="fa fa-list mr-2"></i>Xem đơn hàng của tôi
                         </a>
                         <a href="{{ route('home') }}" class="btn-continue-shopping">
-                            <i class="fas fa-shopping-bag mr-2"></i>Tiếp tục mua sắm
+                            <i class="fa fa-shopping-bag mr-2"></i>Tiếp tục mua sắm
                         </a>
                     </div>
                 </div>

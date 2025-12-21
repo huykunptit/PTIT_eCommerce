@@ -29,9 +29,9 @@
                         @endif
                     </div>
                     <div class="card-body mt-4 ml-2">
-                      <h5 class="card-title text-left"><small><i class="fas fa-user"></i> {{$profile->name}}</small></h5>
-                      <p class="card-text text-left"><small><i class="fas fa-envelope"></i> {{$profile->email}}</small></p>
-                      <p class="card-text text-left"><small class="text-muted"><i class="fas fa-hammer"></i> {{$profile->role}}</small></p>
+                      <h5 class="card-title text-left"><small><i class="fa fa-user"></i> {{$profile->name}}</small></h5>
+                      <p class="card-text text-left"><small><i class="fa fa-envelope"></i> {{$profile->email}}</small></p>
+                      <p class="card-text text-left"><small class="text-muted"><i class="fa fa-hammer"></i> {{$profile->role}}</small></p>
                     </div>
                   </div>
             </div>

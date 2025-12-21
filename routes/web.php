@@ -17,7 +17,10 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\VNPayController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\TagController;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redirect;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -34,6 +37,12 @@ Route::get('/', function () {
     return view('home');
 })->name('home');
 
+// Dev helper: nhanh chóng mở tài liệu API FastAPI (Swagger)
+Route::get('/fastapi/docs', function () {
+    $base = rtrim(env('FASTAPI_URL', 'http://localhost:8001'), '/');
+    return Redirect::away($base . '/docs');
+})->name('fastapi.docs');
+
 // Static pages
 Route::get('/about', function(){
     return view('about');
@@ -42,6 +51,8 @@ Route::get('/about', function(){
 Route::get('/contact', function(){
     return view('contact');
 })->name('contact');
+
+Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'submit'])->name('contact.submit');
 
 // Search
 Route::get('/search', function (\Illuminate\Http\Request $request) {
@@ -110,7 +121,7 @@ Route::group(['prefix' => 'auth', 'as' => 'auth.'], function () {
    
     Route::middleware('auth')->group(function () {
         Route::get('/', [AuthController::class, 'dashboard'])->name('index');
-        Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+        Route::match(['get','post'], '/logout', [AuthController::class, 'logout'])->name('logout');
     });
 });
 
@@ -145,6 +156,10 @@ Route::prefix('payment')->name('payment.')->group(function () {
         Route::post('/ipn', [VNPayController::class, 'ipn'])->name('ipn');
         Route::get('/ipn', [VNPayController::class, 'ipn'])->name('ipn.get'); // VNPay có thể gọi GET hoặc POST
     });
+
+    // Sepay QR payment
+    Route::get('/sepay/{order}', [CheckoutController::class, 'sepay'])->name('sepay.show');
+    Route::get('/sepay/{order}/status', [CheckoutController::class, 'getOrderStatus'])->name('sepay.status');
 });
 
 // Admin Routes
@@ -195,6 +210,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth', 'a
     Route::get('/orders/{id}', [AdminController::class, 'showOrder'])->name('orders.show');
     Route::put('/orders/{id}/status', [AdminController::class, 'updateOrderStatus'])->name('orders.update-status');
     Route::put('/orders/{id}/shipping-status', [AdminController::class, 'updateShippingStatus'])->name('orders.update-shipping-status');
+    Route::post('/orders/{id}/confirm-payment', [AdminController::class, 'confirmPayment'])->name('orders.confirm-payment');
     Route::post('/orders/{id}/cancellation', [AdminController::class, 'handleCancellation'])->name('orders.handle-cancellation');
     Route::post('/orders/{id}/return', [AdminController::class, 'handleReturn'])->name('orders.handle-return');
 
@@ -203,10 +219,27 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth', 'a
     Route::resource('post', PostController::class)->except(['show']);
     Route::resource('comment', CommentController::class)->only(['index','edit','update','destroy']);
     Route::resource('roles', RoleController::class)->except(['show'])->names('roles');
+    Route::resource('tags', TagController::class)->except(['show'])->names('tags');
+
+    // Notifications API
+    Route::get('/notifications', [AdminController::class, 'notificationIndex'])->name('notification.index');
+    Route::get('/notifications/api', [AdminController::class, 'getNotifications'])->name('notifications.api');
+    Route::post('/notifications/{id}/read', [AdminController::class, 'markNotificationAsRead'])->name('notifications.read');
+
+    // Export Data
+    Route::get('/export/orders', [AdminController::class, 'exportOrders'])->name('export.orders');
+    Route::get('/export/products', [AdminController::class, 'exportProducts'])->name('export.products');
+    Route::get('/export/users', [AdminController::class, 'exportUsers'])->name('export.users');
 
     // System Settings
     Route::get('/settings/system', [SystemSettingController::class, 'edit'])->name('system_settings.edit');
     Route::post('/settings/system', [SystemSettingController::class, 'update'])->name('system_settings.update');
+});
+
+// Employee Routes
+Route::group(['prefix' => 'employee', 'as' => 'employee.', 'middleware' => ['auth', 'employee']], function () {
+    Route::get('/dashboard', [EmployeeController::class, 'dashboard'])->name('dashboard');
+    Route::put('/orders/{id}/status', [EmployeeController::class, 'updateOrderStatus'])->name('orders.update-status');
 });
 
 // Admin Brand routes with URL prefix but route names without the admin. prefix to match existing views

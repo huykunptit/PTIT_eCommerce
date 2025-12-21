@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use Illuminate\Support\Facades\DB;
+use OpenApi\Annotations as OA;
 
 class CartController extends Controller
 {
@@ -51,6 +52,24 @@ class CartController extends Controller
 
     public function add(Request $request)
     {
+        /**
+         * @OA\Post(
+         *     path="/api/cart/items",
+         *     tags={"User - Cart (REST)"},
+         *     summary="Thêm sản phẩm vào giỏ hàng (REST)",
+         *     @OA\RequestBody(
+         *         required=true,
+         *         @OA\JsonContent(
+         *             required={"product_id"},
+         *             @OA\Property(property="product_id", type="integer", example=19),
+         *             @OA\Property(property="quantity", type="integer", example=1),
+         *             @OA\Property(property="variant_id", type="integer", nullable=true, example=3)
+         *         )
+         *     ),
+         *     @OA\Response(response=200, description="Đã thêm vào giỏ hàng"),
+         *     @OA\Response(response=400, description="Số lượng không đủ hoặc dữ liệu không hợp lệ")
+         * )
+         */
         $request->validate([
             'product_id' => 'required|exists:products,id',
             'quantity' => 'nullable|integer|min:1',
@@ -106,6 +125,29 @@ class CartController extends Controller
 
     public function update(Request $request, $key)
     {
+        /**
+         * @OA\Put(
+         *     path="/api/cart/items/{key}",
+         *     tags={"User - Cart (REST)"},
+         *     summary="Cập nhật số lượng một item trong giỏ hàng",
+         *     @OA\Parameter(
+         *         name="key",
+         *         in="path",
+         *         required=true,
+         *         @OA\Schema(type="string")
+         *     ),
+         *     @OA\RequestBody(
+         *         required=true,
+         *         @OA\JsonContent(
+         *             required={"quantity"},
+         *             @OA\Property(property="quantity", type="integer", example=2)
+         *         )
+         *     ),
+         *     @OA\Response(response=200, description="Cập nhật thành công"),
+         *     @OA\Response(response=400, description="Số lượng không đủ"),
+         *     @OA\Response(response=404, description="Không tìm thấy item trong giỏ")
+         * )
+         */
         $request->validate([
             'quantity' => 'required|integer|min:1',
         ]);
@@ -148,6 +190,20 @@ class CartController extends Controller
 
     public function remove($key)
     {
+        /**
+         * @OA\Delete(
+         *     path="/api/cart/items/{key}",
+         *     tags={"User - Cart (REST)"},
+         *     summary="Xóa một item khỏi giỏ hàng",
+         *     @OA\Parameter(
+         *         name="key",
+         *         in="path",
+         *         required=true,
+         *         @OA\Schema(type="string")
+         *     ),
+         *     @OA\Response(response=200, description="Đã xóa khỏi giỏ hàng")
+         * )
+         */
         $cart = session()->get('cart', []);
 
         if (isset($cart[$key])) {
@@ -168,6 +224,14 @@ class CartController extends Controller
 
     public function clear()
     {
+        /**
+         * @OA\Delete(
+         *     path="/api/cart",
+         *     tags={"User - Cart (REST)"},
+         *     summary="Xóa toàn bộ giỏ hàng hiện tại",
+         *     @OA\Response(response=200, description="Đã xóa toàn bộ giỏ hàng")
+         * )
+         */
         session()->forget('cart');
         return response()->json(['success' => true, 'message' => 'Đã xóa toàn bộ giỏ hàng']);
     }
@@ -189,6 +253,14 @@ class CartController extends Controller
 
     public function getCartData()
     {
+        /**
+         * @OA\Get(
+         *     path="/api/cart",
+         *     tags={"User - Cart (REST)"},
+         *     summary="Lấy dữ liệu giỏ hàng hiện tại (REST)",
+         *     @OA\Response(response=200, description="OK")
+         * )
+         */
         $cart = session()->get('cart', []);
         $cartItems = [];
         $total = 0;

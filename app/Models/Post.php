@@ -20,6 +20,22 @@ class Post extends Model
         'photo',
         'status',
     ];
+
+    /**
+     * Relationship với Category
+     */
+    public function cat_info()
+    {
+        return $this->belongsTo(Category::class, 'post_cat_id');
+    }
+
+    /**
+     * Relationship với User (author)
+     */
+    public function author()
+    {
+        return $this->belongsTo(User::class, 'added_by');
+    }
 }
 
 

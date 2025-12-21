@@ -25,7 +25,7 @@ services:
     image: nginx:1.27-alpine
     container_name: shop_nginx
     ports:
-      - "8080:80"  
+      - "8082:80"  
     volumes:
       - ./:/var/www/html:ro
       - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
@@ -59,7 +59,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: shop_queue
-    command: php artisan queue:work --sleep=3 --tries=3
+    command: sh -c "until [ -f /var/www/html/vendor/autoload.php ]; do sleep 1; done && php artisan queue:work --sleep=3 --tries=3"
     environment:
       QUEUE_CONNECTION: redis
       REDIS_HOST: redis
@@ -93,6 +93,44 @@ services:
       - "8081:80"   
     depends_on:
       - mysql
+
+  vite:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: shop_vite
+    command: sh -c "npm install --legacy-peer-deps && npm run dev -- --host 0.0.0.0"
+    volumes:
+      - ./:/var/www/html
+      - /var/www/html/node_modules
+    ports:
+      - "8089:8089"
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - app
+
+  fastapi:
+    build:
+      context: ./fastapi
+      dockerfile: Dockerfile
+    container_name: shop_fastapi
+    environment:
+      LARAVEL_BASE_URL: http://shop_nginx
+      LARAVEL_URL: http://shop_app:9000
+      FASTAPI_URL: http://fastapi:8001
+      # AI providers
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.5-flash}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-3.5-turbo}
+    volumes:
+      - ./fastapi:/app
+    depends_on:
+      - nginx
+      - app
+    ports:
+      - "8001:8001"
 
 volumes:
   mysql_data:

@@ -4,7 +4,7 @@
 @php
   use Illuminate\Support\Facades\DB;
   
-  // Load banners from database (DB::table) + robust ID parsing
+  // Load banners from database
   if (!isset($banners) || !count($banners)) {
       $bannerIdsRaw = \App\Models\SystemSetting::get('home_banner_ids');
       $bannerIds = [];
@@ -30,22 +30,12 @@
   }
   
   $categories = DB::table('categories')->select('id','name')->orderBy('name')->get();
-  $selectedCategory = request()->query('category');
-  $search = trim((string) request()->query('q', ''));
   
-  $products = DB::table('products')
-      ->when($selectedCategory, function ($q) use ($selectedCategory) {
-          return $q->where('category_id', $selectedCategory);
-      })
-      ->when($search !== '', function ($q) use ($search) {
-          return $q->where(function($w) use ($search){
-              $w->where('name', 'like', '%'.$search.'%')
-                ->orWhere('description', 'like', '%'.$search.'%');
-          });
-      })
+  // Load all products for client-side filtering
+  $allProducts = DB::table('products')
+      ->where('status', 'active')
       ->orderByDesc('id')
-      ->paginate(12)
-      ->appends(request()->query());
+      ->get();
 @endphp
 
 <!-- Hero Slider Section -->
@@ -56,7 +46,7 @@
             @foreach($banners as $key=>$banner)
             <button type="button" data-target="#heroCarousel" data-slide-to="{{$key}}" class="{{$key==0 ? 'active' : ''}}" aria-label="Slide {{$key+1}}"></button>
             @endforeach
-                    </div>
+        </div>
         
         <div class="carousel-inner">
             @foreach($banners as $key=>$banner)
@@ -66,7 +56,9 @@
                     : asset($banner->photo ?? 'backend/img/thumbnail-default.jpg');
             @endphp
             <div class="carousel-item {{$key==0 ? 'active' : ''}}">
-                <div class="hero-image" style="background-image: url('{{$bSrc}}')"></div>
+                <div class="hero-image">
+                    <img src="{{ $bSrc }}" alt="{{ $banner->title ?? 'Banner' }}" referrerpolicy="no-referrer">
+                </div>
                 <div class="hero-overlay"></div>
                 <div class="container h-100">
                     <div class="row h-100 align-items-center">
@@ -77,22 +69,22 @@
                                 <p class="hero-description">{!! html_entity_decode($banner->description ?? 'Khám phá vẻ đẹp vượt thời gian') !!}</p>
                                 <a href="#products" class="btn-hero">
                                     Khám Phá Ngay
-                                    <i class="fas fa-arrow-right ml-2"></i>
+                                    <i class="fa fa-arrow-right ml-2"></i>
                                 </a>
-                                                </div>
-                                                </div>
-                                            </div>
-                                    </div>
-                                </div>
-                                @endforeach
+                            </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
         
         <button class="carousel-control-prev" type="button" data-target="#heroCarousel" data-slide="prev">
-            <i class="fas fa-chevron-left"></i>
+            <i class="fa fa-chevron-left"></i>
             <span class="sr-only">Previous</span>
         </button>
         <button class="carousel-control-next" type="button" data-target="#heroCarousel" data-slide="next">
-            <i class="fas fa-chevron-right"></i>
+            <i class="fa fa-chevron-right"></i>
             <span class="sr-only">Next</span>
         </button>
     </div>
@@ -106,41 +98,41 @@
             <div class="col-md-3 col-6">
                 <div class="feature-box">
                     <div class="feature-icon">
-                        <i class="fas fa-shipping-fast"></i>
-                </div>
+                        <i class="fa fa-shipping-fast"></i>
+                    </div>
                     <h4>Miễn Phí Vận Chuyển</h4>
                     <p>Cho đơn hàng trên 2 triệu</p>
+                </div>
             </div>
-        </div>
             <div class="col-md-3 col-6">
                 <div class="feature-box">
                     <div class="feature-icon">
-                        <i class="fas fa-shield-alt"></i>
-                                    </div>
+                        <i class="fa fa-shield-alt"></i>
+                    </div>
                     <h4>Bảo Hành Trọn Đời</h4>
                     <p>Cam kết chất lượng vàng</p>
-                                    </div>
-                                </div>
+                </div>
+            </div>
             <div class="col-md-3 col-6">
                 <div class="feature-box">
                     <div class="feature-icon">
-                        <i class="fas fa-gem"></i>
-                            </div>
+                        <i class="fa fa-gem"></i>
+                    </div>
                     <h4>Chất Lượng Cao Cấp</h4>
                     <p>Vàng 24K chính hãng</p>
-                            </div>
-                        </div>
+                </div>
+            </div>
             <div class="col-md-3 col-6">
                 <div class="feature-box">
                     <div class="feature-icon">
-                        <i class="fas fa-headset"></i>
-                </div>
+                        <i class="fa fa-headset"></i>
+                    </div>
                     <h4>Hỗ Trợ 24/7</h4>
                     <p>Tư vấn nhiệt tình</p>
+                </div>
             </div>
         </div>
     </div>
-</div>
 </section>
 
 <!-- Products Section -->
@@ -151,63 +143,104 @@
             <span class="section-subtitle">Bộ Sưu Tập</span>
             <h2 class="section-title">Trang Sức Cao Cấp</h2>
             <p class="section-description">Khám phá những thiết kế trang sức tinh tế và sang trọng</p>
-                        </div>
+        </div>
 
-        <!-- Filter Section -->
-        <div class="filter-container">
-            <form method="GET" action="{{ route('home') }}" id="filterForm">
-                <div class="row align-items-end justify-content-center">
-                    <div class="col-lg-3 col-md-4 mb-3">
-                        <div class="filter-group">
-                            <label><i class="fas fa-layer-group mr-2"></i>Danh Mục</label>
-                            <select name="category" class="custom-select" onchange="document.getElementById('filterForm').submit()">
-                                <option value="">Tất cả danh mục</option>
-                                @foreach($categories as $cat)
-                                    <option value="{{$cat->id}}" {{ (string)$selectedCategory === (string)$cat->id ? 'selected' : '' }}>
-                                        {{$cat->name}}
-                                    </option>
-                    @endforeach
-                            </select>
+        <!-- Filter Section - New Design -->
+        <div class="filter-wrapper-new">
+            <div class="filter-box">
+                <!-- Category Filter -->
+                <div class="filter-item">
+                    <label class="filter-label">
+                        <i class="fa fa-list mr-2"></i>Danh mục
+                    </label>
+                    <select id="categoryFilter" class="filter-control">
+                        <option value="">Tất cả danh mục</option>
+                        @foreach($categories as $cat)
+                            <option value="{{$cat->id}}">{{$cat->name}}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Search Input -->
+                <div class="filter-item filter-item-search">
+                    <label class="filter-label">
+                        <i class="fa fa-search mr-2"></i>Tìm kiếm
+                    </label>
+                    <div class="search-box">
+                        <input type="text" id="searchInput" class="filter-control" placeholder="Nhập tên sản phẩm...">
+                        <button id="clearSearch" class="search-clear" style="display: none;" type="button">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sort Filter -->
+                <div class="filter-item">
+                    <label class="filter-label">
+                        <i class="fa fa-sort mr-2"></i>Sắp xếp
+                    </label>
+                    <select id="sortFilter" class="filter-control">
+                        <option value="newest">Mới nhất</option>
+                        <option value="price-asc">Giá tăng dần</option>
+                        <option value="price-desc">Giá giảm dần</option>
+                        <option value="name">Tên A-Z</option>
+                    </select>
+                </div>
+
+                <!-- Reset Button -->
+                <div class="filter-item filter-item-btn">
+                    <label class="filter-label" style="opacity: 0;">&nbsp;</label>
+                    <button id="resetFilters" class="btn-filter-reset" type="button">
+                        <i class="fa fa-redo mr-2"></i>Đặt lại
+                    </button>
                 </div>
             </div>
-                    <div class="col-lg-5 col-md-6 mb-3">
-                        <div class="filter-group">
-                            <label><i class="fas fa-search mr-2"></i>Tìm Kiếm</label>
-                            <div class="search-box">
-                                <input type="text" name="q" value="{{ $search }}" class="form-control" placeholder="Tìm kiếm sản phẩm...">
-                                <button type="submit" class="search-btn">
-                                    <i class="fas fa-search"></i>
-                                </button>
-        </div>
-    </div>
-                </div>
-                    @if($selectedCategory || $search)
-                    <div class="col-lg-2 col-md-2 mb-3">
-                        <a href="{{ route('home') }}" class="btn btn-outline-secondary btn-block">
-                            <i class="fas fa-redo mr-2"></i>Đặt lại
-                        </a>
+            
+            <!-- Filter Status -->
+            <div id="filterStatus" class="filter-result-info" style="display: none;">
+                <i class="fa fa-info-circle mr-2"></i>
+                <span id="resultCount">0</span> sản phẩm được tìm thấy
             </div>
-            @endif
         </div>
-            </form>
-    </div>
 
         <!-- Products Grid -->
-        <div class="products-grid">
-        <div class="row">
-                @foreach($products as $product)
+        <div id="productsContainer" class="products-grid">
+            <!-- Skeleton Loaders -->
+            <div id="skeletonLoaders" class="row" style="display: none;">
+                @for($i = 0; $i < 8; $i++)
+                <div class="col-lg-3 col-md-4 col-6 mb-4">
+                    <div class="product-card skeleton-card">
+                        <div class="skeleton-image"></div>
+                        <div class="skeleton-content">
+                            <div class="skeleton-line skeleton-title"></div>
+                            <div class="skeleton-line skeleton-price"></div>
+                            <div class="skeleton-line skeleton-rating"></div>
+                        </div>
+                    </div>
+                </div>
+                @endfor
+            </div>
+            
+            <div class="row" id="productsRow">
+                @foreach($allProducts as $product)
                     @php
                         $photos = explode(',', (string)($product->image_url ?? ''));
                         $img = trim($photos[0] ?? '');
-                        $imgSrc = $img && \Illuminate\Support\Str::startsWith($img, ['http://','https://']) 
-                            ? $img 
-                            : ($img ? asset($img) : asset('backend/img/thumbnail-default.jpg'));
-                                                @endphp
-                    <div class="col-lg-3 col-md-4 col-6 mb-4">
+                        $imgLocal = $img && !\Illuminate\Support\Str::startsWith($img, ['http://','https://']) ? public_path($img) : null;
+                        $imgSrc = $img && \Illuminate\Support\Str::startsWith($img, ['http://','https://'])
+                            ? $img
+                            : (($imgLocal && file_exists($imgLocal)) ? asset($img) : asset('backend/img/thumbnail-default.jpg'));
+                    @endphp
+                    <div class="col-lg-3 col-md-4 col-6 mb-4 product-item" 
+                         data-id="{{$product->id}}"
+                         data-name="{{strtolower($product->name)}}"
+                         data-category="{{$product->category_id}}"
+                         data-price="{{$product->price ?? 0}}"
+                         data-description="{{strtolower($product->description ?? '')}}">
                         <div class="product-card">
                             <div class="product-badge">
                                 <span class="badge badge-new">Mới</span>
-                                                    </div>
+                            </div>
                             <div class="product-image">
                                 <a href="{{ url('/product/'.$product->id) }}">
                                     <img src="{{$imgSrc}}" referrerpolicy="no-referrer" alt="{{$product->name}}">
@@ -215,18 +248,18 @@
                                 <div class="product-overlay">
                                     <div class="overlay-actions">
                                         <a href="{{ url('/product/'.$product->id) }}" class="action-btn" title="Xem chi tiết">
-                                            <i class="fas fa-eye"></i>
+                                            <i class="fa fa-eye"></i>
                                         </a>
                                         <button type="button" class="action-btn btn-add-wishlist" data-product-id="{{ $product->id }}" title="Yêu thích">
                                             <i class="far fa-heart"></i>
-                                                        </button>
-                                                    </div>
+                                        </button>
+                                    </div>
                                     <button type="button" class="btn-add-cart" data-product-id="{{ $product->id }}">
-                                        <i class="fas fa-shopping-bag mr-2"></i>
+                                        <i class="fa fa-shopping-bag mr-2"></i>
                                         Thêm vào giỏ
-                                                        </button>
-                                                    </div>
-                                                </div>
+                                    </button>
+                                </div>
+                            </div>
                             <div class="product-info">
                                 <div class="product-category">Trang Sức</div>
                                 <h3 class="product-title">
@@ -235,35 +268,50 @@
                                 @if(isset($product->price))
                                 <div class="product-price">
                                     <span class="current-price">{{ number_format($product->price, 0, ',', '.') }}₫</span>
-                                            </div>
+                                </div>
                                 @endif
                                 <div class="product-rating">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star"></i>
                                     <span>(5.0)</span>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
-    @endforeach
                             </div>
                         </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+        <!-- No Results Message -->
+        <div id="noResults" class="no-results" style="display: none;">
+            <i class="fa fa-search"></i>
+            <h3>Không tìm thấy sản phẩm</h3>
+            <p>Vui lòng thử tìm kiếm với từ khóa khác hoặc điều chỉnh bộ lọc</p>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+            <div class="spinner"></div>
+            <p>Đang tải...</p>
+        </div>
 
         <!-- Pagination -->
-        @if($products->hasPages())
-        <div class="pagination-wrapper">
-            {{ $products->links() }}
-                    </div>
-@endif
+        <div id="paginationContainer" class="pagination-container mt-4">
+            <nav aria-label="Product pagination">
+                <ul class="pagination justify-content-center" id="paginationList">
+                    <!-- Pagination items will be generated by JavaScript -->
+                </ul>
+            </nav>
+        </div>
     </div>
 </section>
 
 @push('styles')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <style>
+<style>
 /* ===== General Styles ===== */
 :root {
     --primary-color: #D4AF37;
@@ -274,14 +322,14 @@
     --transition: all 0.3s ease;
 }
 
-/* ===== Hero Slider ===== */
+/* ===== Hero Slider (Compact) ===== */
 .hero-slider {
     position: relative;
     overflow: hidden;
 }
 
 .hero-slider .carousel-item {
-    height: 650px;
+    height: 450px;
     position: relative;
 }
 
@@ -293,7 +341,13 @@
     height: 100%;
     background-size: cover;
     background-position: center;
-    background-repeat: no-repeat;
+}
+
+.hero-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 .hero-overlay {
@@ -309,44 +363,30 @@
     position: relative;
     z-index: 2;
     color: var(--white);
-    animation: fadeInUp 1s ease;
 }
 
 .hero-subtitle {
     display: inline-block;
     color: var(--primary-color);
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 2px;
     text-transform: uppercase;
-    margin-bottom: 15px;
-    position: relative;
-    padding-left: 60px;
-}
-
-.hero-subtitle::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    width: 50px;
-    height: 2px;
-    background: var(--primary-color);
+    margin-bottom: 10px;
 }
 
 .hero-title {
-    font-size: 64px;
+    font-size: 48px;
     font-weight: 700;
     line-height: 1.2;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     color: var(--white);
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
 }
 
 .hero-description {
-        font-size: 18px;
+    font-size: 16px;
     line-height: 1.6;
-    margin-bottom: 35px;
+    margin-bottom: 25px;
     color: rgba(255,255,255,0.9);
     max-width: 500px;
 }
@@ -354,30 +394,28 @@
 .btn-hero {
     display: inline-flex;
     align-items: center;
-    padding: 16px 40px;
+    padding: 14px 35px;
     background: var(--primary-color);
     color: var(--secondary-color);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
-    border-radius: 0;
     transition: var(--transition);
     text-decoration: none;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .btn-hero:hover {
     background: var(--white);
-    color: var(--secondary-color);
     transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(212,175,55,0.3);
+    box-shadow: 0 8px 20px rgba(212,175,55,0.3);
     text-decoration: none;
 }
 
 .carousel-control-prev,
 .carousel-control-next {
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
     background: rgba(255,255,255,0.1);
     border-radius: 50%;
     top: 50%;
@@ -387,11 +425,11 @@
 }
 
 .carousel-control-prev {
-    left: 30px;
+    left: 20px;
 }
 
 .carousel-control-next {
-    right: 30px;
+    right: 20px;
 }
 
 .carousel-control-prev:hover,
@@ -399,172 +437,268 @@
     background: var(--primary-color);
 }
 
-.carousel-control-prev i,
-.carousel-control-next i {
-    font-size: 20px;
-    color: var(--white);
-}
-
 .carousel-indicators {
-    bottom: 30px;
+    bottom: 20px;
 }
 
 .carousel-indicators button {
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     background: rgba(255,255,255,0.5);
-    border: 2px solid transparent;
-    margin: 0 5px;
+    margin: 0 4px;
 }
 
 .carousel-indicators button.active {
     background: var(--primary-color);
-    border-color: var(--white);
 }
 
-/* ===== Features Section ===== */
+/* ===== Features Section (Compact) ===== */
 .features-section {
-    padding: 80px 0;
+    padding: 50px 0;
     background: var(--white);
     border-bottom: 1px solid #eee;
 }
 
 .feature-box {
     text-align: center;
-    padding: 30px 20px;
+    padding: 20px 15px;
     transition: var(--transition);
 }
 
 .feature-icon {
-    width: 80px;
-    height: 80px;
+    width: 60px;
+    height: 60px;
     background: linear-gradient(135deg, var(--primary-color) 0%, #C4A037 100%);
     color: var(--white);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 20px;
+    margin: 0 auto 15px;
     border-radius: 50%;
-    font-size: 32px;
+    font-size: 24px;
     transition: var(--transition);
 }
 
 .feature-box:hover .feature-icon {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(212,175,55,0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(212,175,55,0.3);
 }
 
 .feature-box h4 {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--secondary-color);
-    margin-bottom: 8px;
+    margin-bottom: 5px;
 }
 
 .feature-box p {
-    font-size: 14px;
+    font-size: 13px;
     color: #666;
     margin: 0;
 }
 
 /* ===== Products Section ===== */
 .products-section {
-    padding: 80px 0;
+    padding: 50px 0;
     background: var(--light-bg);
 }
 
 .section-header {
-    margin-bottom: 60px;
+    margin-bottom: 40px;
 }
 
 .section-subtitle {
     display: inline-block;
     color: var(--primary-color);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     letter-spacing: 2px;
     text-transform: uppercase;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .section-title {
-    font-size: 42px;
+    font-size: 36px;
     font-weight: 700;
     color: var(--secondary-color);
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 .section-description {
-    font-size: 16px;
+    font-size: 15px;
     color: #666;
     max-width: 600px;
     margin: 0 auto;
 }
 
-/* ===== Filter Container ===== */
-.filter-container {
-    background: var(--white);
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.08);
-    margin-bottom: 50px;
+/* ===== New Filter Design ===== */
+.filter-wrapper-new {
+    margin-bottom: 30px;
 }
 
-.filter-group label {
+.filter-box {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    align-items: flex-end;
+}
+
+.filter-item {
+    flex: 1;
+    min-width: 180px;
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-item-search {
+    flex: 2;
+    min-width: 250px;
+    margin-bottom: 15px;
+}
+
+.filter-item-btn {
+    flex: 0 0 auto;
+    min-width: 120px;
+    margin-bottom: 15px;
+}
+
+.filter-label {
     font-size: 13px;
     font-weight: 600;
-    color: var(--text-color);
-    margin-bottom: 10px;
-    display: block;
+    color: #333;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
 }
 
-.filter-group .custom-select {
-    height: 50px;
-    border: 2px solid #eee;
-    border-radius: 4px;
+.filter-control {
+    width: 100%;
+    height: 44px;
+    padding: 0 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
     font-size: 14px;
-    transition: var(--transition);
+    background: #fff;
+    transition: all 0.3s ease;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
 }
 
-.filter-group .custom-select:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(212,175,55,0.1);
+.filter-control:focus {
+    outline: none;
+    border-color: #D4AF37;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
 }
 
+.filter-control option {
+    padding: 10px;
+}
+
+/* Search Box */
 .search-box {
     position: relative;
+    display: flex;
+    align-items: center;
 }
 
-.search-box .form-control {
-    height: 50px;
-    padding-right: 50px;
-    border: 2px solid #eee;
-    border-radius: 4px;
-    transition: var(--transition);
+.search-box .filter-control {
+    padding-right: 40px;
 }
 
-.search-box .form-control:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(212,175,55,0.1);
-}
-
-.search-btn {
+.search-clear {
     position: absolute;
-    right: 0;
-    top: 0;
-    height: 50px;
-    width: 50px;
-    background: var(--primary-color);
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
     border: none;
-    color: var(--white);
+    color: #999;
     cursor: pointer;
-    transition: var(--transition);
-    border-radius: 0 4px 4px 0;
+    padding: 5px 8px;
+    font-size: 14px;
+    transition: color 0.3s ease;
+    z-index: 10;
 }
 
-.search-btn:hover {
-    background: var(--secondary-color);
+.search-clear:hover {
+    color: #D4AF37;
+}
+
+/* Reset Button */
+.btn-filter-reset {
+    width: 100%;
+    height: 44px;
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-filter-reset:hover {
+    background: #D4AF37;
+    color: #1a1a1a;
+}
+
+/* Filter Result Info */
+.filter-result-info {
+    margin-top: 15px;
+    padding: 12px 20px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #666;
+    display: flex;
+    align-items: center;
+}
+
+.filter-result-info i {
+    color: #D4AF37;
+}
+
+#resultCount {
+    font-weight: 600;
+    color: #D4AF37;
+    margin: 0 5px;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+    .filter-box {
+        flex-direction: column;
+    }
+    
+    .filter-item,
+    .filter-item-search,
+    .filter-item-btn {
+        width: 100%;
+        min-width: 100%;
+    }
+}
+
+@media (max-width: 575px) {
+    .filter-box {
+        padding: 15px;
+        gap: 12px;
+    }
+    
+    .filter-control,
+    .btn-filter-reset {
+        height: 42px;
+        font-size: 13px;
+    }
 }
 
 /* ===== Product Card ===== */
@@ -574,13 +708,11 @@
     overflow: hidden;
     transition: var(--transition);
     height: 100%;
-    display: flex;
-    flex-direction: column;
 }
 
 .product-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
 .product-image {
@@ -601,21 +733,21 @@
 }
 
 .product-card:hover .product-image img {
-    transform: scale(1.1);
+    transform: scale(1.08);
 }
 
 .product-badge {
     position: absolute;
-    top: 15px;
-    left: 15px;
+    top: 12px;
+    left: 12px;
     z-index: 2;
 }
 
 .badge-new {
     background: var(--primary-color);
     color: var(--secondary-color);
-    padding: 6px 12px;
-    font-size: 11px;
+    padding: 5px 10px;
+    font-size: 10px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -643,13 +775,13 @@
 
 .overlay-actions {
     display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 8px;
+    margin-bottom: 15px;
 }
 
 .action-btn {
-    width: 45px;
-    height: 45px;
+    width: 40px;
+    height: 40px;
     background: var(--white);
     color: var(--secondary-color);
     display: flex;
@@ -657,54 +789,29 @@
     justify-content: center;
     border-radius: 50%;
     transition: var(--transition);
-    transform: translateY(20px);
-    opacity: 0;
     text-decoration: none;
-}
-
-.product-card:hover .action-btn {
-    transform: translateY(0);
-    opacity: 1;
-}
-
-.action-btn:nth-child(1) {
-    transition-delay: 0.1s;
-}
-
-.action-btn:nth-child(2) {
-    transition-delay: 0.15s;
-}
-
-.action-btn:nth-child(3) {
-    transition-delay: 0.2s;
+    border: none;
+    cursor: pointer;
 }
 
 .action-btn:hover {
     background: var(--primary-color);
     color: var(--white);
-    transform: translateY(-3px);
+    transform: translateY(-2px);
 }
 
 .btn-add-cart {
     background: var(--primary-color);
     color: var(--secondary-color);
     border: none;
-    padding: 12px 30px;
+    padding: 10px 25px;
     font-weight: 600;
     text-transform: uppercase;
-    font-size: 13px;
+    font-size: 12px;
     letter-spacing: 1px;
     cursor: pointer;
     transition: var(--transition);
-    transform: translateY(20px);
-    opacity: 0;
-    border-radius: 25px;
-}
-
-.product-card:hover .btn-add-cart {
-    transform: translateY(0);
-    opacity: 1;
-    transition-delay: 0.25s;
+    border-radius: 20px;
 }
 
 .btn-add-cart:hover {
@@ -713,25 +820,22 @@
 }
 
 .product-info {
-    padding: 20px;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
+    padding: 18px;
 }
 
 .product-category {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--primary-color);
     text-transform: uppercase;
     letter-spacing: 1px;
     font-weight: 600;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .product-title {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     line-height: 1.4;
 }
 
@@ -750,11 +854,11 @@
 }
 
 .product-price {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .current-price {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     color: var(--primary-color);
 }
@@ -762,115 +866,219 @@
 .product-rating {
     display: flex;
     align-items: center;
-    gap: 3px;
-    font-size: 13px;
+    gap: 2px;
+    font-size: 12px;
     color: #FFB800;
 }
 
 .product-rating span {
     color: #999;
-    margin-left: 5px;
+    margin-left: 4px;
+}
+
+/* ===== No Results ===== */
+.no-results {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.no-results i {
+    font-size: 64px;
+    color: #ddd;
+    margin-bottom: 20px;
+}
+
+.no-results h3 {
+    font-size: 24px;
+    color: var(--text-color);
+    margin-bottom: 10px;
+}
+
+.no-results p {
+    font-size: 15px;
+    color: #999;
+}
+
+/* ===== Loading Indicator ===== */
+.loading-indicator {
+    text-align: center;
+    padding: 40px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ===== Skeleton Loaders ===== */
+.skeleton-card {
+    background: var(--white);
+    border-radius: 8px;
+    overflow: hidden;
+    padding: 0;
+}
+
+.skeleton-image {
+    width: 100%;
+    padding-top: 100%;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+.skeleton-content {
+    padding: 18px;
+}
+
+.skeleton-line {
+    height: 12px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.skeleton-title {
+    width: 80%;
+    height: 16px;
+}
+
+.skeleton-price {
+    width: 60%;
+    height: 20px;
+    margin-top: 8px;
+}
+
+.skeleton-rating {
+    width: 40%;
+    height: 14px;
+    margin-top: 8px;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
 }
 
 /* ===== Pagination ===== */
-.pagination-wrapper {
-    margin-top: 50px;
+.pagination-container {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid #eee;
+}
+
+.pagination {
     display: flex;
-    justify-content: center;
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-.pagination-wrapper .pagination {
-    gap: 5px;
+.pagination li {
+    margin: 0 5px;
 }
 
-.pagination-wrapper .page-link {
-    border: 2px solid #eee;
+.pagination a,
+.pagination span {
+    display: inline-block;
+    padding: 10px 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
     color: var(--text-color);
-    padding: 10px 16px;
-    border-radius: 4px;
+    text-decoration: none;
     transition: var(--transition);
+    min-width: 40px;
+    text-align: center;
 }
 
-.pagination-wrapper .page-link:hover {
+.pagination a:hover {
     background: var(--primary-color);
+    color: var(--white);
     border-color: var(--primary-color);
-    color: var(--secondary-color);
 }
 
-.pagination-wrapper .page-item.active .page-link {
+.pagination .active span {
     background: var(--primary-color);
+    color: var(--white);
     border-color: var(--primary-color);
-    color: var(--secondary-color);
 }
 
-/* ===== Animations ===== */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.pagination .disabled span {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ===== Fade Animation ===== */
+.product-item {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.product-item.hiding {
+    opacity: 0;
+    transform: scale(0.95);
 }
 
 /* ===== Responsive ===== */
 @media (max-width: 991px) {
     .hero-slider .carousel-item {
-        height: 500px;
+        height: 400px;
     }
     
     .hero-title {
-        font-size: 42px;
-    }
-    
-    .section-title {
-        font-size: 32px;
-    }
-}
-
-@media (max-width: 767px) {
-    .hero-slider .carousel-item {
-        height: 450px;
-    }
-    
-    .hero-title {
-        font-size: 32px;
-    }
-    
-    .hero-description {
-        font-size: 16px;
+        font-size: 36px;
     }
     
     .section-title {
         font-size: 28px;
     }
+}
+
+@media (max-width: 767px) {
+    .hero-slider .carousel-item {
+        height: 350px;
+    }
+    
+    .hero-title {
+        font-size: 28px;
+    }
+    
+    .section-title {
+        font-size: 24px;
+    }
     
     .features-section {
-        padding: 50px 0;
+        padding: 40px 0;
     }
     
     .products-section {
-        padding: 50px 0;
+        padding: 40px 0;
     }
     
-    .filter-container {
-        padding: 20px;
+    .filter-container-compact {
+        padding: 12px;
     }
     
-    .carousel-control-prev,
-    .carousel-control-next {
-        width: 45px;
-        height: 45px;
-    }
-    
-    .carousel-control-prev {
-        left: 15px;
-    }
-    
-    .carousel-control-next {
-        right: 15px;
+    .filter-select,
+    .filter-input,
+    .btn-reset {
+        height: 38px;
+        font-size: 13px;
     }
 }
 
@@ -882,36 +1090,239 @@
     .current-price {
         font-size: 16px;
     }
-    
-    .hero-subtitle {
-        font-size: 12px;
-        padding-left: 40px;
-    }
-    
-    .hero-subtitle::before {
-        width: 30px;
-    }
-        }
-    </style>
+}
+</style>
 @endpush
 
 @push('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
-    <script>
+<script>
 $(document).ready(function() {
+    // Realtime Filter & Search System
+    let filterTimeout;
+    const $productsContainer = $('#productsRow');
+    const $allProducts = $('.product-item');
+    const $noResults = $('#noResults');
+    const $filterStatus = $('#filterStatus');
+    const $resultCount = $('#resultCount');
+    const $categoryFilter = $('#categoryFilter');
+    const $searchInput = $('#searchInput');
+    const $sortFilter = $('#sortFilter');
+    const $clearSearch = $('#clearSearch');
+    const $resetFilters = $('#resetFilters');
+    const $skeletonLoaders = $('#skeletonLoaders');
+    const $paginationContainer = $('#paginationContainer');
+    const $paginationList = $('#paginationList');
+    
+    // Pagination settings
+    let currentPage = 1;
+    const itemsPerPage = 12;
+    let filteredProducts = [];
+    
+    // Filter function with debounce
+    function filterProducts() {
+        clearTimeout(filterTimeout);
+        filterTimeout = setTimeout(function() {
+            const category = $categoryFilter.val();
+            const searchTerm = $searchInput.val().toLowerCase().trim();
+            const sortBy = $sortFilter.val();
+            
+            // Show/hide clear button
+            $clearSearch.toggle(searchTerm.length > 0);
+            
+            let visibleProducts = $allProducts.filter(function() {
+                const $item = $(this);
+                const matchCategory = !category || $item.data('category') == category;
+                const productName = $item.data('name');
+                const productDesc = $item.data('description');
+                const matchSearch = !searchTerm || 
+                    productName.includes(searchTerm) || 
+                    productDesc.includes(searchTerm);
+                
+                return matchCategory && matchSearch;
+            });
+            
+            // Sort products
+            if (sortBy !== 'newest') {
+                visibleProducts = visibleProducts.sort(function(a, b) {
+                    const $a = $(a);
+                    const $b = $(b);
+                    
+                    switch(sortBy) {
+                        case 'price-asc':
+                            return parseFloat($a.data('price')) - parseFloat($b.data('price'));
+                        case 'price-desc':
+                            return parseFloat($b.data('price')) - parseFloat($a.data('price'));
+                        case 'name':
+                            return $a.data('name').localeCompare($b.data('name'));
+                        default:
+                            return 0;
+                    }
+                });
+            }
+            
+            // Store filtered products
+            filteredProducts = visibleProducts.toArray();
+            currentPage = 1;
+            
+            // Show skeleton loaders
+            $skeletonLoaders.show();
+            $productsContainer.hide();
+            
+            setTimeout(function() {
+                $skeletonLoaders.hide();
+                renderProducts();
+                renderPagination();
+                
+                if (filteredProducts.length > 0) {
+                    $noResults.hide();
+                    $filterStatus.show();
+                    $resultCount.text(filteredProducts.length);
+                } else {
+                    $noResults.show();
+                    $filterStatus.hide();
+                    $paginationContainer.hide();
+                }
+            }, 500);
+            
+        }, 300); // Debounce delay
+    }
+    
+    // Event listeners
+    $categoryFilter.on('change', filterProducts);
+    $searchInput.on('input', filterProducts);
+    $sortFilter.on('change', filterProducts);
+    
+    $clearSearch.on('click', function() {
+        $searchInput.val('').focus();
+        filterProducts();
+    });
+    
+    $resetFilters.on('click', function() {
+        $categoryFilter.val('');
+        $searchInput.val('');
+        $sortFilter.val('newest');
+        $clearSearch.hide();
+        filterProducts();
+    });
+    
+    // Render products for current page
+    function renderProducts() {
+        $allProducts.hide();
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const productsToShow = filteredProducts.slice(startIndex, endIndex);
+        
+        productsToShow.forEach(function(product, index) {
+            const $item = $(product);
+            setTimeout(function() {
+                $item.show().css({
+                    'animation': 'fadeInUp 0.4s ease forwards',
+                    'animation-delay': (index * 0.03) + 's'
+                });
+            }, 50);
+        });
+        
+        $productsContainer.show();
+        
+        // Scroll to products section
+        if (currentPage > 1) {
+            $('html, body').animate({
+                scrollTop: $('#products').offset().top - 70
+            }, 300);
+        }
+    }
+    
+    // Render pagination
+    function renderPagination() {
+        const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+        
+        if (totalPages <= 1) {
+            $paginationContainer.hide();
+            return;
+        }
+        
+        $paginationContainer.show();
+        $paginationList.empty();
+        
+        // Previous button
+        const prevDisabled = currentPage === 1 ? 'disabled' : '';
+        $paginationList.append(`
+            <li class="page-item ${prevDisabled}">
+                <a class="page-link" href="#" data-page="${currentPage - 1}" ${prevDisabled ? 'tabindex="-1"' : ''}>
+                    <i class="fa fa-chevron-left"></i>
+                </a>
+            </li>
+        `);
+        
+        // Page numbers
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, currentPage + 2);
+        
+        if (startPage > 1) {
+            $paginationList.append(`<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>`);
+            if (startPage > 2) {
+                $paginationList.append(`<li class="page-item disabled"><span class="page-link">...</span></li>`);
+            }
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            const active = i === currentPage ? 'active' : '';
+            $paginationList.append(`
+                <li class="page-item ${active}">
+                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                </li>
+            `);
+        }
+        
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                $paginationList.append(`<li class="page-item disabled"><span class="page-link">...</span></li>`);
+            }
+            $paginationList.append(`<li class="page-item"><a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a></li>`);
+        }
+        
+        // Next button
+        const nextDisabled = currentPage === totalPages ? 'disabled' : '';
+        $paginationList.append(`
+            <li class="page-item ${nextDisabled}">
+                <a class="page-link" href="#" data-page="${currentPage + 1}" ${nextDisabled ? 'tabindex="-1"' : ''}>
+                    <i class="fa fa-chevron-right"></i>
+                </a>
+            </li>
+        `);
+    }
+    
+    // Pagination click handler
+    $(document).on('click', '.pagination a', function(e) {
+        e.preventDefault();
+        const page = parseInt($(this).data('page'));
+        if (page && page !== currentPage && page >= 1) {
+            currentPage = page;
+            renderProducts();
+            renderPagination();
+        }
+    });
+    
+    // Initial load
+    filteredProducts = $allProducts.toArray();
+    renderProducts();
+    renderPagination();
+    $filterStatus.show();
+    $resultCount.text($allProducts.length);
+    
     // Smooth scroll to products
     $('a[href="#products"]').on('click', function(e) {
         e.preventDefault();
         $('html, body').animate({
-            scrollTop: $('#products').offset().top - 80
-        }, 800);
+            scrollTop: $('#products').offset().top - 70
+        }, 600);
     });
     
-    // Add to cart with animation
-    $('.btn-add-cart').on('click', function(e) {
+    // Add to cart
+    $(document).on('click', '.btn-add-cart', function(e) {
         e.preventDefault();
-        var productId = $(this).data('product-id');
-        var btn = $(this);
+        const productId = $(this).data('product-id');
         
         $.ajax({
             url: '{{ route("cart.add") }}',
@@ -948,32 +1359,23 @@ $(document).ready(function() {
                         });
                     } else if (typeof openMiniCart === 'function') {
                         openMiniCart();
+                    } else {
+                        swal("Thành công!", "Đã thêm vào giỏ hàng", "success");
                     }
                 }
             },
             error: function(xhr) {
                 const errorMsg = xhr.responseJSON?.error || 'Có lỗi xảy ra';
-                if (typeof showLuxuryModal === 'function') {
-                    showLuxuryModal('error', 'Lỗi!', errorMsg, {
-                        autoClose: 3000
-                    });
-                } else {
-                    swal({
-                        title: "Lỗi!",
-                        text: errorMsg,
-                        icon: "error",
-                        button: "Đóng",
-                    });
-                }
+                swal("Lỗi!", errorMsg, "error");
             }
-            });
         });
+    });
 
     // Add to wishlist
-    $('.btn-add-wishlist').on('click', function(e) {
+    $(document).on('click', '.btn-add-wishlist', function(e) {
         e.preventDefault();
-        var productId = $(this).data('product-id');
-        var btn = $(this);
+        const productId = $(this).data('product-id');
+        const $btn = $(this);
         
         $.ajax({
             url: '{{ route("wishlist.add") }}',
@@ -986,11 +1388,11 @@ $(document).ready(function() {
             },
             success: function(response) {
                 if (response.success) {
-                    btn.find('i').removeClass('far').addClass('fas');
-                    btn.addClass('active');
+                    $btn.find('i').removeClass('far').addClass('fas');
+                    $btn.addClass('active');
                     
                     if (typeof showLuxuryModal === 'function') {
-                        showLuxuryModal('wishlist', 'Đã thêm vào yêu thích!', 'Sản phẩm đã được lưu vào danh sách yêu thích của bạn', {
+                        showLuxuryModal('wishlist', 'Đã thêm vào yêu thích!', 'Sản phẩm đã được lưu vào danh sách yêu thích', {
                             secondaryBtn: {
                                 text: 'Đóng',
                                 action: function() {}
@@ -1004,12 +1406,7 @@ $(document).ready(function() {
                             autoClose: false
                         });
                     } else {
-                        swal({
-                            title: "Thành công!",
-                            text: response.message,
-                            icon: "success",
-                            button: "Đóng",
-                        });
+                        swal("Thành công!", response.message, "success");
                     }
                     
                     if (typeof loadWishlistData === 'function') {
@@ -1019,28 +1416,8 @@ $(document).ready(function() {
             },
             error: function(xhr) {
                 const errorMsg = xhr.responseJSON?.error || 'Có lỗi xảy ra';
-                if (typeof showLuxuryModal === 'function') {
-                    showLuxuryModal('error', 'Lỗi!', errorMsg, {
-                        autoClose: 3000
-                    });
-                } else {
-                    swal({
-                        title: "Lỗi!",
-                        text: errorMsg,
-                        icon: "error",
-                        button: "Đóng",
-                    });
-                }
+                swal("Lỗi!", errorMsg, "error");
             }
-        });
-    });
-    
-    // Product card entrance animation
-    $('.product-card').each(function(index) {
-        $(this).css({
-            'animation': 'fadeInUp 0.6s ease forwards',
-            'animation-delay': (index * 0.05) + 's',
-            'opacity': '0'
         });
     });
     
@@ -1054,6 +1431,6 @@ $(document).ready(function() {
         }
     );
 });
-    </script>
+</script>
 @endpush
 @endsection

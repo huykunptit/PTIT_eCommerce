@@ -9,7 +9,7 @@
 						<!-- Single Widget -->
 						<div class="single-footer about">
 							<div class="logo">
-                                <a href="#"><img src="{{asset('backend/img/logo2.png')}}" alt="#"></a>
+                                <a href="#"><img src="{{asset('images/logotrang.png')}}" alt="#"></a>
 							</div>
 						
 					
@@ -69,7 +69,7 @@
 					<div class="row">
 						<div class="col-lg-6 col-12">
 							<div class="left">
-								<p>Copyright © {{date('Y')}} <a href="https://github.com/Prajwal100" target="_blank">Prajwal Rai</a>  -  All Rights Reserved.</p>
+								<p>Copyright © {{date('Y')}} PTIT ECommerce</a>  -  All Rights Reserved.</p>
 							</div>
 						</div>
 						<div class="col-lg-6 col-12">
@@ -119,6 +119,9 @@
 
 	<!-- Active JS -->
 	<script src="{{asset('frontend/js/active.js')}}"></script>
+
+    <!-- Chatbot AI Widget (pure JS) -->
+    <script src="{{ asset('frontend/js/chatbot-widget.js') }}"></script>
 
 	
 	@stack('scripts')

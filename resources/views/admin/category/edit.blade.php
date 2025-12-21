@@ -18,13 +18,11 @@
         </div>
 
         <div class="form-group floating-group">
-          <input id="image" type="file" name="image" class="form-control modern-input">
+          <input id="image" type="file" name="image" class="form-control modern-input" data-preview-target="#categoryImagePreview">
           <label for="image" class="col-form-label">Ảnh danh mục</label>
-          @if($category->image)
-            <div class="mt-2">
-              <img src="{{$category->image}}" alt="{{$category->name}}" style="max-height:80px"/>
-            </div>
-          @endif
+          <div class="mt-2" data-preview-wrapper style="{{ $category->image ? '' : 'display:none;' }}">
+            <img id="categoryImagePreview" src="{{$category->image}}" alt="{{$category->name}}" style="max-height:120px;border:1px solid #ddd;border-radius:6px;padding:4px;{{ $category->image ? '' : 'display:none;' }}">
+          </div>
           @error('image')
           <span class="text-danger">{{$message}}</span>
           @enderror

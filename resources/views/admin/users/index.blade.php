@@ -10,7 +10,7 @@
      </div>
     <div class="card-header py-3">
       <h6 class="m-0 font-weight-bold text-primary float-left">Danh sách người dùng</h6>
-      <a href="{{route('admin.users.create')}}" class="btn btn-primary btn-sm float-right" data-toggle="tooltip" data-placement="bottom" title="Thêm người dùng"><i class="fas fa-plus"></i> Thêm người dùng</a>
+      <a href="{{route('admin.users.create')}}" class="btn btn-primary btn-sm float-right" data-toggle="tooltip" data-placement="bottom" title="Thêm người dùng"><i class="fa fa-plus"></i> Thêm người dùng</a>
     </div>
     <div class="card-body">
       <div class="table-responsive">
@@ -54,8 +54,8 @@
                         @endif
                     </td>
                     <td>
-                        <a href="{{route('admin.users.edit',$user->id)}}" class="btn btn-primary btn-sm float-left mr-1" style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" title="edit" data-placement="bottom"><i class="fas fa-edit"></i></a>
-                        <button type="button" class="btn btn-danger btn-sm" style="height:30px; width:30px;border-radius:50%" data-toggle="modal" data-target="#confirmDelete{{$user->id}}" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                        <a href="{{route('admin.users.edit',$user->id)}}" class="btn btn-primary btn-sm float-left mr-1" style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" title="edit" data-placement="bottom"><i class="fa fa-edit"></i></a>
+                        <button type="button" class="btn btn-danger btn-sm" style="height:30px; width:30px;border-radius:50%" data-toggle="modal" data-target="#confirmDelete{{$user->id}}" title="Delete"><i class="fa fa-trash-alt"></i></button>
                         <!-- Delete Confirm Modal -->
                         <div class="modal fade" id="confirmDelete{{$user->id}}" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteLabel{{$user->id}}" aria-hidden="true">
                           <div class="modal-dialog" role="document">

@@ -73,7 +73,7 @@
                         <span class="badge badge-{{ $shippingStatus['class'] }}">{{ $shippingStatus['text'] }}</span>
                     </td>
                     <td>
-                        <a href="{{route('admin.orders.show',$order->id)}}" class="btn btn-warning btn-sm float-left mr-1" style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" title="view" data-placement="bottom"><i class="fas fa-eye"></i></a>
+                        <a href="{{route('admin.orders.show',$order->id)}}" class="btn btn-warning btn-sm float-left mr-1" style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" title="view" data-placement="bottom"><i class="fa fa-eye"></i></a>
                     </td>
                 </tr>  
             @endforeach

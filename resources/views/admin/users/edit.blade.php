@@ -56,14 +56,37 @@
                     @foreach($roles as $role)
                         <option value="{{ $role->id }}" 
                             {{ old('role_id', $user->role_id ?? '') == $role->id ? 'selected' : '' }}>
-                            {{ $role->role_name }}
+                            {{ $role->role_name }} @if($role->role_code) ({{ $role->role_code }}) @endif
                         </option>
                     @endforeach
                 </select>
 
-              @error('role')
+              @error('role_id')
               <span class="text-danger">{{$message}}</span>
               @enderror
+              </div>
+              <div class="form-group">
+                <label class="col-form-label">Phân quyền nhân viên</label>
+                @php
+                  $permissionOptions = [
+                    'employee.access' => 'Truy cập dashboard nhân viên',
+                    'orders.manage' => 'Quản lý / cập nhật đơn hàng',
+                    'shipping.update' => 'Cập nhật giao hàng (shipper)',
+                    'inventory.view' => 'Xem tồn kho',
+                  ];
+                  $currentPermissions = old('permissions', $user->permissions ?? []);
+                @endphp
+                <div class="row">
+                  @foreach($permissionOptions as $key => $label)
+                  <div class="col-md-6">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" name="permissions[]" value="{{ $key }}"
+                        {{ in_array($key, $currentPermissions ?? []) ? 'checked' : '' }}>
+                      <label class="form-check-label">{{ $label }}</label>
+                    </div>
+                  </div>
+                  @endforeach
+                </div>
               </div>
               <div class="form-group">
                 <label for="status" class="col-form-label">Trạng thái</label>
@@ -87,7 +110,7 @@
       <div class="card-body text-center">
         <img src="{{ $user->photo ? asset($user->photo) : asset('backend/img/avatar.png') }}" alt="avatar" class="rounded-circle img-fluid preview-avatar" style="width: 150px;">
         <h5 class="my-3 preview-name-text">{{$user->name}}</h5>
-        <p class="text-muted mb-1 preview-role-text">{{$user->role}}</p>
+        <p class="text-muted mb-1 preview-role-text">{{ optional($user->getRole)->role_name }}</p>
         <p class="text-muted mb-4 preview-email-text">{{$user->email}}</p>
         <div class="d-flex justify-content-center mb-2">
           <button type="button" class="btn btn-primary">Follow</button>
@@ -109,7 +132,7 @@
         <hr>
         <div class="row">
           <div class="col-sm-3"><p class="mb-0">Vai trò</p></div>
-          <div class="col-sm-9"><p class="text-muted mb-0 preview-role-text">{{$user->role}}</p></div>
+          <div class="col-sm-9"><p class="text-muted mb-0 preview-role-text">{{ optional($user->getRole)->role_name }}</p></div>
         </div>
         <hr>
         <div class="row">
@@ -128,12 +151,13 @@
   // Update preview when editing
   $(function(){
     const sync = function(){
+      const roleText = $('select[name="role_id"] option:selected').text().trim();
       $('.preview-name-text').text($('#inputTitle').val()||'');
       $('.preview-email-text').text($('#inputEmail').val()||'');
-      $('.preview-role-text').text($('select[name="role"]').val()||'');
+      $('.preview-role-text').text(roleText||'');
       $('.preview-status-text').text($('select[name="status"]').val()||'');
     };
-    $('#inputTitle,#inputEmail,select[name="role"],select[name="status"]').on('input change', sync);
+    $('#inputTitle,#inputEmail,select[name="role_id"],select[name="status"]').on('input change', sync);
     sync();
   });
 </script>

@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <html lang="zxx">
 <head>
-	@include('frontend.layouts.head')	
+    @include('frontend.layouts.head')
+
+    {{-- CSS cho component / widget --}}
+    @stack('styles')
 </head>
+
 <body class="js">
 
 	<!-- Global Loading Overlay - Disabled -->
@@ -76,5 +80,12 @@
 	}
 	</style>
 
+	<!-- CSRF token cho các widget JS (ví dụ: Chatbot AI) -->
+	<meta name="csrf-token" content="{{ csrf_token() }}">
+	@if(Auth::check())
+		<meta name="user-id" content="{{ Auth::id() }}">
+	@endif
+
+	@stack('scripts')
 </body>
 </html>

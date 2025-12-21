@@ -7,8 +7,12 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderConfirmationMail;
+use Illuminate\Support\Str;
 
 class CheckoutController extends Controller
 {
@@ -67,7 +71,7 @@ class CheckoutController extends Controller
     {
         try {
             $request->validate([
-                'payment_method' => 'required|in:vnpay,cod',
+                'payment_method' => 'required|in:vnpay,cod,sepay',
                 'shipping_name' => 'required|string|max:255',
                 'shipping_phone' => 'required|string|max:20',
                 'shipping_address' => 'required|string|max:500',
@@ -199,6 +203,30 @@ class CheckoutController extends Controller
             
             DB::commit();
             
+            // Gửi email xác nhận đơn hàng (qua queue nếu QUEUE_CONNECTION != sync)
+            try {
+                $email = $order->shipping_email ?? $order->user->email ?? null;
+                if ($email) {
+                    Mail::to($email)->queue(new OrderConfirmationMail($order));
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to send order confirmation email: ' . $e->getMessage());
+                // Không throw exception, chỉ log lỗi để không ảnh hưởng đến quá trình đặt hàng
+            }
+
+            // Tạo notification cho admin về đơn hàng mới
+            try {
+                $admins = User::whereHas('getRole', function($q) {
+                    $q->where('role_code', 'admin');
+                })->get();
+                
+                foreach ($admins as $admin) {
+                    $admin->notify(new \App\Notifications\NewOrderNotification($order));
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to create notification: ' . $e->getMessage());
+            }
+            
             // Xử lý thanh toán
             if ($request->payment_method == 'vnpay') {
                 // Lưu thông tin vào session để VNPayController có thể lấy
@@ -209,6 +237,17 @@ class CheckoutController extends Controller
                 ]);
                 
                 return redirect()->route('payment.vnpay.create');
+            } elseif ($request->payment_method == 'sepay') {
+                // Thanh toán Sepay - chuyển sang trang hiển thị QR
+                session()->forget('cart');
+
+                $transferDescription = 'ORDER_'.$order->id.'_'.Str::upper(Str::random(6));
+                $order->update([
+                    'notes' => trim(($order->notes ?? '').' | Sepay: '.$transferDescription),
+                ]);
+
+                return redirect()->route('payment.sepay.show', ['order' => $order->id])
+                    ->with('transfer_description', $transferDescription);
             } else {
                 // COD - thanh toán khi nhận hàng, xóa giỏ hàng ngay vì đã đặt hàng thành công
                 session()->forget('cart');
@@ -235,6 +274,52 @@ class CheckoutController extends Controller
         $order = $orderId ? Order::with('items.product')->find($orderId) : null;
         
         return view('frontend.checkout.success', compact('order'));
+    }
+
+    /**
+     * Trang hiển thị QR thanh toán Sepay
+     */
+    public function sepay(Request $request, $orderId)
+    {
+         $order = Order::findOrFail($orderId);
+
+         // Số tài khoản VCB: lấy từ ENV, hoặc default là 1022752041 nếu chưa cấu hình
+         $account  = env('SEPAY_ACCOUNT', '1022752041');             
+         $bank     = env('SEPAY_BANK', 'VCB');         
+         $amount   = (int) ($order->total_amount ?? 0); 
+        $template = env('SEPAY_TEMPLATE', 'compact');
+        $download = env('SEPAY_DOWNLOAD', 0);
+
+        $des = $request->session()->get('transfer_description');
+        if (!$des) {
+            $des = 'ORDER_'.$order->id.'_'.Str::upper(Str::random(6));
+        }
+
+        $qrUrl = sprintf(
+            'https://qr.sepay.vn/img?acc=%s&bank=%s&amount=%d&des=%s&template=%s&download=%s',
+            urlencode($account),
+            urlencode($bank),
+            $amount,
+            urlencode($des),
+            urlencode($template),
+            urlencode($download)
+        );
+
+        return view('frontend.payment.sepay', compact('order', 'qrUrl', 'account', 'bank', 'des', 'amount'));
+    }
+
+    /**
+     * API: Lấy trạng thái đơn hàng (dùng cho trang Sepay polling realtime)
+     */
+    public function getOrderStatus($orderId)
+    {
+        $order = Order::findOrFail($orderId);
+
+        return response()->json([
+            'success' => true,
+            'status' => $order->status,
+            'shipping_status' => $order->shipping_status,
+        ]);
     }
 }
 

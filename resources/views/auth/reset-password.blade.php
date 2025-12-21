@@ -164,7 +164,7 @@
   <div class="reset-container">
     <div class="reset-card">
       <div class="reset-icon">
-        <i class="fas fa-lock"></i>
+        <i class="fa fa-lock"></i>
       </div>
       
       <h1>Đặt lại mật khẩu</h1>
@@ -191,7 +191,7 @@
                  id="email"
                  value="{{ $email }}" 
                  disabled>
-          <i class="fas fa-envelope input-icon"></i>
+          <i class="fa fa-envelope input-icon"></i>
         </div>
 
         <div class="form-group">
@@ -202,7 +202,7 @@
                  id="password"
                  placeholder="Nhập mật khẩu mới"
                  required>
-          <i class="fas fa-lock input-icon"></i>
+          <i class="fa fa-lock input-icon"></i>
           @error('password')
             <div class="invalid-feedback">{{ $message }}</div>
           @enderror
@@ -216,17 +216,17 @@
                  id="password_confirmation"
                  placeholder="Nhập lại mật khẩu mới"
                  required>
-          <i class="fas fa-lock input-icon"></i>
+          <i class="fa fa-lock input-icon"></i>
         </div>
 
         <button type="submit" class="btn btn-submit">
-          <i class="fas fa-check me-2"></i>
+          <i class="fa fa-check me-2"></i>
           Đặt lại mật khẩu
         </button>
       </form>
 
       <a href="{{ route('auth.login') }}" class="back-link">
-        <i class="fas fa-arrow-left me-1"></i>
+        <i class="fa fa-arrow-left me-1"></i>
         Quay lại đăng nhập
       </a>
     </div>

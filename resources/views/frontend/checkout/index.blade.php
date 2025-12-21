@@ -139,30 +139,41 @@
 
                         <div class="payment-methods">
                             <h4 class="payment-title">Phương thức thanh toán</h4>
+
                             <div class="payment-option">
                                 <input type="radio" id="payment_vnpay" name="payment_method" value="vnpay" 
                                        {{ old('payment_method', 'vnpay') == 'vnpay' ? 'checked' : '' }} required>
                                 <label for="payment_vnpay">
-                                    <i class="fas fa-credit-card"></i>
+                                    <i class="fa fa-credit-card"></i>
                                     <span>Thanh toán qua VNPay</span>
                                 </label>
                             </div>
+
+                            <div class="payment-option">
+                                <input type="radio" id="payment_sepay" name="payment_method" value="sepay"
+                                       {{ old('payment_method') == 'sepay' ? 'checked' : '' }}>
+                                <label for="payment_sepay">
+                                    <i class="fa fa-qrcode"></i>
+                                    <span>Chuyển khoản QR Sepay (Vietcombank)</span>
+                                </label>
+                            </div>
+
                             <div class="payment-option">
                                 <input type="radio" id="payment_cod" name="payment_method" value="cod" 
                                        {{ old('payment_method') == 'cod' ? 'checked' : '' }}>
                                 <label for="payment_cod">
-                                    <i class="fas fa-money-bill-wave"></i>
+                                    <i class="fa fa-money-bill-wave"></i>
                                     <span>Thanh toán khi nhận hàng (COD)</span>
                                 </label>
                             </div>
                         </div>
 
                         <button type="submit" class="btn-checkout-submit">
-                            <i class="fas fa-lock mr-2"></i>Đặt hàng
+                            <i class="fa fa-lock mr-2"></i>Đặt hàng
                         </button>
 
                         <p class="secure-notice">
-                            <i class="fas fa-shield-alt mr-2"></i>
+                            <i class="fa fa-shield-alt mr-2"></i>
                             Thông tin của bạn được bảo mật
                         </p>
                     </div>

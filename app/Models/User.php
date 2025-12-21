@@ -27,6 +27,7 @@ class User extends Authenticatable
         'role_id',
         'address',
         'status',
+        'permissions',
     ];
 
     /**
@@ -47,6 +48,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'permissions' => 'array',
     ];
 
     public function products()
@@ -71,5 +73,18 @@ class User extends Authenticatable
     public function cartItems()
     {
         return $this->hasMany(ShoppingCart::class);
+    }
+
+    /**
+     * Kiểm tra quyền của nhân viên
+     */
+    public function hasPermission(string $permission): bool
+    {
+        $permissions = $this->permissions;
+        // Nếu chưa cấu hình quyền, mặc định không chặn (giữ hành vi cũ)
+        if ($permissions === null) {
+            return true;
+        }
+        return in_array($permission, $permissions, true);
     }
 }

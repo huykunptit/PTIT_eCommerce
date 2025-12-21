@@ -1,18 +1,18 @@
-/* Theme Colors - Đồng bộ màu sắc cho toàn hệ thống */
+/* Theme Colors - Flattened (no gradients) */
 :root {
-    /* Primary Colors - Gradient Purple */
-    --primary-color: #667eea;
-    --primary-dark: #5568d3;
-    --secondary-color: #764ba2;
-    --secondary-dark: #653a91;
+    /* Primary Colors - Brand */
+    --primary-color: #134686;
+    --primary-dark: #0f3a6f;
+    --secondary-color: #134686;
+    --secondary-dark: #0a2745;
     
-    /* Gradient */
-    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --primary-gradient-hover: linear-gradient(135deg, #5568d3 0%, #653a91 100%);
+    /* Gradient placeholders mapped to solid colors */
+    --primary-gradient: var(--primary-color);
+    --primary-gradient-hover: var(--primary-dark);
     
     /* Accent Colors */
-    --accent-color: #f093fb;
-    --accent-dark: #d47ae8;
+    --accent-color: #ED3F27;
+    --accent-dark: #cf381f;
     
     /* Text Colors */
     --text-dark: #2d3748;
@@ -37,26 +37,26 @@
 /* Apply primary gradient to buttons */
 .btn-primary,
 .btn-primary:focus {
-    background: var(--primary-gradient);
+    background: var(--primary-color);
     border: none;
     color: white;
 }
 
 .btn-primary:hover,
 .btn-primary:active {
-    background: var(--primary-gradient-hover);
+    background: var(--primary-dark);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 .btn-primary:not(:disabled):not(.disabled):active {
-    background: var(--primary-gradient-hover);
+    background: var(--primary-dark);
 }
 
 /* Badge with gradient */
 .badge-primary,
 .badge-secondary {
-    background: var(--primary-gradient);
+    background: var(--primary-color);
     color: white;
 }
 
@@ -116,7 +116,7 @@ a:hover {
 }
 
 .page-item.active .page-link {
-    background: var(--primary-gradient);
+    background: var(--primary-color);
     border-color: var(--primary-color);
 }
 
@@ -133,7 +133,7 @@ a:hover {
 
 /* Progress bar */
 .progress-bar {
-    background: var(--primary-gradient);
+    background: var(--primary-color);
 }
 
 /* Breadcrumb */
@@ -149,7 +149,7 @@ a:hover {
 
 /* Modal */
 .modal-header {
-    background: var(--primary-gradient);
+    background: var(--primary-color);
     color: white;
 }
 
@@ -164,7 +164,7 @@ a:hover {
 
 /* Sidebar active link */
 .sidebar .nav-link.active {
-    background: var(--primary-gradient);
+    background: var(--primary-color);
     color: white;
 }
 
@@ -174,7 +174,7 @@ a:hover {
 }
 
 .bg-primary {
-    background: var(--primary-gradient) !important;
+    background: var(--primary-color) !important;
 }
 
 .border-primary {

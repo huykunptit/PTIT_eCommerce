@@ -10,6 +10,7 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\User;
 use App\Models\ProductVariant;
+use App\Models\Tag;
 
 class ProductController extends Controller
 {
@@ -26,7 +27,8 @@ class ProductController extends Controller
             $categories = Category::all();
             $brands = Brand::all();
             $sellers = User::where('role_id', '<>', 1)->get();
-            return view('backend.product.create', compact('categories','brands','sellers'));
+            $tags = Tag::all();
+            return view('backend.product.create', compact('categories','brands','sellers','tags'));
         }
     
         public function storeProduct(Request $request)
@@ -83,6 +85,12 @@ class ProductController extends Controller
             ];
     
             $product = Product::create($data);
+
+            // Sync tags if provided
+            if ($request->has('tags')) {
+                $tagIds = is_array($request->tags) ? $request->tags : [];
+                $product->tags()->sync($tagIds);
+            }
 
             // Variants (optional): arrays variant_sku[], variant_price[], variant_stock[], variant_size[], variant_option[]
             $variantSkus = (array) $request->input('variant_sku', []);
@@ -162,12 +170,13 @@ class ProductController extends Controller
     
         public function editProduct($id)
         {
-            $product = Product::findOrFail($id);
+            $product = Product::with('tags')->findOrFail($id);
             $categories = Category::all();
             $brands = Brand::all();
             $sellers = User::where('role_id', '<>', 1)->get();
+            $tags = Tag::all();
 
-            return view('backend.product.edit', compact('product', 'categories','brands','sellers'));
+            return view('backend.product.edit', compact('product', 'categories','brands','sellers','tags'));
         }
     
         public function updateProduct(Request $request, $id)
@@ -328,6 +337,15 @@ class ProductController extends Controller
                         }
                     }
                 }
+            }
+
+            // Sync tags if provided
+            if ($request->has('tags')) {
+                $tagIds = is_array($request->tags) ? $request->tags : [];
+                $product->tags()->sync($tagIds);
+            } else {
+                // If tags not provided, keep existing tags
+                // Or remove all tags if you want: $product->tags()->detach();
             }
     
             return redirect()->route('admin.products.index')->with('success', 'Product updated successfully!');

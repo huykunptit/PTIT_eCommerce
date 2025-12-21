@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use OpenApi\Annotations as OA;
 
 class WishlistController extends Controller
 {
@@ -43,6 +44,22 @@ class WishlistController extends Controller
         return view('frontend.wishlist.index', compact('wishlistItems'));
     }
 
+    /**
+     * @OA\Post(
+     *     path="/wishlist/add",
+     *     tags={"User - Wishlist"},
+     *     summary="Thêm sản phẩm vào danh sách yêu thích (session-based)",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"product_id"},
+     *             @OA\Property(property="product_id", type="integer", example=19)
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Đã thêm vào yêu thích"),
+     *     @OA\Response(response=422, description="Dữ liệu không hợp lệ")
+     * )
+     */
     public function add(Request $request)
     {
         $request->validate([
@@ -64,6 +81,20 @@ class WishlistController extends Controller
         ]);
     }
 
+    /**
+     * @OA\Delete(
+     *     path="/wishlist/remove/{productId}",
+     *     tags={"User - Wishlist"},
+     *     summary="Xóa một sản phẩm khỏi danh sách yêu thích",
+     *     @OA\Parameter(
+     *         name="productId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(response=200, description="Đã xóa khỏi yêu thích")
+     * )
+     */
     public function remove($productId)
     {
         $wishlist = session()->get('wishlist', []);
@@ -77,12 +108,28 @@ class WishlistController extends Controller
         ]);
     }
 
+    /**
+     * @OA\Delete(
+     *     path="/wishlist/clear",
+     *     tags={"User - Wishlist"},
+     *     summary="Xóa toàn bộ danh sách yêu thích",
+     *     @OA\Response(response=200, description="Đã xóa toàn bộ yêu thích")
+     * )
+     */
     public function clear()
     {
         session()->forget('wishlist');
         return response()->json(['success' => true, 'message' => 'Đã xóa toàn bộ yêu thích']);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/wishlist/data",
+     *     tags={"User - Wishlist"},
+     *     summary="Lấy dữ liệu danh sách yêu thích hiện tại",
+     *     @OA\Response(response=200, description="OK")
+     * )
+     */
     public function getWishlistData()
     {
         $wishlist = session()->get('wishlist', []);

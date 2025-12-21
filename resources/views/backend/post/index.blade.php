@@ -10,7 +10,7 @@
      </div>
     <div class="card-header py-3">
       <h6 class="m-0 font-weight-bold text-primary float-left">Post Lists</h6>
-      <a href="{{route('admin.post.create')}}" class="btn btn-primary btn-sm float-right" data-toggle="tooltip" data-placement="bottom" title="Add User"><i class="fas fa-plus"></i> Add Post</a>
+      <a href="{{route('admin.post.create')}}" class="btn btn-primary btn-sm float-right" data-toggle="tooltip" data-placement="bottom" title="Add User"><i class="fa fa-plus"></i> Add Post</a>
     </div>
     <div class="card-body">
       <div class="table-responsive">
@@ -52,7 +52,7 @@
                 <tr>
                     <td>{{$post->id}}</td>
                     <td>{{$post->title}}</td>
-                    <td>{{$post->cat_info->title}}</td>
+                    <td>{{$post->cat_info ? $post->cat_info->title : 'N/A'}}</td>
                     <td>{{$post->tags}}</td>
 
                     <td>
@@ -62,7 +62,7 @@
                     </td>
                     <td>
                         @if($post->photo)
-                            <img src="{{$post->photo}}" class="img-fluid zoom" style="max-width:80px" alt="{{$post->photo}}">
+                            <img src="{{asset($post->photo)}}" class="img-fluid zoom" style="max-width:80px" alt="{{$post->title}}">
                         @else
                             <img src="{{asset('backend/img/thumbnail-default.jpg')}}" class="img-fluid" style="max-width:80px" alt="avatar.png">
                         @endif
@@ -75,11 +75,11 @@
                         @endif
                     </td>
                     <td>
-                        <a href="{{route('admin.post.edit',$post->id)}}" class="btn btn-primary btn-sm float-left mr-1" style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" title="edit" data-placement="bottom"><i class="fas fa-edit"></i></a>
+                        <a href="{{route('admin.post.edit',$post->id)}}" class="btn btn-primary btn-sm float-left mr-1" style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" title="edit" data-placement="bottom"><i class="fa fa-edit"></i></a>
                     <form method="POST" action="{{route('admin.post.destroy',[$post->id])}}">
                       @csrf 
                       @method('delete')
-                          <button class="btn btn-danger btn-sm dltBtn" data-id={{$post->id}} style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" data-placement="bottom" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                          <button class="btn btn-danger btn-sm dltBtn" data-id={{$post->id}} style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" data-placement="bottom" title="Delete"><i class="fa fa-trash-alt"></i></button>
                         </form>
                     </td>
                 </tr>  

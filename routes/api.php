@@ -4,6 +4,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\HomepageController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\Api\OrderApiController;
 
 
 /*
@@ -21,6 +24,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::get('/ping', function () {
+    return response()->json(['status' => 'ok']);
+});
+
+// Public Homepage config/data
+Route::get('/homepage', [HomepageController::class, 'index']);
+
 // API Authentication Routes
 Route::group(['prefix' => 'auth', 'as' => 'auth.'], function () {
     // Guest routes
@@ -29,9 +39,15 @@ Route::group(['prefix' => 'auth', 'as' => 'auth.'], function () {
     
     // Protected routes
     Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/logout', [AuthController::class, 'apiLogout']);
+        Route::get('/logout', [AuthController::class, 'apiLogout']);
         Route::get('/profile', [AuthController::class, 'apiProfile']);
     });
+});
+
+// Chatbot API Routes (tạm thời mở cho cả guest; nếu cần có thể thêm auth:sanctum sau)
+Route::group(['prefix' => 'chatbot', 'as' => 'chatbot.'], function () {
+    Route::post('/message', [\App\Http\Controllers\ChatbotController::class, 'sendMessage']);
+    Route::get('/system-data', [\App\Http\Controllers\ChatbotController::class, 'index']);
 });
 
 // Admin API Routes
@@ -65,4 +81,25 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth:sanc
     Route::get('/orders', [AdminController::class, 'getOrders']);
     Route::get('/orders/{id}', [AdminController::class, 'getOrder']);
     Route::put('/orders/{id}/status', [AdminController::class, 'updateOrderStatus']);
+
+    // Fine-grained permissions for employees
+    Route::get('/employees/{id}/permissions', [AdminController::class, 'getEmployeePermissions']);
+    Route::put('/employees/{id}/permissions', [AdminController::class, 'updateEmployeePermissions']);
+});
+
+// Public / session-based Cart API (giữ nguyên logic giỏ hàng hiện tại)
+Route::prefix('cart')->group(function () {
+    Route::get('/', [CartController::class, 'getCartData']);
+    Route::post('/items', [CartController::class, 'add']);
+    Route::put('/items/{key}', [CartController::class, 'update']);
+    Route::delete('/items/{key}', [CartController::class, 'remove']);
+    Route::delete('/', [CartController::class, 'clear']);
+});
+
+// User Orders REST API (yêu cầu auth:sanctum)
+Route::middleware('auth:sanctum')->prefix('orders')->group(function () {
+    Route::get('/', [OrderApiController::class, 'index']);
+    Route::get('/{id}', [OrderApiController::class, 'show']);
+    Route::post('/', [OrderApiController::class, 'store']);
+    Route::delete('/{id}', [OrderApiController::class, 'cancel']);
 });

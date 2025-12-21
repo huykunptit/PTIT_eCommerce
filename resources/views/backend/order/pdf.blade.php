@@ -71,7 +71,7 @@
 </style>
   <div class="invoice-header">
     <div class="float-left site-logo">
-      <img src="{{asset('backend/img/logo.png')}}" alt="">
+      <img src="{{asset('images/logoden.png')}}" alt="">
     </div>
     <div class="float-right site-address">
       <h4>{{env('APP_NAME')}}</h4>

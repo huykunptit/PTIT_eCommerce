@@ -148,7 +148,7 @@
   <div class="forgot-container">
     <div class="forgot-card">
       <div class="forgot-icon">
-        <i class="fas fa-key"></i>
+        <i class="fa fa-key"></i>
       </div>
       
       <h1>Quên mật khẩu?</h1>
@@ -179,17 +179,17 @@
                  placeholder="Nhập email của bạn"
                  required 
                  autofocus>
-          <i class="fas fa-envelope input-icon"></i>
+          <i class="fa fa-envelope input-icon"></i>
         </div>
 
         <button type="submit" class="btn btn-submit">
-          <i class="fas fa-paper-plane me-2"></i>
+          <i class="fa fa-paper-plane me-2"></i>
           Gửi link reset
         </button>
       </form>
 
       <a href="{{ route('auth.login') }}" class="back-link">
-        <i class="fas fa-arrow-left me-1"></i>
+        <i class="fa fa-arrow-left me-1"></i>
         Quay lại đăng nhập
       </a>
     </div>

@@ -35,8 +35,12 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:4096',
+            'role_id' => 'required|exists:roles,id',
+            'status' => 'nullable|in:active,inactive',
             'phone_number' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
+            'permissions' => 'nullable|array',
+            'permissions.*' => 'string',
         ]);
 
         $photoPath = null;
@@ -59,8 +63,9 @@ class UserController extends Controller
             'photo' => $photoPath,
             'phone_number' => $validated['phone_number'] ?? null,
             'address' => $validated['address'] ?? null,
-            'role_id' => $request->input('role_id'),
+            'role_id' => $validated['role_id'],
             'status' => $request->input('status', 'active'),
+            'permissions' => $request->input('permissions', []),
         ]);
 
         return redirect()->route('admin.users.index')->with('success', 'User created successfully!');
@@ -82,19 +87,22 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email,' . $id,
             'password' => 'nullable|string|min:8|confirmed',
             'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:4096',
-            'role' => 'nullable|in:admin,user',
+            'role_id' => 'required|exists:roles,id',
             'status' => 'nullable|in:active,inactive',
             'phone_number' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
+            'permissions' => 'nullable|array',
+            'permissions.*' => 'string',
         ]);
 
         $data = [
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'role_id' => $request->input('role_id', $user->role_id),
+            'role_id' => $validated['role_id'],
             'status' => $request->input('status', $user->status),
             'phone_number' => $validated['phone_number'] ?? $user->phone_number,
             'address' => $validated['address'] ?? $user->address,
+            'permissions' => $request->input('permissions', $user->permissions ?? []),
         ];
 
         if (!empty($validated['password'])) {

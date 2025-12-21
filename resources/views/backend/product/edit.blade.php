@@ -74,6 +74,22 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="tags" class="col-form-label">Tags</label>
+                        <select class="form-control select2" id="tags" name="tags[]" multiple>
+                            @if(isset($tags))
+                                @foreach($tags as $tag)
+                                    <option value="{{ $tag->id }}" 
+                                            {{ $product->tags->contains($tag->id) ? 'selected' : '' }}
+                                            style="color: {{ $tag->color }};">
+                                        {{ $tag->name }}
+                                    </option>
+                                @endforeach
+                            @endif
+                        </select>
+                        <small class="form-text text-muted">Chọn các tags cho sản phẩm (có thể chọn nhiều)</small>
+                    </div>
+
+                    <div class="form-group">
                         <label for="image_url" class="col-form-label">Hình ảnh sản phẩm</label>
                         <input type="file" class="form-control" id="image_url" name="image_url" accept="image/*">
                         @if($product->image_url)
@@ -238,7 +254,36 @@
 
 @endsection
 
+@push('styles')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+.select2-container--default .select2-selection--multiple {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    min-height: 38px;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: #D4AF37;
+    border: none;
+    color: #1a1a1a;
+    padding: 5px 10px;
+    margin: 3px;
+    border-radius: 4px;
+}
+</style>
+@endpush
+
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#tags').select2({
+        placeholder: 'Chọn tags...',
+        allowClear: true,
+        width: '100%'
+    });
+});
+</script>
 <script>
 $(document).ready(function() {
     // Live preview functionality

@@ -40,5 +40,8 @@ class Product extends Model
         return $this->hasMany(ShoppingCart::class);
     }
 
-    
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'product_tags');
+    }
 } 

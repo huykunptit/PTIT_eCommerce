@@ -10,7 +10,7 @@
      </div>
     <div class="card-header py-3">
       <h6 class="m-0 font-weight-bold text-primary float-left">Danh sách danh mục</h6>
-      <a href="{{route('admin.categories.create')}}" class="btn btn-primary btn-sm float-right" data-toggle="tooltip" data-placement="bottom" title="Thêm danh mục"><i class="fas fa-plus"></i> Thêm danh mục</a>
+      <a href="{{route('admin.categories.create')}}" class="btn btn-primary btn-sm float-right" data-toggle="tooltip" data-placement="bottom" title="Thêm danh mục"><i class="fa fa-plus"></i> Thêm danh mục</a>
     </div>
     <div class="card-body">
       <div class="table-responsive">
@@ -53,8 +53,8 @@
                     <td>{{$category->created_at}}</td>
                     <td>{{$category->updated_at}}</td>
                     <td>
-                        <a href="{{route('admin.categories.edit',$category->id)}}" class="btn btn-primary btn-sm float-left mr-1" style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" title="Sửa" data-placement="bottom"><i class="fas fa-edit"></i></a>
-                        <button type="button" class="btn btn-danger btn-sm" style="height:30px; width:30px;border-radius:50%" data-toggle="modal" data-target="#confirmDeleteCat{{$category->id}}" title="Xoá"><i class="fas fa-trash-alt"></i></button>
+                        <a href="{{route('admin.categories.edit',$category->id)}}" class="btn btn-primary btn-sm float-left mr-1" style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" title="Sửa" data-placement="bottom"><i class="fa fa-edit"></i></a>
+                        <button type="button" class="btn btn-danger btn-sm" style="height:30px; width:30px;border-radius:50%" data-toggle="modal" data-target="#confirmDeleteCat{{$category->id}}" title="Xoá"><i class="fa fa-trash-alt"></i></button>
                         <div class="modal fade" id="confirmDeleteCat{{$category->id}}" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteCatLabel{{$category->id}}" aria-hidden="true">
                           <div class="modal-dialog" role="document">
                             <div class="modal-content">

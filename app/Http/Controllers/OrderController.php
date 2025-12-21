@@ -8,11 +8,20 @@ use App\Models\OrderCancellation;
 use App\Models\OrderReturn;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use OpenApi\Annotations as OA;
 
 class OrderController extends Controller
 {
     /**
      * Lấy đơn hàng gần đây cho dropdown
+     *
+     * @OA\Get(
+     *     path="/orders/recent",
+     *     tags={"User - Orders"},
+     *     summary="Lấy danh sách đơn hàng gần đây của người dùng",
+     *     description="Trả về tối đa 5 đơn gần nhất cho người dùng đang đăng nhập.",
+     *     @OA\Response(response=200, description="OK")
+     * )
      */
     public function getRecentOrders()
     {

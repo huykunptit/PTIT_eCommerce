@@ -1,6 +1,6 @@
 <div id="notifications">
     <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        <i class="fas fa-bell fa-fw"></i>
+        <i class="fa fa-bell fa-fw"></i>
         <!-- Counter - Alerts -->
         <span class="badge badge-danger badge-counter">
             <span class="count" data-count="3">3</span>
@@ -14,7 +14,7 @@
         <a class="dropdown-item d-flex align-items-center" target="_blank" href="#">
             <div class="mr-3">
                 <div class="icon-circle bg-primary">
-                    <i class="fas fa-file-alt text-white"></i>
+                    <i class="fa fa-file-alt text-white"></i>
                 </div>
             </div>
             <div>
@@ -25,7 +25,7 @@
         <a class="dropdown-item d-flex align-items-center" target="_blank" href="#">
             <div class="mr-3">
                 <div class="icon-circle bg-success">
-                    <i class="fas fa-donate text-white"></i>
+                    <i class="fa fa-donate text-white"></i>
                 </div>
             </div>
             <div>
@@ -36,7 +36,7 @@
         <a class="dropdown-item d-flex align-items-center" target="_blank" href="#">
             <div class="mr-3">
                 <div class="icon-circle bg-warning">
-                    <i class="fas fa-exclamation-triangle text-white"></i>
+                    <i class="fa fa-exclamation-triangle text-white"></i>
                 </div>
             </div>
             <div>

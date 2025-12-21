@@ -7,6 +7,7 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use OpenApi\Annotations as OA;
 
 class ProfileController extends Controller
 {
@@ -62,12 +63,43 @@ class ProfileController extends Controller
     }
 
     // User Profile
+    /**
+     * @OA\Get(
+     *     path="/profile",
+     *     tags={"User - Profile"},
+     *     summary="Xem thông tin tài khoản (web)",
+     *     description="Yêu cầu phiên đăng nhập web. Endpoint chủ yếu để mô tả luồng người dùng trên Swagger.",
+     *     @OA\Response(response=200, description="Trang profile người dùng")
+     * )
+     */
     public function showUserProfile()
     {
         $user = Auth::user();
         return view('frontend.profile.edit', compact('user'));
     }
 
+    /**
+     * @OA\Put(
+     *     path="/profile",
+     *     tags={"User - Profile"},
+     *     summary="Cập nhật thông tin người dùng",
+     *     description="Cập nhật tên, email, số điện thoại, địa chỉ, mật khẩu và avatar cho người dùng hiện tại.",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name","email"},
+     *             @OA\Property(property="name", type="string", example="Nguyễn Văn A"),
+     *             @OA\Property(property="email", type="string", format="email", example="user@example.com"),
+     *             @OA\Property(property="phone_number", type="string", example="0123456789"),
+     *             @OA\Property(property="address", type="string", example="Hà Nội"),
+     *             @OA\Property(property="password", type="string", format="password", example="new-password"),
+     *             @OA\Property(property="password_confirmation", type="string", format="password", example="new-password")
+     *         )
+     *     ),
+     *     @OA\Response(response=302, description="Redirect sau khi cập nhật thành công"),
+     *     @OA\Response(response=422, description="Dữ liệu không hợp lệ")
+     * )
+     */
     public function updateUserProfile(Request $request)
     {
         $user = Auth::user();
@@ -113,12 +145,28 @@ class ProfileController extends Controller
     }
 
     // User Orders
-    public function showUserOrders()
+    public function showUserOrders(Request $request)
     {
         $user = Auth::user();
-        $orders = Order::where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        $query = Order::with(['items.product', 'payments'])
+            ->where('user_id', $user->id);
+        
+        // Filter by status
+        if ($request->has('status') && $request->status != '') {
+            $query->where('status', $request->status);
+        }
+        
+        // Search by order ID
+        if ($request->has('search') && $request->search != '') {
+            $query->where('id', 'like', '%' . $request->search . '%');
+        }
+        
+        // Sort
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
+        
+        $orders = $query->paginate(10)->appends($request->all());
         
         return view('frontend.profile.orders', compact('orders'));
     }

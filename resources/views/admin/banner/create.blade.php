@@ -27,7 +27,10 @@
 
         <div class="form-group">
         <label for="image" class="col-form-label">Photo <span class="text-danger">*</span></label>
-        <input id="image" class="form-control" type="file" name="image" accept="image/*">
+        <input id="image" class="form-control" type="file" name="image" accept="image/*" data-preview-target="#bannerImagePreview">
+          <div class="mt-2" data-preview-wrapper style="display:none;">
+            <img id="bannerImagePreview" alt="Xem trước ảnh" style="max-height:140px;border:1px solid #ddd;border-radius:6px;padding:4px;display:none;">
+          </div>
           @error('image')
           <span class="text-danger">{{$message}}</span>
           @enderror

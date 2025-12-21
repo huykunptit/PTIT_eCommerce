@@ -26,12 +26,10 @@
 
         <div class="form-group">
         <label for="image" class="col-form-label">Photo</label>
-        <input id="image" class="form-control" type="file" name="image" accept="image/*">
-        @if($banner->photo)
-          <div class="mt-2">
-            <img src="{{$banner->photo}}" alt="current" style="max-height:100px;" />
-          </div>
-        @endif
+        <input id="image" class="form-control" type="file" name="image" accept="image/*" data-preview-target="#bannerImagePreview">
+        <div class="mt-2" data-preview-wrapper style="{{ $banner->photo ? '' : 'display:none;' }}">
+          <img id="bannerImagePreview" src="{{$banner->photo}}" alt="current" style="max-height:140px;border:1px solid #ddd;border-radius:6px;padding:4px;{{ $banner->photo ? '' : 'display:none;' }}" />
+        </div>
           @error('image')
           <span class="text-danger">{{$message}}</span>
           @enderror

@@ -21,7 +21,7 @@
                 <div class="h5 mb-0 font-weight-bold text-gray-800">{{\App\Models\Category::countActiveCategory()}}</div>
               </div>
               <div class="col-auto">
-                <i class="fas fa-sitemap fa-2x text-gray-300"></i>
+                <i class="fa fa-sitemap fa-2x text-gray-300"></i>
               </div>
             </div>
           </div>
@@ -38,7 +38,7 @@
                 <div class="h5 mb-0 font-weight-bold text-gray-800">{{\App\Models\Product::countActiveProduct()}}</div>
               </div>
               <div class="col-auto">
-                <i class="fas fa-cubes fa-2x text-gray-300"></i>
+                <i class="fa fa-cubes fa-2x text-gray-300"></i>
               </div>
             </div>
           </div>
@@ -60,7 +60,7 @@
                 </div>
               </div>
               <div class="col-auto">
-                <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                <i class="fa fa-clipboard-list fa-2x text-gray-300"></i>
               </div>
             </div>
           </div>
@@ -77,7 +77,7 @@
                 <div class="h5 mb-0 font-weight-bold text-gray-800">{{\App\Models\Post::countActivePost()}}</div>
               </div>
               <div class="col-auto">
-                <i class="fas fa-folder fa-2x text-gray-300"></i>
+                <i class="fa fa-folder fa-2x text-gray-300"></i>
               </div>
             </div>
           </div>

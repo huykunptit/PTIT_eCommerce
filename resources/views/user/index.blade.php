@@ -21,7 +21,7 @@
                 <div class="h5 mb-0 font-weight-bold text-gray-800">{{\App\Models\Category::countActiveCategory()}}</div>
               </div>
               <div class="col-auto">
-                <i class="fas fa-sitemap fa-2x text-gray-300"></i>
+                <i class="fa fa-sitemap fa-2x text-gray-300"></i>
               </div>
             </div>
           </div>
@@ -38,7 +38,7 @@
                 <div class="h5 mb-0 font-weight-bold text-gray-800">{{\App\Models\Product::countActiveProduct()}}</div>
               </div>
               <div class="col-auto">
-                <i class="fas fa-cubes fa-2x text-gray-300"></i>
+                <i class="fa fa-cubes fa-2x text-gray-300"></i>
               </div>
             </div>
           </div>
@@ -60,7 +60,7 @@
                 </div>
               </div>
               <div class="col-auto">
-                <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                <i class="fa fa-clipboard-list fa-2x text-gray-300"></i>
               </div>
             </div>
           </div>
@@ -77,7 +77,7 @@
                 <div class="h5 mb-0 font-weight-bold text-gray-800">{{\App\Models\Post::countActivePost()}}</div>
               </div>
               <div class="col-auto">
-                <i class="fas fa-folder fa-2x text-gray-300"></i>
+                <i class="fa fa-folder fa-2x text-gray-300"></i>
               </div>
             </div>
           </div>
@@ -140,11 +140,11 @@
                         @endif
                     </td>
                     <td>
-                        <a href="{{route('user.order.show',$order->id)}}" class="btn btn-warning btn-sm float-left mr-1" style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" title="view" data-placement="bottom"><i class="fas fa-eye"></i></a>
+                        <a href="{{route('user.order.show',$order->id)}}" class="btn btn-warning btn-sm float-left mr-1" style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" title="view" data-placement="bottom"><i class="fa fa-eye"></i></a>
                         <form method="POST" action="{{route('user.order.delete',[$order->id])}}">
                           @csrf 
                           @method('delete')
-                              <button class="btn btn-danger btn-sm dltBtn" data-id={{$order->id}} style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" data-placement="bottom" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                              <button class="btn btn-danger btn-sm dltBtn" data-id={{$order->id}} style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" data-placement="bottom" title="Delete"><i class="fa fa-trash-alt"></i></button>
                         </form>
                     </td>
                 </tr>  

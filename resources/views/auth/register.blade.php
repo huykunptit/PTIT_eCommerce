@@ -10,15 +10,17 @@
   
   <style>
     :root {
-      --primary-color: #667eea;
-      --secondary-color: #764ba2;
-      --accent-color: #f093fb;
-      --text-dark: #2d3748;
-      --text-light: #718096;
+      --primary-color: #C5A059;
+      --primary-dark: #A48342;
+      --primary-light: #D4AF37;
+      --secondary-color: #111111;
+      --accent-color: #f5f5f5;
+      --text-dark: #111111;
+      --text-light: #555555;
       --white: #ffffff;
-      --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-      --shadow-heavy: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      --shadow-light: 0 2px 4px rgba(0, 0, 0, 0.1);
+      --shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.1);
+      --shadow-heavy: 0 8px 16px rgba(0, 0, 0, 0.1);
     }
 
     * {
@@ -29,7 +31,7 @@
 
     body {
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 50%, var(--accent-color) 100%);
+      background: #f8f8f8;
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -38,22 +40,6 @@
       overflow-x: hidden;
     }
 
-    body::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><radialGradient id="c" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0.1"/><stop offset="100%" stop-color="%23ffffff" stop-opacity="0"/></radialGradient></defs><rect width="100%" height="100%" fill="url(%23c)"/></svg>');
-      opacity: 0.3;
-      animation: float 20s ease-in-out infinite;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-20px) rotate(2deg); }
-    }
 
     .register-container {
       width: 100%;
@@ -66,22 +52,20 @@
 
     .register-card {
       background: var(--white);
-      border-radius: 20px;
-      box-shadow: var(--shadow-heavy);
+      border-radius: 8px;
+      box-shadow: var(--shadow-medium);
       overflow: hidden;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border: 1px solid #e5e5e5;
       transform: translateY(0);
       transition: all 0.3s ease;
     }
 
     .register-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 25px 35px -5px rgba(0, 0, 0, 0.15);
+      box-shadow: var(--shadow-heavy);
     }
 
     .register-image-side {
-      background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
       position: relative;
       display: flex;
       align-items: center;
@@ -96,8 +80,8 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>');
-      opacity: 0.3;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>');
+      opacity: 0.5;
     }
 
     .register-image-content {
@@ -107,22 +91,13 @@
       position: relative;
     }
 
-    .logo-icon {
-      width: 120px;
-      height: 120px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .logo-image {
+      width: 200px;
+      height: auto;
       margin: 0 auto 30px;
-      backdrop-filter: blur(10px);
-      border: 2px solid rgba(255, 255, 255, 0.3);
-    }
-
-    .logo-icon i {
-      font-size: 60px;
-      color: var(--white);
+      display: block;
+      filter: brightness(0) invert(1);
+      opacity: 0.95;
     }
 
     .register-form-side {
@@ -139,14 +114,10 @@
     }
 
     .welcome-text h1 {
-      font-size: 2.5rem;
+      font-size: 2.2rem;
       font-weight: 700;
       color: var(--text-dark);
       margin-bottom: 10px;
-      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
     }
 
     .welcome-text p {
@@ -161,27 +132,27 @@
     }
 
     .form-control {
-      height: 55px;
-      border: 2px solid #e2e8f0;
-      border-radius: 15px;
-      padding: 15px 20px 15px 60px;
-      font-size: 16px;
-      font-weight: 500;
-      background: #f8fafc;
+      height: 50px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 12px 20px 12px 50px;
+      font-size: 15px;
+      font-weight: 400;
+      background: var(--white);
       transition: all 0.3s ease;
       color: var(--text-dark);
     }
 
     .form-control:focus {
       border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      box-shadow: 0 0 0 2px rgba(197, 160, 89, 0.1);
       background: var(--white);
       outline: none;
     }
 
     .form-control.is-invalid {
       border-color: #e53e3e;
-      box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+      box-shadow: 0 0 0 2px rgba(229, 62, 62, 0.1);
     }
 
     .input-icon {
@@ -200,39 +171,26 @@
     }
 
     .btn-register {
-      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      background: var(--primary-color);
       border: none;
-      height: 60px;
-      border-radius: 15px;
-      font-size: 18px;
+      height: 50px;
+      border-radius: 4px;
+      font-size: 16px;
       font-weight: 600;
       color: var(--white);
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
       margin-bottom: 20px;
     }
 
-    .btn-register::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: left 0.5s;
-    }
-
-    .btn-register:hover::before {
-      left: 100%;
-    }
 
     .btn-register:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(197, 160, 89, 0.3);
     }
 
     .login-link {
@@ -247,21 +205,6 @@
       position: relative;
     }
 
-    .login-link a::after {
-      content: '';
-      position: absolute;
-      width: 0;
-      height: 2px;
-      bottom: -2px;
-      left: 50%;
-      background: var(--primary-color);
-      transition: all 0.3s ease;
-      transform: translateX(-50%);
-    }
-
-    .login-link a:hover::after {
-      width: 100%;
-    }
 
     .login-link a:hover {
       color: var(--secondary-color);
@@ -302,12 +245,10 @@
         <div class="col-lg-6">
           <div class="register-image-side">
             <div class="register-image-content">
-              <div class="logo-icon">
-                <i class="fas fa-user-plus"></i>
-              </div>
-              <h2 style="font-weight: 700; margin-bottom: 15px;">PTIT</h2>
-              <p style="font-size: 1.1rem; opacity: 0.9;">Posts and Telecommunications Institute of Technology</p>
-              <p style="font-size: 0.95rem; opacity: 0.7; margin-top: 20px;">Create Your Account</p>
+              <img src="{{ asset('images/logoden.png') }}" alt="PTIT Ecommerce Logo" class="logo-image">
+              <h2 style="font-weight: 700; margin-bottom: 15px; font-size: 2rem;">PTIT Ecommerce</h2>
+              <p style="font-size: 1rem; opacity: 0.95; line-height: 1.6;">Simplify your e-commerce management with our user-friendly admin dashboard.</p>
+              <p style="font-size: 0.9rem; opacity: 0.8; margin-top: 30px; font-weight: 500;">Create Your Account</p>
             </div>
           </div>
         </div>
@@ -331,7 +272,7 @@
                        required 
                        autocomplete="name" 
                        autofocus>
-                <i class="fas fa-user input-icon"></i>
+                <i class="fa fa-user input-icon"></i>
                 @error('name')
                     <div class="invalid-feedback">
                         {{ $message }}
@@ -347,7 +288,7 @@
                        placeholder="Email"
                        required 
                        autocomplete="email">
-                <i class="fas fa-envelope input-icon"></i>
+                <i class="fa fa-envelope input-icon"></i>
                 @error('email')
                     <div class="invalid-feedback">
                         {{ $message }}
@@ -362,7 +303,7 @@
                        value="{{ old('phone_number') }}" 
                        placeholder="Số điện thoại (tùy chọn)"
                        autocomplete="tel">
-                <i class="fas fa-phone input-icon"></i>
+                <i class="fa fa-phone input-icon"></i>
                 @error('phone_number')
                     <div class="invalid-feedback">
                         {{ $message }}
@@ -377,7 +318,7 @@
                        placeholder="Mật khẩu"
                        required 
                        autocomplete="new-password">
-                <i class="fas fa-lock input-icon"></i>
+                <i class="fa fa-lock input-icon"></i>
                 @error('password')
                     <div class="invalid-feedback">
                         {{ $message }}
@@ -392,11 +333,11 @@
                        placeholder="Xác nhận mật khẩu"
                        required 
                        autocomplete="new-password">
-                <i class="fas fa-lock input-icon"></i>
+                <i class="fa fa-lock input-icon"></i>
               </div>
 
               <button type="submit" class="btn btn-register w-100">
-                <i class="fas fa-user-plus me-2"></i>
+                <i class="fa fa-user-plus me-2"></i>
                 Đăng ký
               </button>
             </form>

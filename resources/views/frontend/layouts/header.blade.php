@@ -42,7 +42,7 @@
                 <div class="col-lg-2 col-md-2 col-12">
                     <!-- Logo -->
                     <div class="logo">
-                        <a href="{{ route('home') }}"><img src="/images/logo-removebg-preview.png" alt="logo"></a>
+                        <a href="{{ route('home') }}"><img src="/images/logoden.png" alt="logo"></a>
                     </div>
                     <!--/ End Logo -->
                     <!-- Search Form -->
@@ -90,7 +90,7 @@
                         <!-- Wishlist -->
                         <div class="sinlge-bar shopping wishlist-dropdown">
                             <a href="{{ route('wishlist.index') }}" class="single-icon">
-                                <i class="fa fa-heart-o"></i> 
+                                <i class="fa fa-heart"></i> 
                                 <span class="total-count wishlist-count">0</span>
                             </a>
                             <!-- Shopping Item -->

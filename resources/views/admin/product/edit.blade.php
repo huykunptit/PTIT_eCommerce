@@ -125,7 +125,7 @@
           <div class="input-group">
               <span class="input-group-btn">
                   <a id="lfm" data-input="thumbnail" data-preview="holder" class="btn btn-primary text-white">
-                  <i class="fas fa-image"></i> Choose
+                  <i class="fa fa-image"></i> Choose
                   </a>
               </span>
           <input id="thumbnail" class="form-control" type="text" name="photo" value="{{$product->photo}}">

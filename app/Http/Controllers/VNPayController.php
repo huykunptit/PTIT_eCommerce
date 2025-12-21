@@ -8,6 +8,9 @@ use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderConfirmationMail;
+use OpenApi\Annotations as OA;
 
 class VNPayController extends Controller
 {
@@ -20,6 +23,23 @@ class VNPayController extends Controller
     
     /**
      * Tạo URL thanh toán VNPay
+     *
+     * @OA\Post(
+     *     path="/payment/vnpay/create",
+     *     tags={"User - Payments"},
+     *     summary="Tạo giao dịch thanh toán VNPay cho đơn hàng",
+     *     description="Nhận order_id và amount, kiểm tra hợp lệ và redirect sang cổng VNPay.",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"order_id","amount"},
+     *             @OA\Property(property="order_id", type="integer", example=123),
+     *             @OA\Property(property="amount", type="number", example=1500000)
+     *         )
+     *     ),
+     *     @OA\Response(response=302, description="Redirect sang VNPay hoặc quay lại trang checkout khi lỗi"),
+     *     @OA\Response(response=400, description="Thông tin không hợp lệ")
+     * )
      */
     public function createPayment(Request $request)
     {
@@ -122,6 +142,16 @@ class VNPayController extends Controller
                 
                 // Cập nhật trạng thái đơn hàng
                 $order->update(['status' => 'paid']);
+                
+                // Gửi email xác nhận đơn hàng
+                try {
+                    $email = $order->shipping_email ?? $order->user->email ?? null;
+                    if ($email) {
+                        Mail::to($email)->send(new OrderConfirmationMail($order));
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Failed to send order confirmation email: ' . $e->getMessage());
+                }
                 
                 // Xóa giỏ hàng sau khi thanh toán thành công
                 session()->forget('cart');

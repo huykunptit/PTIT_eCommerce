@@ -12,7 +12,7 @@ class PostController extends Controller
 {
     public function index()
     {
-        $posts = Post::latest()->paginate(10);
+        $posts = Post::with(['cat_info', 'author'])->latest()->paginate(10);
         return view('admin.post.index', compact('posts'));
     }
 
@@ -35,7 +35,8 @@ class PostController extends Controller
             'tags' => 'nullable|array',
             'tags.*' => 'string',
             'added_by' => 'required|exists:users,id',
-            'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            // 5MB: max:5120 (KB)
+            'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
             'status' => 'required|in:active,inactive',
         ]);
 
@@ -47,11 +48,23 @@ class PostController extends Controller
             $file = $request->file('photo');
             $filename = time() . '_' . $file->getClientOriginalName();
             $path = 'uploads/img/post';
-            if (!file_exists(public_path($path))) {
-                mkdir(public_path($path), 0755, true);
+            
+            // Đảm bảo thư mục tồn tại
+            $fullPath = public_path($path);
+            if (!file_exists($fullPath)) {
+                @mkdir($fullPath, 0755, true);
             }
-            $file->move(public_path($path), $filename);
-            $data['photo'] = $path . '/' . $filename;
+            
+            // Upload file
+            try {
+                $file->move($fullPath, $filename);
+                $data['photo'] = $path . '/' . $filename;
+            } catch (\Exception $e) {
+                \Log::error('File upload error: ' . $e->getMessage());
+                return redirect()->back()
+                    ->with('error', 'Không thể upload ảnh. Vui lòng kiểm tra quyền thư mục uploads.')
+                    ->withInput();
+            }
         } else {
             // Remove photo from data if no file uploaded
             unset($data['photo']);
@@ -59,7 +72,7 @@ class PostController extends Controller
 
         Post::create($data);
 
-        return redirect()->route('post.index')->with('success', 'Post created successfully!');
+        return redirect()->route('admin.post.index')->with('success', 'Post created successfully!');
     }
 
     public function edit(Post $post)
@@ -81,7 +94,8 @@ class PostController extends Controller
             'tags' => 'nullable|array',
             'tags.*' => 'string',
             'added_by' => 'required|exists:users,id',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            // 5MB: max:5120 (KB)
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
             'status' => 'required|in:active,inactive',
         ]);
 
@@ -92,17 +106,29 @@ class PostController extends Controller
         if ($request->hasFile('photo')) {
             // Delete old photo if exists
             if ($post->photo && file_exists(public_path($post->photo))) {
-                unlink(public_path($post->photo));
+                @unlink(public_path($post->photo));
             }
             
             $file = $request->file('photo');
             $filename = time() . '_' . $file->getClientOriginalName();
             $path = 'uploads/img/post';
-            if (!file_exists(public_path($path))) {
-                mkdir(public_path($path), 0755, true);
+            
+            // Đảm bảo thư mục tồn tại
+            $fullPath = public_path($path);
+            if (!file_exists($fullPath)) {
+                @mkdir($fullPath, 0755, true);
             }
-            $file->move(public_path($path), $filename);
-            $data['photo'] = $path . '/' . $filename;
+            
+            // Upload file
+            try {
+                $file->move($fullPath, $filename);
+                $data['photo'] = $path . '/' . $filename;
+            } catch (\Exception $e) {
+                \Log::error('File upload error: ' . $e->getMessage());
+                return redirect()->back()
+                    ->with('error', 'Không thể upload ảnh. Vui lòng kiểm tra quyền thư mục uploads.')
+                    ->withInput();
+            }
         } else {
             // Keep existing photo if no new file uploaded
             unset($data['photo']);
@@ -110,13 +136,13 @@ class PostController extends Controller
 
         $post->update($data);
 
-        return redirect()->route('post.index')->with('success', 'Post updated successfully!');
+        return redirect()->route('admin.post.index')->with('success', 'Post updated successfully!');
     }
 
     public function destroy(Post $post)
     {
         $post->delete();
-        return redirect()->route('post.index')->with('success', 'Post deleted successfully!');
+        return redirect()->route('admin.post.index')->with('success', 'Post deleted successfully!');
     }
 }
 

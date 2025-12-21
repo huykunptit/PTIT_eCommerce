@@ -11,7 +11,7 @@ $.fn.fab = function (options) {
 
   var toggler = $('<a>')
     .addClass('fab-button fab-toggle')
-    .append($('<i>').addClass('fas fa-plus'))
+    .append($('<i>').addClass('fa fa-plus'))
     .click(function () {
       menu.toggleClass('fab-expand');
     });
@@ -35,12 +35,12 @@ $(document).ready(function () {
   $('#fab').fab({
     buttons: [
       {
-        icon: 'fas fa-upload',
+        icon: 'fa fa-upload',
         label: lang['nav-upload'],
         attrs: {id: 'upload'}
       },
       {
-        icon: 'fas fa-folder',
+        icon: 'fa fa-folder',
         label: lang['nav-new'],
         attrs: {id: 'add-folder'}
       }
@@ -53,7 +53,7 @@ $(document).ready(function () {
         $('<a>').addClass('nav-link d-none')
           .attr('data-action', action.name)
           .attr('data-multiple', action.multiple)
-          .append($('<i>').addClass('fas fa-fw fa-' + action.icon))
+          .append($('<i>').addClass('fa fa-fw fa-' + action.icon))
           .append($('<span>').text(action.label))
       )
     );
@@ -62,7 +62,7 @@ $(document).ready(function () {
   sortings.forEach(function (sort) {
     $('#nav-buttons .dropdown-menu').append(
       $('<a>').addClass('dropdown-item').attr('data-sortby', sort.by)
-        .append($('<i>').addClass('fas fa-fw fa-' + sort.icon))
+        .append($('<i>').addClass('fa fa-fw fa-' + sort.icon))
         .append($('<span>').text(sort.label))
         .click(function() {
           sort_type = sort.by;
@@ -77,7 +77,7 @@ $(document).ready(function () {
       JSON.parse(response).forEach(function (message) {
         $('#alerts').append(
           $('<div>').addClass('alert alert-warning')
-            .append($('<i>').addClass('fas fa-exclamation-circle'))
+            .append($('<i>').addClass('fa fa-exclamation-circle'))
             .append(' ' + message)
         );
       });
@@ -598,7 +598,7 @@ function preview(items) {
 
     carouselItem.find('.carousel-label').attr('target', '_blank').attr('href', item.url)
       .append(item.name)
-      .append($('<i class="fas fa-external-link-alt ml-2"></i>'));
+      .append($('<i class="fa fa-external-link-alt ml-2"></i>'));
 
     carousel.children('.carousel-inner').append(carouselItem);
 

@@ -12,6 +12,9 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
         // Thêm 'vnpay' và 'cod' vào ENUM payment_method
         DB::statement("ALTER TABLE payments MODIFY COLUMN payment_method ENUM('credit_card', 'paypal', 'cash_on_delivery', 'vnpay', 'cod') NOT NULL");
     }
@@ -21,6 +24,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
         // Trả lại ENUM ban đầu
         DB::statement("ALTER TABLE payments MODIFY COLUMN payment_method ENUM('credit_card', 'paypal', 'cash_on_delivery') NOT NULL");
     }

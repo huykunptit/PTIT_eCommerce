@@ -17,7 +17,7 @@
 
   <!-- Scroll to Top Button-->
   <a class="scroll-to-top rounded" href="#page-top">
-    <i class="fas fa-angle-up"></i>
+    <i class="fa fa-angle-up"></i>
   </a>
 
   <!-- Logout Modal-->
@@ -62,4 +62,32 @@
     setTimeout(function(){
       $('.alert').slideUp();
     },4000);
+
+    // Hide Laravel pagination when DataTables is present in the same card to avoid double paginators
+    $(function(){
+      $('.card-body').each(function(){
+        const hasDataTable = $(this).find('.dataTables_wrapper').length > 0;
+        if(hasDataTable){
+          $(this).find('nav[role="navigation"], .pagination').not('.dataTables_paginate').hide();
+        }
+      });
+    });
+
+    // Generic image preview handler: attach data-preview-target="#selector" to file inputs
+    document.addEventListener('change', function (e) {
+      const input = e.target;
+      if (!input.matches('input[type="file"][data-preview-target]')) return;
+      const target = document.querySelector(input.dataset.previewTarget);
+      if (!target) return;
+      const wrapper = target.closest('[data-preview-wrapper]');
+      if (input.files && input.files[0]) {
+        const url = URL.createObjectURL(input.files[0]);
+        target.src = url;
+        target.style.display = 'block';
+        if (wrapper) wrapper.style.display = 'block';
+      } else {
+        target.removeAttribute('src');
+        if (wrapper) wrapper.style.display = 'none';
+      }
+    });
   </script>

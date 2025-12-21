@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +20,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Force https when chạy qua ngrok hoặc khi APP_URL là https
+        $appUrl = config('app.url');
+        if ($appUrl && str_starts_with($appUrl, 'https://')) {
+            URL::forceScheme('https');
+        }
     }
 }

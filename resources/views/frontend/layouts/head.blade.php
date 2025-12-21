@@ -3,9 +3,8 @@
 <!-- Title Tag  -->
 <title>@yield('title')</title>
 <!-- Favicon -->
-<link rel="icon" type="image/png" href="images/favicon.png">
-<!-- Web Font -->
-<link href="https://fonts.googleapis.com/css?family=Poppins:200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="{{ asset('backend/img/favicon.png') }}">
+<!-- Web Font - Using System Fonts -->
 
 <!-- StyleSheet -->
 <link rel="manifest" href="/manifest.json">
@@ -41,8 +40,18 @@
 @if(file_exists(public_path('css/theme-colors.css')))
 <link rel="stylesheet" href="{{asset('css/theme-colors.css')}}">
 @endif
-<script type='text/javascript' src='https://platform-api.sharethis.com/js/sharethis.js#property=5f2e5abf393162001291e431&product=inline-share-buttons' async='async'></script>
+{{-- ShareThis tạm tắt để tránh lỗi DNS/mixed-content trên môi trường ngrok --}}
 <style>
+    /* System Font Stack - Font cơ bản - Override Poppins */
+    body, html {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
+    }
+    
+    /* Áp dụng cho các element text, trừ icons */
+    h1, h2, h3, h4, h5, h6, p, span, a, div, li, td, th, label, input, textarea, select, button:not([class*="fa"]):not([class*="icon"]) {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif !important;
+    }
+    
     /* Multilevel dropdown */
     .dropdown-submenu {
     position: relative;

@@ -17,8 +17,11 @@
         </div>
 
         <div class="form-group floating-group">
-          <input id="image" type="file" name="image" class="form-control modern-input">
+          <input id="image" type="file" name="image" class="form-control modern-input" data-preview-target="#categoryImagePreview">
           <label for="image" class="col-form-label">Ảnh danh mục</label>
+          <div class="mt-2" data-preview-wrapper style="display:none;">
+            <img id="categoryImagePreview" src="" alt="Xem trước ảnh" style="max-height:120px;border:1px solid #ddd;border-radius:6px;padding:4px;display:none;">
+          </div>
           @error('image')
           <span class="text-danger">{{$message}}</span>
           @enderror

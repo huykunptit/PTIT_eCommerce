@@ -8,7 +8,7 @@
             <div class="col-lg-8">
                 <div class="failed-content">
                     <div class="failed-icon">
-                        <i class="fas fa-times-circle"></i>
+                        <i class="fa fa-times-circle"></i>
                     </div>
                     <h1 class="failed-title">Thanh toán thất bại</h1>
                     <p class="failed-message">
@@ -68,14 +68,14 @@
                     <div class="failed-actions">
                         @if($order)
                         <a href="{{ route('payment.vnpay.create', ['order_id' => $order->id, 'amount' => $order->total_amount]) }}" class="btn-retry-payment">
-                            <i class="fas fa-redo mr-2"></i>Thử thanh toán lại
+                            <i class="fa fa-redo mr-2"></i>Thử thanh toán lại
                         </a>
                         @endif
                         <a href="{{ route('user.orders') }}" class="btn-view-orders">
-                            <i class="fas fa-list mr-2"></i>Xem đơn hàng của tôi
+                            <i class="fa fa-list mr-2"></i>Xem đơn hàng của tôi
                         </a>
                         <a href="{{ route('home') }}" class="btn-continue-shopping">
-                            <i class="fas fa-shopping-bag mr-2"></i>Tiếp tục mua sắm
+                            <i class="fa fa-shopping-bag mr-2"></i>Tiếp tục mua sắm
                         </a>
                     </div>
                 </div>

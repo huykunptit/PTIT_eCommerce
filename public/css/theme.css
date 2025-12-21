@@ -1,8 +1,9 @@
 /* Theme Colors - Đồng bộ màu cho toàn hệ thống */
 :root {
-    --primary-color: #667eea;
-    --secondary-color: #764ba2;
-    --accent-color: #f093fb;
+    /* Concept palette */
+    --primary-color: #134686;
+    --secondary-color: #FEB21A;
+    --accent-color: #ED3F27;
     --success-color: #28a745;
     --danger-color: #e53e3e;
     --warning-color: #ffc107;
@@ -18,14 +19,14 @@
     --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     --shadow-heavy: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     
-    /* Gradient */
-    --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-    --gradient-gold: linear-gradient(135deg, #D4AF37 0%, #C4A037 100%);
+    /* Gradient placeholders flattened to solid brand colors */
+    --gradient-primary: var(--primary-color);
+    --gradient-gold: var(--primary-color);
 }
 
 /* Common Button Styles */
 .btn-primary {
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     border: none;
     color: var(--white);
     transition: all 0.3s ease;
@@ -38,7 +39,7 @@
 }
 
 .btn-gold {
-    background: var(--gradient-gold);
+    background: var(--primary-color);
     border: none;
     color: var(--text-dark);
 }
@@ -51,7 +52,7 @@
 
 /* Card Header Gradient */
 .card-header-gradient {
-    background: var(--gradient-primary);
+    background: var(--primary-color);
     color: var(--white);
 }
 
@@ -66,7 +67,7 @@
 
 /* Background Colors */
 .bg-primary-custom {
-    background: var(--gradient-primary);
+    background: var(--primary-color);
 }
 
 .bg-light-custom {

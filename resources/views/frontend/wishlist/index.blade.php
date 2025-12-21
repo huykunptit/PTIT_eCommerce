@@ -30,10 +30,10 @@
                             </a>
                             <div class="product-actions">
                                 <button type="button" class="action-btn btn-add-cart" data-product-id="{{ $item['product']->id }}" title="Thêm vào giỏ">
-                                    <i class="fas fa-shopping-bag"></i>
+                                    <i class="fa fa-shopping-bag"></i>
                                 </button>
                                 <button type="button" class="action-btn btn-remove-wishlist" data-product-id="{{ $item['product']->id }}" title="Xóa khỏi yêu thích">
-                                    <i class="fas fa-trash-alt"></i>
+                                    <i class="fa fa-trash-alt"></i>
                                 </button>
                             </div>
                         </div>
@@ -51,7 +51,7 @@
                             @endif
                             <div class="product-actions-bottom">
                                 <a href="{{ route('product.show', $item['product']->id) }}" class="btn-view-detail">
-                                    <i class="fas fa-eye mr-2"></i>Xem chi tiết
+                                    <i class="fa fa-eye mr-2"></i>Xem chi tiết
                                 </a>
                             </div>
                         </div>
@@ -62,21 +62,21 @@
         </div>
         <div class="wishlist-actions">
             <a href="{{ route('home') }}" class="btn-continue">
-                <i class="fas fa-arrow-left mr-2"></i>Tiếp tục mua sắm
+                <i class="fa fa-arrow-left mr-2"></i>Tiếp tục mua sắm
             </a>
             <button type="button" class="btn-clear-wishlist">
-                <i class="fas fa-trash mr-2"></i>Xóa toàn bộ
+                <i class="fa fa-trash mr-2"></i>Xóa toàn bộ
             </button>
         </div>
         @else
         <div class="empty-wishlist">
             <div class="empty-icon">
-                <i class="fas fa-heart"></i>
+                <i class="fa fa-heart"></i>
             </div>
             <h3>Danh sách yêu thích của bạn đang trống</h3>
             <p>Hãy thêm sản phẩm yêu thích để xem lại sau</p>
             <a href="{{ route('home') }}" class="btn-shop-now">
-                <i class="fas fa-shopping-bag mr-2"></i>Mua sắm ngay
+                <i class="fa fa-shopping-bag mr-2"></i>Mua sắm ngay
             </a>
         </div>
         @endif

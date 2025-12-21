@@ -76,7 +76,7 @@
                                     </td>
                                     <td>
                                         <button type="button" class="btn-remove" data-key="{{ $item['key'] }}" title="Xóa">
-                                            <i class="fas fa-trash-alt"></i>
+                                            <i class="fa fa-trash-alt"></i>
                                         </button>
                                     </td>
                                 </tr>
@@ -86,10 +86,10 @@
                     </div>
                     <div class="cart-actions">
                         <a href="{{ route('home') }}" class="btn-continue">
-                            <i class="fas fa-arrow-left mr-2"></i>Tiếp tục mua sắm
+                            <i class="fa fa-arrow-left mr-2"></i>Tiếp tục mua sắm
                         </a>
                         <button type="button" class="btn-clear-cart">
-                            <i class="fas fa-trash mr-2"></i>Xóa toàn bộ
+                            <i class="fa fa-trash mr-2"></i>Xóa toàn bộ
                         </button>
                     </div>
                 </div>
@@ -114,10 +114,10 @@
                     </div>
                     <div class="summary-actions">
                         <a href="{{ route('checkout.index') }}" class="btn-checkout">
-                            <i class="fas fa-shopping-bag mr-2"></i>Thanh toán
+                            <i class="fa fa-shopping-bag mr-2"></i>Thanh toán
                         </a>
                         <p class="secure-text">
-                            <i class="fas fa-lock mr-2"></i>Thanh toán an toàn và bảo mật
+                            <i class="fa fa-lock mr-2"></i>Thanh toán an toàn và bảo mật
                         </p>
                     </div>
                 </div>
@@ -126,12 +126,12 @@
         @else
         <div class="empty-cart">
             <div class="empty-icon">
-                <i class="fas fa-shopping-cart"></i>
+                <i class="fa fa-shopping-cart"></i>
             </div>
             <h3>Giỏ hàng của bạn đang trống</h3>
             <p>Hãy thêm sản phẩm vào giỏ hàng để tiếp tục mua sắm</p>
             <a href="{{ route('home') }}" class="btn-shop-now">
-                <i class="fas fa-shopping-bag mr-2"></i>Mua sắm ngay
+                <i class="fa fa-shopping-bag mr-2"></i>Mua sắm ngay
             </a>
         </div>
         @endif

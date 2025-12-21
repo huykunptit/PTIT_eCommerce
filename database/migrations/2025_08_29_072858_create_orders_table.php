@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users');
             $table->decimal('total_amount', 10, 2);
-            $table->enum('status', ['pending', 'paid', 'shipped', 'completed', 'canceled'])->default('pending');
+            $table->enum('status', ['pending', 'pending_payment', 'paid', 'shipped', 'completed', 'canceled'])->default('pending');
             $table->timestamps();
         });
     }

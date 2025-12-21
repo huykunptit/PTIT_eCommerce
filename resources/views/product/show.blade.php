@@ -218,7 +218,7 @@
                             <i class="ti-bag mr-2"></i>Thêm vào giỏ
                         </button>
                         <button type="button" class="btn btn-outline-danger btn-add-to-wishlist" data-product-id="{{ $product->id }}" style="padding:12px 20px;border:1px solid #dc3545;color:#dc3545;background:transparent;border-radius:4px;">
-                            <i class="fa fa-heart-o"></i>
+                            <i class="fa fa-heart"></i>
                         </button>
                     </div>
                 </div>
@@ -342,31 +342,25 @@
 
 @push('scripts')
 <style>
-    .product-variants select.variant-select {
-        cursor: pointer !important;
-        pointer-events: auto !important;
-        z-index: 10 !important;
-        position: relative !important;
-        -webkit-appearance: menulist !important;
-        -moz-appearance: menulist !important;
-        appearance: menulist !important;
-    }
-    .product-variants select.variant-select:disabled {
-        cursor: not-allowed !important;
-        opacity: 0.6;
-    }
+    /* Đảm bảo dropdown Size/Option luôn hiển thị phía trên các nút bên dưới */
     .product-variants {
+        position: relative;
+        z-index: 5;
+        margin-bottom: 10px;
+    }
+    .product-variants select.variant-select {
+        cursor: pointer;
+        position: relative;
+        z-index: 10;
+        width: 100%;
+    }
+    .product-actions {
         position: relative;
         z-index: 1;
     }
-    /* Đảm bảo tất cả options trong Size dropdown luôn hiển thị */
-    #selectSize option {
-        display: block !important;
-        visibility: visible !important;
-    }
-    #selectSize {
-        /* Không cho phép bất kỳ code nào modify Size dropdown */
-        pointer-events: auto !important;
+    .product-variants select.variant-select:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
     }
 </style>
 <script>

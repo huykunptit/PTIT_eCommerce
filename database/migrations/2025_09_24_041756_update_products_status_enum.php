@@ -11,6 +11,9 @@ return new class extends Migration
      */
     public function up()
     {
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
         Schema::table('products', function (Blueprint $table) {
             $table->enum('status', ['active', 'inactive'])->default('active')->change();
         });
@@ -21,6 +24,9 @@ return new class extends Migration
      */
     public function down()
     {
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
         Schema::table('products', function (Blueprint $table) {
             $table->enum('status', ['active', 'out_of_stock'])->default('active')->change();
         });

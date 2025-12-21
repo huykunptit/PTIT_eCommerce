@@ -1,4 +1,4 @@
-FROM php:8.1-fpm-alpine
+FROM php:8.2-fpm-alpine
 
 RUN apk add --no-cache \
     git \
@@ -26,11 +26,18 @@ RUN pecl install redis && docker-php-ext-enable redis
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
+# Cài đặt Node.js và npm
+RUN apk add --no-cache nodejs npm
 
 WORKDIR /var/www/html
 COPY . .
 RUN composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader
 
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Cài đặt npm dependencies và build Vite assets
+RUN npm install --legacy-peer-deps && npm run build
+
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
+    && mkdir -p /var/www/html/public/uploads/img/post \
+    && chown -R www-data:www-data /var/www/html/public/uploads
 
 CMD ["php-fpm", "-y", "/usr/local/etc/php-fpm.conf", "-R"]
