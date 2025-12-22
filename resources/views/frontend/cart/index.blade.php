@@ -511,7 +511,7 @@
 <script>
 $(document).ready(function() {
     // Update quantity
-    $('.qty-btn').on('click', function() {
+    $('.qty-btn').off('click').on('click', function() {
         const key = $(this).data('key');
         const input = $(`.qty-input[data-key="${key}"]`);
         let qty = parseInt(input.val());
@@ -526,7 +526,7 @@ $(document).ready(function() {
         updateCartItem(key, qty);
     });
     
-    $('.qty-input').on('change', function() {
+    $('.qty-input').off('change').on('change', function() {
         const key = $(this).data('key');
         const qty = parseInt($(this).val()) || 1;
         updateCartItem(key, qty);

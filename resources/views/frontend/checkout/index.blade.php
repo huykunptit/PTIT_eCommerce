@@ -77,7 +77,7 @@
 
                         <div class="form-group">
                             <label for="shipping_address">Địa chỉ giao hàng <span class="required">*</span></label>
-                            <textarea class="form-control" id="shipping_address" name="shipping_address" rows="3" required>{{ old('shipping_address') }}</textarea>
+                            <textarea class="form-control" id="shipping_address" name="shipping_address" rows="3" required>{{ old('shipping_address', $user->address ?? '') }}</textarea>
                             @error('shipping_address')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror

@@ -101,6 +101,13 @@
         </div>
     </li>
 
+    <!-- Users -->
+    <li class="nav-item">
+       <a class="nav-link" href="{{route('admin.users.index')}}">
+           <i class="fa fa-users"></i>
+           <span>Người dùng</span></a>
+    </li>
+
   
     {{-- Shipping --}}
     <li class="nav-item">
@@ -111,8 +118,8 @@
         <div id="shippingCollapse" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
             <h6 class="collapse-header">Tùy chọn vận chuyển:</h6>
-            <a class="collapse-item" href="#">Danh sách phương thức</a>
-            <a class="collapse-item" href="#">Thêm phương thức</a>
+            <a class="collapse-item" href="{{ route('admin.orders') }}">Danh sách đơn hàng</a>
+            <a class="collapse-item" href="{{ route('admin.orders') }}">Quản lý vận chuyển</a>
           </div>
         </div>
     </li>
@@ -211,12 +218,7 @@
           <i class="fa fa-sliders-h"></i>
           <span>Cấu hình hệ thống</span></a>
     </li>
-     <!-- Users -->
-     <li class="nav-item">
-        <a class="nav-link" href="{{route('admin.users.index')}}">
-            <i class="fa fa-users"></i>
-            <span>Người dùng</span></a>
-    </li>
+    
      <!-- General settings -->
      <li class="nav-item">
         <a class="nav-link" href="#">

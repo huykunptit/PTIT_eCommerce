@@ -8,7 +8,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<meta name="keywords" content="online shop, purchase, cart, ecommerce site, best online shopping">
 	<meta name="description" content="{{$product_detail->summary}}">
-	<meta property="og:url" content="{{route('product-detail',$product_detail->slug)}}">
+	<meta property="og:url" content="{{route('product.show',$product_detail->id)}}">
 	<meta property="og:type" content="article">
 	<meta property="og:title" content="{{$product_detail->title}}">
 	<meta property="og:image" content="{{$product_detail->photo}}">
@@ -321,7 +321,7 @@
                                 <!-- Start Single Product -->
                                 <div class="single-product">
                                     <div class="product-img">
-										<a href="{{route('product-detail',$data->slug)}}">
+										<a href="{{route('product.show',$data->id)}}">
 											@php 
 												$photo=explode(',',$data->photo);
 											@endphp
@@ -342,7 +342,7 @@
                                         </div>
                                     </div>
                                     <div class="product-content">
-                                        <h3><a href="{{route('product-detail',$data->slug)}}">{{$data->title}}</a></h3>
+										<h3><a href="{{route('product.show',$data->id)}}">{{$data->title}}</a></h3>
                                         <div class="product-price">
                                             @php 
                                                 $after_discount=($data->price-(($data->discount*$data->price)/100));

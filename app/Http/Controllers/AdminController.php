@@ -312,6 +312,17 @@ class AdminController extends Controller
     }
 
     /**
+     * Mark all notifications as read for the current admin
+     */
+    public function markAllNotificationsAsRead()
+    {
+        $user = Auth::user();
+        $user->unreadNotifications->each->markAsRead();
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
      * Export Orders to Excel/PDF
      */
     public function exportOrders(Request $request)

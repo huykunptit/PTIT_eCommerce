@@ -42,9 +42,9 @@
                                     ? $product->image_url
                                     : asset($product->image_url);
                             @endphp
-                            <img src="{{ $src }}" referrerpolicy="no-referrer" class="img-fluid rounded-circle" style="max-width:50px" alt="{{$product->name}}">
+                            <img src="{{ $src }}" referrerpolicy="no-referrer" loading="lazy" class="img-fluid rounded-circle" style="max-width:50px" alt="{{$product->name}}">
                         @else
-                            <img src="{{asset('backend/img/avatar.png')}}" class="img-fluid rounded-circle" style="max-width:50px" alt="avatar.png">
+                            <img src="{{asset('backend/img/avatar.png')}}" loading="lazy" class="img-fluid rounded-circle" style="max-width:50px" alt="avatar.png">
                         @endif
                     </td>
                     <td>{{$product->price}}</td>

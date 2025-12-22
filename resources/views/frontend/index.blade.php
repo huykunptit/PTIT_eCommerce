@@ -13,7 +13,7 @@
         <div class="carousel-inner" role="listbox">
                 @foreach($banners as $key=>$banner)
                 <div class="carousel-item {{(($key==0)? 'active' : '')}}">
-                    <img class="first-slide" src="{{$banner->photo}}" alt="First slide">
+                    <img class="first-slide" src="{{$banner->photo}}" alt="First slide" loading="lazy">
                     <div class="carousel-caption d-none d-md-block text-left">
                         <h1 class="wow fadeInDown">{{$banner->title}}</h1>
                         <p>{!! html_entity_decode($banner->description) !!}</p>
@@ -49,9 +49,9 @@
                         <div class="col-lg-4 col-md-6 col-12">
                             <div class="single-banner">
                                 @if($cat->photo)
-                                    <img src="{{$cat->photo}}" alt="{{$cat->photo}}">
+                                    <img src="{{$cat->photo}}" alt="{{$cat->photo}}" loading="lazy">
                                 @else
-                                    <img src="https://via.placeholder.com/600x370" alt="#">
+                                    <img src="https://via.placeholder.com/600x370" alt="#" loading="lazy">
                                 @endif
                                 <div class="content">
                                     <h3>{{$cat->name}}</h3>
@@ -109,13 +109,13 @@
                                 <div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item {{$product->cat_id}}">
                                     <div class="single-product">
                                         <div class="product-img">
-                                            <a href="{{route('product-detail',$product->slug)}}">
+                                            <a href="{{route('product.show',$product->id)}}">
                                                 @php
                                                     $photo=explode(',',$product->photo);
                                                 // dd($photo);
                                                 @endphp
-                                                <img class="default-img" src="{{$photo[0]}}" alt="{{$photo[0]}}">
-                                                <img class="hover-img" src="{{$photo[0]}}" alt="{{$photo[0]}}">
+                                                <img class="default-img" src="{{$photo[0]}}" alt="{{$photo[0]}}" loading="lazy">
+                                                <img class="hover-img" src="{{$photo[0]}}" alt="{{$photo[0]}}" loading="lazy">
                                                 @if($product->stock<=0)
                                                     <span class="out-of-stock">Sale out</span>
                                                 @elseif($product->condition=='new')
@@ -139,7 +139,7 @@
                                             </div>
                                         </div>
                                         <div class="product-content">
-                                            <h3><a href="{{route('product-detail',$product->slug)}}">{{$product->title}}</a></h3>
+                                            <h3><a href="{{route('product.show',$product->id)}}">{{$product->title}}</a></h3>
                                             <div class="product-price">
                                                 @php
                                                     $after_discount=($product->price-($product->price*$product->discount)/100);
@@ -179,11 +179,11 @@
                             @php
                                 $photo=explode(',',$data->photo);
                             @endphp
-                            <img src="{{$photo[0]}}" alt="{{$photo[0]}}">
+                            <img src="{{$photo[0]}}" alt="{{$photo[0]}}" loading="lazy">
                             <div class="content">
                                 <p>{{$data->cat_info['title']}}</p>
                                 <h3>{{$data->title}} <br>Up to<span> {{$data->discount}}%</span></h3>
-                                <a href="{{route('product-detail',$data->slug)}}">Shop Now</a>
+                                <a href="{{route('product.show',$data->id)}}">Shop Now</a>
                             </div>
                         </div>
                     </div>
@@ -213,7 +213,7 @@
                             <!-- Start Single Product -->
                         <div class="single-product">
                             <div class="product-img">
-                                <a href="{{route('product-detail',$product->slug)}}">
+                                <a href="{{route('product.show',$product->id)}}">
                                     @php
                                         $photo=explode(',',$product->photo);
                                     // dd($photo);
@@ -233,7 +233,7 @@
                                 </div>
                             </div>
                             <div class="product-content">
-                                <h3><a href="{{route('product-detail',$product->slug)}}">{{$product->title}}</a></h3>
+                                <h3><a href="{{route('product.show',$product->id)}}">{{$product->title}}</a></h3>
                                 <div class="product-price">
                                     <span class="old">${{number_format($product->price,2)}}</span>
                                     @php

@@ -77,6 +77,32 @@ Route::get('/search', function (\Illuminate\Http\Request $request) {
     return response()->json($products);
 })->name('search');
 
+// Blog frontend routes (simple closures to serve existing views)
+Route::get('/blog', function (\Illuminate\Http\Request $request) {
+    $posts = \App\Models\Post::where('status', 'active')->latest()->paginate(6);
+    $recent_posts = \App\Models\Post::where('status', 'active')->latest()->take(5)->get();
+    return view('frontend.pages.blog', compact('posts', 'recent_posts'));
+})->name('blog');
+
+Route::get('/blog/{slug}', function ($slug) {
+    $post = \App\Models\Post::where('slug', $slug)->where('status', 'active')->firstOrFail();
+    $recent_posts = \App\Models\Post::where('status', 'active')->latest()->take(5)->get();
+    return view('frontend.pages.blog-detail', compact('post', 'recent_posts'));
+})->name('blog.detail');
+
+Route::get('/blog-search', function (\Illuminate\Http\Request $request) {
+    $q = $request->get('search', '');
+    $posts = \App\Models\Post::where('status', 'active')
+        ->where(function($qr) use ($q) {
+            if ($q) {
+                $qr->where('title', 'like', "%{$q}%")
+                   ->orWhere('summary', 'like', "%{$q}%");
+            }
+        })->paginate(10);
+    $recent_posts = \App\Models\Post::where('status', 'active')->latest()->take(5)->get();
+    return view('frontend.pages.blog', compact('posts', 'recent_posts'));
+})->name('blog.search');
+
 // Product detail
 Route::get('/product/{id}', function ($id) {
     return view('product.show', ['id' => $id]);
@@ -225,6 +251,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth', 'a
     Route::get('/notifications', [AdminController::class, 'notificationIndex'])->name('notification.index');
     Route::get('/notifications/api', [AdminController::class, 'getNotifications'])->name('notifications.api');
     Route::post('/notifications/{id}/read', [AdminController::class, 'markNotificationAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [AdminController::class, 'markAllNotificationsAsRead'])->name('notifications.readAll');
 
     // Export Data
     Route::get('/export/orders', [AdminController::class, 'exportOrders'])->name('export.orders');

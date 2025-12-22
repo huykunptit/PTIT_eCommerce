@@ -10,6 +10,7 @@
     <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown" style="width: 350px; max-height: 400px; overflow-y: auto;">
         <h6 class="dropdown-header">
             Notifications Center
+            <a href="#" id="markAllRead" class="float-right small mr-2">Đã xem hết</a>
             <a href="{{ route('admin.notification.index') }}" class="float-right small">Xem tất cả</a>
         </h6>
         <div id="notificationsList">
@@ -105,9 +106,31 @@ $(document).ready(function() {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            success: function() {
+                // Refresh list/badge
+                loadNotifications();
             }
         });
     }
+
+
+    // Mark all as read
+    $('#markAllRead').on('click', function(e) {
+        e.preventDefault();
+        $.ajax({
+            url: '{{ route("admin.notifications.readAll") }}',
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            success: function() {
+                // Refresh notifications UI
+                updateNotificationBadge(0);
+                $('#notificationsList').html('<div class="dropdown-item text-center text-muted p-3">Không có thông báo mới</div>');
+            }
+        });
+    });
     
     // Load notifications on page load
     loadNotifications();

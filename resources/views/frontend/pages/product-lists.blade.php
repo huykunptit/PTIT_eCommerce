@@ -115,7 +115,7 @@
                                                 <img src="{{$photo[0]}}" alt="{{$photo[0]}}">
                                             </div>
                                             <div class="content">
-                                                <h5><a href="{{route('product-detail',$product->slug)}}">{{$product->title}}</a></h5>
+												<h5><a href="{{route('product.show',$product->id)}}">{{$product->title}}</a></h5>
                                                 @php
                                                     $org=($product->price-($product->price*$product->discount)/100);
                                                 @endphp
@@ -186,7 +186,7 @@
 												<div class="col-lg-4 col-md-6 col-sm-6">
 													<div class="single-product">
 														<div class="product-img">
-															<a href="{{route('product-detail',$product->slug)}}">
+															<a href="{{route('product.show',$product->id)}}">
 															@php 
 																$photo=explode(',',$product->photo);
 															@endphp

@@ -60,17 +60,29 @@
                         @endif
                     </td>
                     <td>
-                        @php
-                            $shippingStatusMap = [
-                                'pending_pickup' => ['text' => 'Chờ lấy hàng', 'class' => 'warning'],
-                                'in_transit' => ['text' => 'Đang vận chuyển', 'class' => 'info'],
-                                'delivered' => ['text' => 'Đã nhận hàng', 'class' => 'success'],
-                                'cancelled' => ['text' => 'Đã hủy', 'class' => 'danger'],
-                                'returned' => ['text' => 'Đã hoàn trả', 'class' => 'secondary'],
-                            ];
-                            $shippingStatus = $shippingStatusMap[$order->shipping_status ?? 'pending_pickup'] ?? ['text' => 'Chờ lấy hàng', 'class' => 'warning'];
-                        @endphp
-                        <span class="badge badge-{{ $shippingStatus['class'] }}">{{ $shippingStatus['text'] }}</span>
+                      @php
+                        // Compute a combined stage similar to common marketplace flows
+                        if ($order->status === 'cancelled') {
+                          $stageText = 'Đã hủy';
+                          $stageClass = 'danger';
+                        } elseif ($order->shipping_status === 'returned') {
+                          $stageText = 'Trả hàng';
+                          $stageClass = 'secondary';
+                        } elseif ($order->shipping_status === 'delivered') {
+                          $stageText = 'Đã giao';
+                          $stageClass = 'success';
+                        } elseif ($order->shipping_status === 'in_transit') {
+                          $stageText = 'Đang giao';
+                          $stageClass = 'info';
+                        } elseif ($order->shipping_status === 'pending_pickup') {
+                          $stageText = ($order->status === 'pending_payment') ? 'Chờ xác nhận' : 'Chờ lấy hàng';
+                          $stageClass = 'warning';
+                        } else {
+                          $stageText = 'Chờ xác nhận';
+                          $stageClass = 'warning';
+                        }
+                      @endphp
+                      <span class="badge badge-{{ $stageClass }}">{{ $stageText }}</span>
                     </td>
                     <td>
                         <a href="{{route('admin.orders.show',$order->id)}}" class="btn btn-warning btn-sm float-left mr-1" style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" title="view" data-placement="bottom"><i class="fa fa-eye"></i></a>

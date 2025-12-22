@@ -476,7 +476,7 @@
         }
 
         // Các nút tăng giảm số lượng
-        $('.qty-minus').on('click', function () {
+        $('.qty-minus').off('click').on('click', function () {
             var qtyInput = $('#productQuantity');
             var currentQty = parseInt(qtyInput.val()) || 1;
             if(currentQty > 1){
@@ -484,7 +484,7 @@
             }
         });
 
-        $('.qty-plus').on('click', function () {
+        $('.qty-plus').off('click').on('click', function () {
             var qtyInput = $('#productQuantity');
             var currentQty = parseInt(qtyInput.val()) || 1;
             var maxStock;
@@ -503,7 +503,7 @@
         });
 
         // Validate số lượng nhập tay
-        $('#productQuantity').on('change', function(){
+        $('#productQuantity').off('change').on('change', function(){
             var qty = parseInt($(this).val()) || 1;
             var maxStock;
             var selectedSize = $('#selectSize').val();

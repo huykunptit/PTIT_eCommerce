@@ -17,7 +17,7 @@ class ProductController extends Controller
         // Management Products
         public function products()
         {
-            $products = Product::with('category')->paginate(10);
+            $products = Product::with(['category','seller'])->paginate(10);
             $brands  = Brand::all();
             return view('backend.product.index', compact('products', 'brands'));
         }

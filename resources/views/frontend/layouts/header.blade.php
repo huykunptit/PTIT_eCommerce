@@ -50,8 +50,8 @@
                         <div class="top-search"><a href="#0"><i class="ti-search"></i></a></div>
                         <!-- Search Form -->
                         <div class="search-top">
-                            <form class="search-form">
-                                <input type="text" placeholder="Search here..." name="search">
+                            <form class="search-form" action="{{ route('search') }}" method="GET">
+                                <input type="text" placeholder="Search here..." name="q">
                                 <button value="search" type="submit"><i class="ti-search"></i></button>
                             </form>
                         </div>
@@ -63,7 +63,7 @@
                 <div class="col-lg-8 col-md-7 col-12">
                     <div class="search-bar-top">
                         <div class="search-bar" style="position:relative;">
-                            <select id="search-category" style="display:none;">
+                            <select id="search-category" name="category" style="display:none;">
                                 <option value="">All Category</option>
                                 @php
                                     $categories = DB::table('categories')->get();
@@ -72,8 +72,8 @@
                                 <option value="{{$cat->id}}">{{$cat->name}}</option>
                                 @endforeach
                             </select>
-                            <form id="search-form" method="GET" action="{{ route('home') }}" style="position:relative;">
-                                <input id="search-input" name="search" placeholder="Search Products Here....." type="search" autocomplete="off">
+                            <form id="search-form" method="GET" action="{{ route('search') }}" style="position:relative;">
+                                <input id="search-input" name="q" placeholder="Search Products Here....." type="search" autocomplete="off">
                                 <button class="btnn" type="submit"><i class="ti-search"></i></button>
                             </form>
                             <div id="search-results" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #ddd;border-radius:4px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:1000;max-height:500px;overflow-y:auto;margin-top:5px;">

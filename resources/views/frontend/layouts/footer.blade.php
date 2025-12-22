@@ -412,7 +412,7 @@
 						contentDiv.html(html);
 						
 						if (products.length > 5) {
-							$('#search-view-all').attr('href', '{{ route("home") }}?search=' + encodeURIComponent(query)).show();
+							$('#search-view-all').attr('href', '{{ route("search") }}?q=' + encodeURIComponent(query)).show();
 						} else {
 							$('#search-view-all').hide();
 						}

@@ -36,6 +36,22 @@ class Post extends Model
     {
         return $this->belongsTo(User::class, 'added_by');
     }
+
+    /**
+     * Active top-level comments for this post
+     */
+    public function comments()
+    {
+        return $this->hasMany(Comment::class)->where('status', 'active')->whereNull('parent_id');
+    }
+
+    /**
+     * All comments for this post (including inactive/children)
+     */
+    public function allComments()
+    {
+        return $this->hasMany(Comment::class);
+    }
 }
 
 
