@@ -129,7 +129,8 @@ return [
         ],
 
         'default' => [
-            'url' => env('REDIS_URL'),
+            // Prefer TLS URL on platforms like Heroku, fall back to plain URL
+            'url' => env('REDIS_TLS_URL', env('REDIS_URL')),
             'host' => env('REDIS_HOST', '127.0.0.1'),
             'username' => env('REDIS_USERNAME'),
             'password' => env('REDIS_PASSWORD'),
@@ -138,7 +139,8 @@ return [
         ],
 
         'cache' => [
-            'url' => env('REDIS_URL'),
+            // Prefer TLS URL on platforms like Heroku, fall back to plain URL
+            'url' => env('REDIS_TLS_URL', env('REDIS_URL')),
             'host' => env('REDIS_HOST', '127.0.0.1'),
             'username' => env('REDIS_USERNAME'),
             'password' => env('REDIS_PASSWORD'),
