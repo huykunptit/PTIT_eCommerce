@@ -49,8 +49,7 @@
             "@php artisan key:generate --ansi"
         ],
         "post-install-cmd": [
-            "@php artisan config:clear",
-            "@php artisan cache:clear"
+            "@php artisan config:clear"
         ]
     },
     "extra": {
