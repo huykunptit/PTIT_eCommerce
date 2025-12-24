@@ -67,7 +67,7 @@
                             <select id="search-category" style="display:none;">
                                 <option value="">All Category</option>
                                 @php
-                                    $categories = DB::table('categories')->get();
+                                    $categories = DB::table('categories')->select('id','name')->orderBy('name')->get();
                                 @endphp
                                 @foreach($categories as $cat)
                                 <option value="{{$cat->id}}">{{$cat->name}}</option>

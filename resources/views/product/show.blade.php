@@ -7,7 +7,10 @@
     use Illuminate\Support\Str;
 
     $productId = request()->route('id');
-    $product = DB::table('products')->where('id', $productId)->first();
+    $product = DB::table('products')
+        ->select(['id','name','price','quantity','image_url','description','category_id','seller_id'])
+        ->where('id', $productId)
+        ->first();
     $variants = \App\Models\ProductVariant::where('product_id', $productId)->where('status','active')->get();
 
     // Collect all product images
@@ -65,7 +68,12 @@
     $productPost = ProductPost::where('product_id', $productId)->where('status', 'published')->first();
 
     // Get reviews
-    $reviews = ProductReview::where('product_id', $productId)->where('status', 'approved')->orderBy('created_at', 'desc')->get();
+    // Limit review list to prevent OOM on products with huge review counts.
+    $reviews = ProductReview::where('product_id', $productId)
+        ->where('status', 'approved')
+        ->orderBy('created_at', 'desc')
+        ->limit(50)
+        ->get();
     $avgRating = $reviews->avg('rating') ?? 0;
     $reviewCount = $reviews->count();
 

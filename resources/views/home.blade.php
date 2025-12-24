@@ -32,10 +32,18 @@
   $categories = DB::table('categories')->select('id','name')->orderBy('name')->get();
     $categoryMap = $categories->pluck('name', 'id');
   
-  // Load all products for client-side filtering
+  // Load products for client-side filtering.
+  // IMPORTANT: do NOT load the entire products table in-memory (can OOM on small RAM dynos).
+  // Keep this reasonably bounded; UI still supports filtering within this window.
+  $maxProducts = (int) (env('HOME_PRODUCTS_MAX') ?: 200);
+  if ($maxProducts <= 0) { $maxProducts = 200; }
+  if ($maxProducts > 500) { $maxProducts = 500; }
+
   $allProducts = DB::table('products')
+      ->select(['id','name','price','quantity','image_url','category_id','description'])
       ->where('status', 'active')
       ->orderByDesc('id')
+      ->limit($maxProducts)
       ->get();
 @endphp
 
