@@ -30,6 +30,7 @@
   }
   
   $categories = DB::table('categories')->select('id','name')->orderBy('name')->get();
+    $categoryMap = $categories->pluck('name', 'id');
   
   // Load all products for client-side filtering
   $allProducts = DB::table('products')
@@ -230,11 +231,13 @@
                         $imgSrc = $img && \Illuminate\Support\Str::startsWith($img, ['http://','https://'])
                             ? $img
                             : (($imgLocal && file_exists($imgLocal)) ? asset($img) : asset('backend/img/thumbnail-default.jpg'));
+                        $categoryName = (string)($categoryMap[$product->category_id] ?? '');
                     @endphp
                     <div class="col-lg-3 col-md-4 col-6 mb-4 product-item" 
                          data-id="{{$product->id}}"
                          data-name="{{strtolower($product->name)}}"
                          data-category="{{$product->category_id}}"
+                         data-category-name="{{strtolower($categoryName)}}"
                          data-price="{{$product->price ?? 0}}"
                          data-description="{{strtolower($product->description ?? '')}}">
                         <div class="product-card">
@@ -261,7 +264,7 @@
                                 </div>
                             </div>
                             <div class="product-info">
-                                <div class="product-category">Trang Sức</div>
+                                <div class="product-category">{{ $categoryName !== '' ? $categoryName : 'Danh mục' }}</div>
                                 <h3 class="product-title">
                                     <a href="{{ url('/product/'.$product->id) }}">{{$product->name}}</a>
                                 </h3>
@@ -1118,13 +1121,23 @@ $(document).ready(function() {
     let currentPage = 1;
     const itemsPerPage = 12;
     let filteredProducts = [];
+
+    function normalizeText(value) {
+        if (value === null || value === undefined) return '';
+        return String(value)
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/đ/g, 'd')
+            .trim();
+    }
     
     // Filter function with debounce
     function filterProducts() {
         clearTimeout(filterTimeout);
         filterTimeout = setTimeout(function() {
             const category = $categoryFilter.val();
-            const searchTerm = $searchInput.val().toLowerCase().trim();
+            const searchTerm = normalizeText($searchInput.val());
             const sortBy = $sortFilter.val();
             
             // Show/hide clear button
@@ -1133,11 +1146,13 @@ $(document).ready(function() {
             let visibleProducts = $allProducts.filter(function() {
                 const $item = $(this);
                 const matchCategory = !category || $item.data('category') == category;
-                const productName = $item.data('name');
-                const productDesc = $item.data('description');
+                const productName = normalizeText($item.data('name'));
+                const productDesc = normalizeText($item.data('description'));
+                const productCategoryName = normalizeText($item.data('category-name'));
                 const matchSearch = !searchTerm || 
                     productName.includes(searchTerm) || 
-                    productDesc.includes(searchTerm);
+                    productDesc.includes(searchTerm) ||
+                    productCategoryName.includes(searchTerm);
                 
                 return matchCategory && matchSearch;
             });
@@ -1154,7 +1169,7 @@ $(document).ready(function() {
                         case 'price-desc':
                             return parseFloat($b.data('price')) - parseFloat($a.data('price'));
                         case 'name':
-                            return $a.data('name').localeCompare($b.data('name'));
+                            return normalizeText($a.data('name')).localeCompare(normalizeText($b.data('name')));
                         default:
                             return 0;
                     }

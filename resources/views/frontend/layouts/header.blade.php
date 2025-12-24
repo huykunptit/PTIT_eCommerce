@@ -17,7 +17,8 @@
                     <!-- Top Right -->
                     <div class="right-content">
                         <ul class="list-main">
-                        <li><i class="ti-location-pin"></i> <a href="#">Track Order</a></li>
+                            <li><i class="ti-location-pin"></i> <span>Địa chỉ: PTIT</span></li>
+                            <li><i class="ti-alarm-clock"></i> <span>Giờ làm việc: 08:00 - 17:30</span></li>
                             {{-- <li><i class="ti-alarm-clock"></i> <a href="#">Daily deal</a></li> --}}
                             @auth 
                                 @if(Auth::user()->role=='admin')
@@ -42,19 +43,19 @@
                 <div class="col-lg-2 col-md-2 col-12">
                     <!-- Logo -->
                     <div class="logo">
-                        <a href="{{ route('home') }}"><img src="/images/logoden.png" alt="logo"></a>
+                        <a href="{{ route('home') }}" style="display:inline-flex;align-items:center;">
+                            <img src="{{ asset('images/logoden.png') }}" alt="logo" style="max-height:60px;width:auto;object-fit:contain;">
+                        </a>
                     </div>
                     <!--/ End Logo -->
                     <!-- Search Form -->
                     <div class="search-top">
                         <div class="top-search"><a href="#0"><i class="ti-search"></i></a></div>
                         <!-- Search Form -->
-                        <div class="search-top">
-                            <form class="search-form">
-                                <input type="text" placeholder="Search here..." name="search">
-                                <button value="search" type="submit"><i class="ti-search"></i></button>
-                            </form>
-                        </div>
+                        <form class="search-form">
+                            <input type="text" placeholder="Search here..." name="search">
+                            <button value="search" type="submit"><i class="ti-search"></i></button>
+                        </form>
                         <!--/ End Search Form -->
                     </div>
                     <!--/ End Search Form -->
@@ -129,7 +130,7 @@
                                         <span>Tổng cộng</span>
                                         <span class="total-amount cart-total">0₫</span>
                                     </div>
-                                    <a href="{{ route('cart.index') }}" class="btn animate">Thanh toán</a>
+                                    <a href="{{ route('checkout.index') }}" class="btn animate">Thanh toán</a>
                                 </div>
                             </div>
                             <!--/ End Shopping Item -->
@@ -229,7 +230,7 @@
                                             <li class="{{Request::path()=='' || Request::path()=='home' ? 'active' : ''}}"><a href="{{ route('home') }}">Home</a></li>
                                             <li class="{{Request::path()=='about' ? 'active' : ''}}"><a href="{{ route('about') }}">About Us</a></li>
                                             <li class="@if(Request::path()=='product-grids'||Request::path()=='product-lists'||Request::is('product*'))  active  @endif"><a href="{{ route('home') }}#products">Products</a><span class="new">New</span></li>
-                                            <li class="{{Request::path()=='blog' ? 'active' : ''}}"><a href="{{ route('home') }}#blog">Blog</a></li>
+                                            <li class="{{Request::path()=='blog' ? 'active' : ''}}"><a href="{{ route('blog.index') }}">Blog</a></li>
                                             <li class="{{Request::path()=='contact' ? 'active' : ''}}"><a href="{{ route('contact') }}">Contact Us</a></li>
                                             @guest
                                             <li><a href="{{ route('auth.login') }}"><i class="ti-user"></i> Login</a></li>

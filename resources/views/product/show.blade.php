@@ -70,12 +70,20 @@
     $reviewCount = $reviews->count();
 
     // Get related products (same category)
-    $relatedProducts = DB::table('products')
-        ->where('category_id', $product->category_id)
-        ->where('id', '!=', $productId)
-        ->where('status', 'active')
-        ->limit(5)
-        ->get();
+    $relatedProducts = collect();
+    if ($product && isset($product->category_id)) {
+        $relatedProducts = DB::table('products')
+            ->where('category_id', $product->category_id)
+            ->where('id', '!=', $productId)
+            ->where('status', 'active')
+            ->limit(5)
+            ->get();
+    }
+
+    $seller = null;
+    if ($product && isset($product->seller_id) && $product->seller_id) {
+        $seller = DB::table('users')->where('id', $product->seller_id)->first();
+    }
 @endphp
 
 <!-- Breadcrumb -->
@@ -167,23 +175,38 @@
                 <!-- Variants -->
                 @if(count($sizes) > 0)
                 <div class="product-variants mb-4">
-                    <div class="row">
-                        <div class="col-6 mb-3">
-                            <label style="font-weight:600;margin-bottom:8px;display:block;">Kích thước:</label>
-                            <select id="selectSize" class="form-control variant-select" style="padding:10px;border:1px solid #ddd;border-radius:4px;cursor:pointer;pointer-events:auto;z-index:1;position:relative;">
+                    <label style="font-weight:600;margin-bottom:8px;display:block;">Phân loại:</label>
+
+                    <div class="variant-btn-groups" style="display:grid;gap:12px;">
+                        <div>
+                            <div style="color:#666;font-size:14px;margin-bottom:8px;">Kích thước</div>
+                            <div class="variant-size-buttons" style="display:flex;flex-wrap:wrap;gap:10px;">
+                                @foreach($sizes as $s)
+                                    <button type="button" class="btn btn-sm btn-outline-secondary variant-size-btn" data-size="{{$s}}" style="padding:8px 12px;">{{$s}}</button>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style="color:#666;font-size:14px;margin-bottom:8px;">Tùy chọn</div>
+                            <div id="optionButtons" class="variant-option-buttons" style="display:flex;flex-wrap:wrap;gap:10px;">
+                                <span style="color:#999;font-size:14px;">Vui lòng chọn kích thước</span>
+                            </div>
+                        </div>
+
+                        <!-- Keep original selects for compatibility with existing JS logic -->
+                        <div style="display:none;">
+                            <select id="selectSize" class="form-control variant-select">
                                 <option value="">-- Chọn kích thước --</option>
                                 @foreach($sizes as $s)
                                     <option value="{{$s}}">{{$s}}</option>
                                 @endforeach
                             </select>
-                        </div>
-                        <div class="col-6 mb-3">
-                            <label style="font-weight:600;margin-bottom:8px;display:block;">Tùy chọn:</label>
-                            <select id="selectOption" class="form-control variant-select" disabled style="padding:10px;border:1px solid #ddd;border-radius:4px;cursor:pointer;pointer-events:auto;z-index:1;position:relative;">
+                            <select id="selectOption" class="form-control variant-select" disabled>
                                 <option value="">-- Chọn tùy chọn --</option>
                             </select>
                         </div>
-                    </div>
+
                     <div id="variant-info" class="mt-3" style="display:none;padding:15px;background:#f8f9fa;border-radius:4px;border-left:3px solid #D4AF37;">
                         <div class="row">
                             <div class="col-6">
@@ -217,6 +240,9 @@
                         <button type="button" class="btn btn-primary btn-add-to-cart" data-product-id="{{ $product->id }}" style="flex:1;padding:12px 20px;background:#D4AF37;border:none;color:#1a1a1a;font-weight:600;border-radius:4px;">
                             <i class="ti-bag mr-2"></i>Thêm vào giỏ
                         </button>
+                        <button type="button" class="btn btn-outline-secondary btn-buy-now" data-product-id="{{ $product->id }}" style="flex:1;padding:12px 20px;border:1px solid #ddd;color:#1a1a1a;background:transparent;font-weight:600;border-radius:4px;">
+                            Mua ngay
+                        </button>
                         <button type="button" class="btn btn-outline-danger btn-add-to-wishlist" data-product-id="{{ $product->id }}" style="padding:12px 20px;border:1px solid #dc3545;color:#dc3545;background:transparent;border-radius:4px;">
                             <i class="fa fa-heart"></i>
                         </button>
@@ -227,6 +253,31 @@
                 <div class="shipping-info mt-4" style="padding:15px;background:#f8f9fa;border-radius:4px;">
                     <p style="margin:0;color:#28a745;font-weight:600;"><i class="ti-truck mr-2"></i>Miễn phí vận chuyển cho tất cả đơn hàng</p>
                     <p style="margin:5px 0 0 0;color:#666;font-size:14px;">Giao hàng trong 3-5 ngày làm việc</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seller / Shop Info (simple, based on seller_id) -->
+        <div class="mb-5" style="padding:20px;border:1px solid #eee;border-radius:8px;background:#fff;">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div style="width:48px;height:48px;border-radius:50%;background:#f8f9fa;border:1px solid #eee;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+                            @if($seller && isset($seller->avatar) && $seller->avatar)
+                                <img src="{{ Str::startsWith($seller->avatar, ['http://','https://']) ? $seller->avatar : asset($seller->avatar) }}" referrerpolicy="no-referrer" alt="Seller" style="width:100%;height:100%;object-fit:cover;">
+                            @else
+                                <i class="fa fa-user" style="color:#999;"></i>
+                            @endif
+                        </div>
+                        <div>
+                            <div style="font-weight:700;color:#1a1a1a;">{{ $seller->name ?? 'Người bán' }}</div>
+                            <div style="color:#666;font-size:14px;">Thông tin người bán</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4" style="display:flex;gap:10px;justify-content:flex-end;">
+                    <a href="{{ route('contact') }}" class="btn btn-outline-secondary" style="border-radius:4px;">Chat</a>
+                    <a href="{{ route('home') }}" class="btn btn-outline-secondary" style="border-radius:4px;">Xem shop</a>
                 </div>
             </div>
         </div>
@@ -275,9 +326,17 @@
             </div>
             
             <!-- Reviews List -->
+            <div class="review-filters mb-3" style="display:flex;flex-wrap:wrap;gap:10px;">
+                <button type="button" class="btn btn-sm btn-outline-secondary review-filter-btn active" data-filter="all">Tất cả ({{ $reviewCount }})</button>
+                @for($s=5; $s>=1; $s--)
+                    <button type="button" class="btn btn-sm btn-outline-secondary review-filter-btn" data-filter="{{ $s }}">{{ $s }} Sao ({{ $reviews->where('rating', $s)->count() }})</button>
+                @endfor
+                <button type="button" class="btn btn-sm btn-outline-secondary review-filter-btn" data-filter="comment">Có bình luận ({{ $reviews->filter(fn($r) => (bool)($r->comment))->count() }})</button>
+            </div>
+
             <div class="reviews-list">
                 @foreach($reviews as $review)
-                <div class="review-item" style="padding:20px;border-bottom:1px solid #eee;margin-bottom:20px;">
+                <div class="review-item" data-rating="{{ (int)$review->rating }}" data-has-comment="{{ $review->comment ? '1' : '0' }}" style="padding:20px;border-bottom:1px solid #eee;margin-bottom:20px;">
                     <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px;">
                         <div>
                             <div style="font-weight:600;margin-bottom:5px;">{{$review->name ?? ($review->user ? $review->user->name : 'Khách')}}</div>
@@ -342,6 +401,40 @@
 
 @push('scripts')
 <style>
+    .variant-size-btn.active,
+    .variant-option-btn.active,
+    .review-filter-btn.active {
+        border-color: #D4AF37 !important;
+        color: #1a1a1a !important;
+        background: rgba(212, 175, 55, 0.15) !important;
+    }
+
+    .variant-option-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 4px;
+    }
+
+    .variant-option-thumb {
+        width: 26px;
+        height: 26px;
+        border-radius: 4px;
+        overflow: hidden;
+        border: 1px solid #eee;
+        background: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .variant-option-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
     /* Đảm bảo dropdown Size/Option luôn hiển thị phía trên các nút bên dưới */
     .product-variants {
         position: relative;
@@ -381,10 +474,14 @@
         $('#selectSize').on('change', function(){
             var selectedSize = $(this).val();
             var optionSelect = $('#selectOption');
+            var optionButtons = $('#optionButtons');
             
             // Reset Option dropdown
             optionSelect.empty();
             optionSelect.append('<option value="">-- Chọn tùy chọn --</option>');
+
+            // Reset option buttons
+            optionButtons.empty();
             
             if(selectedSize && sizeOptionMap[selectedSize]){
                 // Hiển thị các option tương ứng với size đã chọn
@@ -394,10 +491,23 @@
                         optionSelect.append('<option value="'+opt+'">'+opt+'</option>');
                     }
                 }
+
+                // Render Shopee-like option buttons
+                for(var optBtn in options){
+                    if(!options.hasOwnProperty(optBtn)) continue;
+                    var v = options[optBtn];
+                    var thumb = v && v.image ? ('<span class="variant-option-thumb"><img src="'+v.image+'" referrerpolicy="no-referrer" alt="" /></span>') : '';
+                    optionButtons.append(
+                        '<button type="button" class="btn btn-sm btn-outline-secondary variant-option-btn" data-option="'+optBtn+'">'+thumb+'<span>'+optBtn+'</span></button>'
+                    );
+                }
+
                 optionSelect.prop('disabled', false);
                 // Ẩn thông tin tồn kho sản phẩm gốc
                 $('#base-stock-info').hide();
                 $('#variant-info').hide();
+                // Reset active state
+                $('.variant-option-btn').removeClass('active');
                 // Reset giá về giá gốc
                 $('#priceDisplay').html(new Intl.NumberFormat('vi-VN').format(baseProductPrice) + '₫');
             } else {
@@ -405,9 +515,28 @@
                 optionSelect.prop('disabled', true);
                 $('#base-stock-info').show();
                 $('#variant-info').hide();
+                optionButtons.html('<span style="color:#999;font-size:14px;">Vui lòng chọn kích thước</span>');
                 // Hiển thị giá gốc
                 $('#priceDisplay').html(new Intl.NumberFormat('vi-VN').format(baseProductPrice) + '₫');
             }
+        });
+
+        // Size button click -> update hidden select
+        $(document).on('click', '.variant-size-btn', function(){
+            var size = $(this).data('size');
+            $('.variant-size-btn').removeClass('active');
+            $(this).addClass('active');
+            $('#selectSize').val(size).trigger('change');
+            // Reset option select
+            $('#selectOption').val('').trigger('change');
+        });
+
+        // Option button click -> update hidden select
+        $(document).on('click', '.variant-option-btn', function(){
+            var opt = $(this).data('option');
+            $('.variant-option-btn').removeClass('active');
+            $(this).addClass('active');
+            $('#selectOption').val(opt).trigger('change');
         });
 
         // Khi chọn option, hiển thị giá và tồn kho của variant
@@ -565,7 +694,37 @@
                     }
                 },
                 error: function(xhr){
-                    var errMsg = xhr.responseJSON?.error || 'Có lỗi xảy ra';
+                    var errMsg = (xhr.responseJSON && xhr.responseJSON.error) ? xhr.responseJSON.error : 'Có lỗi xảy ra';
+                    alert(errMsg);
+                }
+            });
+            return false;
+        });
+
+        // Buy now = add to cart then go checkout
+        $('.btn-buy-now').on('click', function(e){
+            e.preventDefault();
+            e.stopPropagation();
+            var productId = $(this).data('product-id');
+            var quantity = parseInt($('#productQuantity').val()) || 1;
+            var selectedSize = $('#selectSize').val();
+            var selectedOption = $('#selectOption').val();
+            var variantId = null;
+            if(selectedSize && selectedOption && sizeOptionMap[selectedSize] && sizeOptionMap[selectedSize][selectedOption]){
+                variantId = sizeOptionMap[selectedSize][selectedOption].id;
+            }
+            $.ajax({
+                url: '{{ route("cart.add") }}',
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                data: { product_id: productId, quantity: quantity, variant_id: variantId },
+                success: function(response){
+                    if(response.success){
+                        window.location.href = '{{ route("checkout.index") }}';
+                    }
+                },
+                error: function(xhr){
+                    var errMsg = (xhr.responseJSON && xhr.responseJSON.error) ? xhr.responseJSON.error : 'Có lỗi xảy ra';
                     alert(errMsg);
                 }
             });
@@ -594,11 +753,34 @@
                     }
                 },
                 error: function(xhr){
-                    var errMsg = xhr.responseJSON?.error || 'Có lỗi xảy ra';
+                    var errMsg = (xhr.responseJSON && xhr.responseJSON.error) ? xhr.responseJSON.error : 'Có lỗi xảy ra';
                     alert(errMsg);
                 }
             });
             return false;
+        });
+
+        // Review filters
+        $('.review-filter-btn').on('click', function(){
+            var filter = $(this).data('filter');
+            $('.review-filter-btn').removeClass('active');
+            $(this).addClass('active');
+
+            $('.review-item').each(function(){
+                var rating = parseInt($(this).data('rating'), 10);
+                var hasComment = $(this).data('has-comment') == 1;
+                var show = true;
+
+                if(filter === 'all') {
+                    show = true;
+                } else if(filter === 'comment') {
+                    show = hasComment;
+                } else {
+                    show = (rating === parseInt(filter, 10));
+                }
+
+                $(this).toggle(show);
+            });
         });
     })();
 </script>

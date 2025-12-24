@@ -11,7 +11,8 @@ import httpx
 
 router = APIRouter(prefix="/chatbot", tags=["Chatbot"])
 
-LARAVEL_URL = os.getenv("LARAVEL_URL", "http://shop_app:9000")
+# Prefer nginx (HTTP) over php-fpm port (not HTTP)
+LARAVEL_URL = os.getenv("LARAVEL_BASE_URL") or os.getenv("LARAVEL_URL", "http://shop_nginx")
 
 # Gemini configuration
 gemini_model = None
@@ -163,11 +164,10 @@ async def chat(message: ChatMessage):
             conversation_id=message.conversation_id or f"conv_{message.user_id or 'guest'}",
         )
     except Exception as e:
-        # Trả thông tin lỗi chi tiết để dễ debug (chỉ nên dùng trong môi trường dev)
-        err_text = f"Lỗi khi gọi dịch vụ AI: {e}"
-        print(f"[Chatbot] AI provider error: {err_text}")
+        # Không trả lỗi chi tiết ra cho end-user (tránh lộ thông tin cấu hình/API provider).
+        print(f"[Chatbot] AI provider error: {e}")
         return ChatResponse(
-            response=err_text,
+            response="Xin lỗi, dịch vụ AI đang gặp sự cố. Vui lòng thử lại sau hoặc liên hệ admin.",
             conversation_id=message.conversation_id or "default",
         )
 

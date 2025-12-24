@@ -50,7 +50,7 @@
 				<span class="mini-cart-total" style="color:#D4AF37;font-size:20px;">0₫</span>
 			</div>
 			<a href="{{ route('cart.index') }}" class="btn btn-primary" style="display:block;width:100%;padding:15px;text-align:center;background:#D4AF37;color:#1a1a1a;text-decoration:none;border-radius:4px;font-weight:600;margin-bottom:10px;">Xem giỏ hàng</a>
-			<a href="{{ route('cart.index') }}" class="btn btn-secondary" style="display:block;width:100%;padding:15px;text-align:center;background:#1a1a1a;color:#fff;text-decoration:none;border-radius:4px;font-weight:600;">Thanh toán</a>
+			<a href="{{ route('checkout.index') }}" class="btn btn-secondary" style="display:block;width:100%;padding:15px;text-align:center;background:#1a1a1a;color:#fff;text-decoration:none;border-radius:4px;font-weight:600;">Thanh toán</a>
 		</div>
 	</div>
 	

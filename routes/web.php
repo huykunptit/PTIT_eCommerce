@@ -21,6 +21,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\TagController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
+use App\Http\Controllers\BlogController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -54,6 +55,10 @@ Route::get('/contact', function(){
 
 Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'submit'])->name('contact.submit');
 
+// Blog (public)
+Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/{id}', [BlogController::class, 'show'])->whereNumber('id')->name('blog.show');
+
 // Search
 Route::get('/search', function (\Illuminate\Http\Request $request) {
     $query = $request->get('q', '');
@@ -80,7 +85,7 @@ Route::get('/search', function (\Illuminate\Http\Request $request) {
 // Product detail
 Route::get('/product/{id}', function ($id) {
     return view('product.show', ['id' => $id]);
-})->name('product.show');
+})->whereNumber('id')->name('product.show');
 
 // Cart Routes
 Route::prefix('cart')->name('cart.')->group(function () {

@@ -173,7 +173,7 @@ class OrderApiController extends Controller
                 'user_id' => Auth::id(),
                 'total_amount' => $total,
                 'status' => $request->payment_method === 'cod' ? 'pending' : 'pending_payment',
-                'shipping_status' => 'pending_pickup',
+                'shipping_status' => 'pending_confirmation',
                 'shipping_name' => $request->shipping_name,
                 'shipping_phone' => $request->shipping_phone,
                 'shipping_address' => $request->shipping_address,
@@ -278,10 +278,10 @@ class OrderApiController extends Controller
 
         $order = Order::where('user_id', $user->id)->findOrFail($id);
 
-        if ($order->shipping_status !== 'pending_pickup') {
+        if (!in_array($order->shipping_status, ['pending_confirmation', 'pending_pickup'], true)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Chỉ có thể hủy đơn hàng khi đang ở trạng thái "Chờ lấy hàng"',
+                'message' => 'Chỉ có thể hủy đơn hàng khi đang ở trạng thái "Chờ xác nhận" hoặc "Chờ lấy hàng"',
             ], 400);
         }
 

@@ -95,9 +95,9 @@ class OrderController extends Controller
     {
         $order = Order::where('user_id', Auth::id())->findOrFail($id);
 
-        // Chỉ cho phép hủy khi trạng thái là "Chờ lấy hàng"
-        if ($order->shipping_status != 'pending_pickup') {
-            return redirect()->back()->with('error', 'Chỉ có thể hủy đơn hàng khi đang ở trạng thái "Chờ lấy hàng"');
+        // Shopee-like: cho phép hủy khi còn ở "Chờ xác nhận" hoặc "Chờ lấy hàng"
+        if (!in_array($order->shipping_status, ['pending_confirmation', 'pending_pickup'], true)) {
+            return redirect()->back()->with('error', 'Chỉ có thể hủy đơn hàng khi đang ở trạng thái "Chờ xác nhận" hoặc "Chờ lấy hàng"');
         }
 
         $request->validate([

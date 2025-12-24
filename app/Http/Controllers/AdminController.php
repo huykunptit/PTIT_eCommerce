@@ -189,7 +189,7 @@ class AdminController extends Controller
         $order = Order::findOrFail($id);
         
         $validated = $request->validate([
-            'shipping_status' => 'required|in:pending_pickup,in_transit,delivered,cancelled,returned',
+            'shipping_status' => 'required|in:pending_confirmation,pending_pickup,in_transit,delivered,cancelled,returned',
         ]);
 
         $order->update($validated);
@@ -226,7 +226,7 @@ class AdminController extends Controller
                 'admin_note' => $request->admin_note,
             ]);
             // Khôi phục trạng thái ban đầu
-            $order->update(['shipping_status' => 'pending_pickup']);
+            $order->update(['shipping_status' => 'pending_confirmation']);
         }
 
         return redirect()->back()->with('success', 'Yêu cầu hủy đơn hàng đã được xử lý!');

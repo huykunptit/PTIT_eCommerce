@@ -151,7 +151,7 @@ class CheckoutController extends Controller
                     'user_id' => Auth::id(),
                     'total_amount' => $total,
                     'status' => $request->payment_method == 'cod' ? 'pending' : 'pending_payment',
-                    'shipping_status' => 'pending_pickup', // Mặc định: Chờ lấy hàng
+                    'shipping_status' => 'pending_confirmation', // Shopee-like: Chờ xác nhận
                     'shipping_name' => $request->shipping_name,
                     'shipping_phone' => $request->shipping_phone,
                     'shipping_address' => $request->shipping_address,

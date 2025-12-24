@@ -63,6 +63,26 @@ class ChatbotController extends Controller
                     'conversation_id' => $conversationId,
                 ]);
             }
+
+            // FastAPI có phản hồi nhưng không thành công
+            
+            $detail = null;
+            try {
+                $detail = $response->json();
+            } catch (\Throwable $e) {
+                $detail = $response->body();
+            }
+
+            \Log::warning('Chatbot FastAPI non-2xx', [
+                'status' => $response->status(),
+                'detail' => $detail,
+            ]);
+
+            return response()->json([
+                'message' => 'Chatbot service error',
+                'response' => 'Xin lỗi, dịch vụ AI đang gặp sự cố. Vui lòng thử lại sau.',
+                'conversation_id' => $conversationId,
+            ], 502);
         } catch (\Exception $e) {
             \Log::error('Chatbot error: ' . $e->getMessage());
         }

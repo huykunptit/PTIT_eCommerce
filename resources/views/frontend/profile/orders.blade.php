@@ -35,13 +35,13 @@
                             <label style="font-weight: 600; margin-bottom: 8px; display: block;">Lọc theo trạng thái:</label>
                             <select id="orderStatusFilter" class="form-control">
                                 <option value="">Tất cả</option>
-                                <option value="pending">Chờ xử lý</option>
-                                <option value="pending_payment">Chờ thanh toán</option>
-                                <option value="paid">Đã thanh toán</option>
-                                <option value="processing">Đang xử lý</option>
-                                <option value="shipped">Đã gửi hàng</option>
-                                <option value="delivered">Đã giao hàng</option>
+                                <option value="pending_confirmation">Chờ xác nhận</option>
+                                <option value="pending_pickup">Chờ lấy hàng</option>
+                                <option value="in_transit">Đang giao</option>
+                                <option value="delivered">Đã giao</option>
+                                <option value="awaiting_review">Đánh giá</option>
                                 <option value="cancelled">Đã hủy</option>
+                                <option value="returned">Trả hàng</option>
                             </select>
                         </div>
                         <div class="col-md-3 mb-3">
@@ -72,9 +72,9 @@
         @if(count($orders) > 0)
         <div class="row">
             @foreach($orders as $order)
-            <div class="col-12 mb-4 order-card-item"
+              <div class="col-12 mb-4 order-card-item"
                  data-order-id="{{ $order->id }}"
-                 data-status="{{ $order->status }}"
+                  data-status="{{ $order->buyer_status }}"
                  data-total="{{ $order->total_amount }}"
                  data-created="{{ $order->created_at->timestamp }}">
                 <div class="order-card" style="background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden;">
@@ -91,38 +91,27 @@
                                 </p>
                             </div>
                             <div class="col-md-6 text-right">
-                                @php
-                                    $statusLabel = [
-                                        'pending' => 'Chờ xử lý',
-                                        'pending_payment' => 'Chờ thanh toán',
-                                        'paid' => 'Đã thanh toán',
-                                        'processing' => 'Đang xử lý',
-                                        'shipped' => 'Đã gửi hàng',
-                                        'delivered' => 'Đã giao hàng',
-                                        'cancelled' => 'Đã hủy',
-                                    ];
-                                @endphp
-                                <span class="badge badge-status-{{ $order->status }}" 
+                                                                <span class="badge badge-status-{{ $order->buyer_status }}" 
                                       style="padding: 8px 16px; font-size: 14px; font-weight: 600;">
-                                    {{ $statusLabel[$order->status] ?? ucfirst($order->status) }}
+                                    {{ $order->buyer_status_label }}
                                 </span>
                             </div>
                         </div>
                         
                         <!-- Order Progress Timeline -->
-                        @if($order->status != 'cancelled')
+                        @if($order->buyer_status != 'cancelled')
                         <div class="order-timeline" style="padding: 15px 20px; background: rgba(0,0,0,0.05);">
                             <div class="timeline-steps">
                                 @php
                                     $statuses = [
-                                        'pending' => ['label' => 'Chờ xử lý', 'icon' => 'fa-clock'],
-                                        'processing' => ['label' => 'Đang xử lý', 'icon' => 'fa-cog'],
-                                        'paid' => ['label' => 'Đã thanh toán', 'icon' => 'fa-check-circle'],
-                                        'shipped' => ['label' => 'Đã gửi hàng', 'icon' => 'fa-shipping-fast'],
-                                        'delivered' => ['label' => 'Đã giao hàng', 'icon' => 'fa-check-circle'],
+                                        'pending_confirmation' => ['label' => 'Chờ xác nhận', 'icon' => 'fa-clock'],
+                                        'pending_pickup' => ['label' => 'Chờ lấy hàng', 'icon' => 'fa-box'],
+                                        'in_transit' => ['label' => 'Đang giao', 'icon' => 'fa-shipping-fast'],
+                                        'delivered' => ['label' => 'Đã giao', 'icon' => 'fa-check-circle'],
+                                        'awaiting_review' => ['label' => 'Đánh giá', 'icon' => 'fa-star'],
                                     ];
                                     $statusKeys = array_keys($statuses);
-                                    $currentStatusIndex = array_search($order->status, $statusKeys);
+                                    $currentStatusIndex = array_search($order->buyer_status, $statusKeys);
                                     if ($currentStatusIndex === false) $currentStatusIndex = -1;
                                 @endphp
                                 @foreach($statuses as $key => $status)
@@ -133,14 +122,14 @@
                                     @endphp
                                     <div class="timeline-step {{ $isActive ? 'active' : '' }} {{ $isCurrent ? 'current' : '' }}" 
                                          style="flex: 1; text-align: center; position: relative;">
-                                        <div class="step-icon" style="width: 40px; height: 40px; border-radius: 50%; background: {{ $isActive ? '#D4AF37' : '#ddd' }}; color: {{ $isActive ? '#1a1a1a' : '#999' }}; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 16px;">
+                                        <div class="step-icon" style="width: 40px; height: 40px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 16px;">
                                             <i class="fa {{ $status['icon'] }}"></i>
                                         </div>
-                                        <div class="step-label" style="font-size: 12px; color: {{ $isActive ? '#1a1a1a' : '#999' }}; font-weight: {{ $isActive ? '600' : '400' }};">
+                                        <div class="step-label" style="font-size: 12px;">
                                             {{ $status['label'] }}
                                         </div>
                                         @if($stepIndex < count($statuses) - 1)
-                                            <div class="step-line" style="position: absolute; top: 20px; left: 60%; width: 80%; height: 2px; background: {{ $isActive && $stepIndex < $currentStatusIndex ? '#D4AF37' : '#ddd' }}; z-index: -1;"></div>
+                                            <div class="step-line {{ ($isActive && $stepIndex < $currentStatusIndex) ? 'filled' : '' }}" style="position: absolute; top: 20px; left: 60%; width: 80%; height: 2px; z-index: -1;"></div>
                                         @endif
                                     </div>
                                 @endforeach
@@ -235,9 +224,11 @@
                         <div class="order-footer" style="border-top: 2px solid #eee; padding-top: 20px; margin-top: 20px;">
                             <div class="row align-items-center">
                                 <div class="col-md-6">
-                                    @if($order->status == 'pending' || $order->status == 'processing')
+                                    @if(in_array($order->buyer_status, ['pending_confirmation','pending_pickup'], true))
                                     <form action="{{ route('orders.cancel', $order->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn hủy đơn hàng này?');">
                                         @csrf
+                                        <input type="hidden" name="reason" value="changed_mind">
+                                        <input type="hidden" name="reason_detail" value="">
                                         <button type="submit" class="btn btn-outline-danger btn-sm">
                                             <i class="fa fa-times"></i> Hủy đơn hàng
                                         </button>
@@ -288,24 +279,24 @@
 
 @push('styles')
 <style>
-.badge-status-pending,
-.badge-status-pending_payment {
+.badge-status-pending_confirmation,
+.badge-status-pending_pickup {
     background-color: #ffc107 !important;
     color: #000 !important;
 }
 
-.badge-status-paid,
+.badge-status-awaiting_review,
 .badge-status-delivered {
     background-color: #28a745 !important;
     color: #fff !important;
 }
 
-.badge-status-processing {
+.badge-status-in_transit {
     background-color: #17a2b8 !important;
     color: #fff !important;
 }
 
-.badge-status-shipped {
+.badge-status-returned {
     background-color: #007bff !important;
     color: #fff !important;
 }
@@ -333,6 +324,34 @@
 
 .timeline-step {
     position: relative;
+}
+
+.timeline-step .step-icon {
+    background-color: #ddd;
+    color: #999;
+}
+
+.timeline-step.active .step-icon {
+    background-color: #D4AF37;
+    color: #1a1a1a;
+}
+
+.timeline-step .step-label {
+    color: #999;
+    font-weight: 400;
+}
+
+.timeline-step.active .step-label {
+    color: #1a1a1a;
+    font-weight: 600;
+}
+
+.timeline-step .step-line {
+    background: #ddd;
+}
+
+.timeline-step .step-line.filled {
+    background: #D4AF37;
 }
 
 .timeline-step .step-icon {

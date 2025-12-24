@@ -221,7 +221,7 @@ class EmployeeController extends Controller
 
         $validated = $request->validate([
             'status' => 'nullable|in:pending,processing,shipped,delivered',
-            'shipping_status' => 'nullable|in:pending_pickup,in_transit,delivered',
+            'shipping_status' => 'nullable|in:pending_confirmation,pending_pickup,in_transit,delivered',
             'note' => 'nullable|string|max:500',
         ]);
 
