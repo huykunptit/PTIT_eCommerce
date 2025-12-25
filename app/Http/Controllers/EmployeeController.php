@@ -22,6 +22,7 @@ class EmployeeController extends Controller
      */
     public function dashboard()
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         if (!$user->hasPermission('employee.access')) {
             return redirect()->route('home')->with('error', 'Bạn không có quyền truy cập khu vực nhân viên.');
@@ -66,13 +67,15 @@ class EmployeeController extends Controller
         $stats = [
             'total_assigned' => Order::where('assigned_to', Auth::id())->count(),
             'pending_orders' => Order::where('assigned_to', Auth::id())
-                ->where('status', 'pending')
+                ->where(function ($q) {
+                    $q->where('shipping_status', 'pending_confirmation')->orWhereNull('shipping_status');
+                })
                 ->count(),
             'processing_orders' => Order::where('assigned_to', Auth::id())
-                ->where('status', 'processing')
+                ->where('shipping_status', 'pending_pickup')
                 ->count(),
             'completed_today' => Order::where('assigned_to', Auth::id())
-                ->where('status', 'delivered')
+                ->where('shipping_status', 'delivered')
                 ->whereDate('updated_at', today())
                 ->count(),
         ];
@@ -132,7 +135,8 @@ class EmployeeController extends Controller
     private function packerDashboard($data)
     {
         // Đơn hàng cần đóng gói
-        $ordersToPack = Order::where('status', 'processing')
+        $ordersToPack = Order::whereIn('shipping_status', ['pending_confirmation', 'pending_pickup'])
+            ->whereIn('status', ['pending', 'pending_payment', 'paid'])
             ->where(function($q) {
                 $q->where('assigned_packer', Auth::id())
                   ->orWhereNull('assigned_packer');
@@ -142,7 +146,8 @@ class EmployeeController extends Controller
             ->paginate(10);
 
         $stats = [
-            'total_to_pack' => Order::where('status', 'processing')
+            'total_to_pack' => Order::whereIn('shipping_status', ['pending_confirmation', 'pending_pickup'])
+                ->whereIn('status', ['pending', 'pending_payment', 'paid'])
                 ->where(function($q) {
                     $q->where('assigned_packer', Auth::id())
                       ->orWhereNull('assigned_packer');
@@ -171,9 +176,9 @@ class EmployeeController extends Controller
         // Thống kê tổng quan
         $stats = [
             'total_orders' => Order::count(),
-            'total_revenue' => Order::where('status', '!=', 'cancelled')->sum('total_amount'),
+            'total_revenue' => Order::where('status', '!=', 'canceled')->sum('total_amount'),
             'pending_orders' => Order::where('status', 'pending')->count(),
-            'cancelled_orders' => Order::where('status', 'cancelled')->count(),
+            'cancelled_orders' => Order::where('status', 'canceled')->count(),
         ];
 
         // Đơn hàng gần đây
@@ -204,6 +209,7 @@ class EmployeeController extends Controller
     public function updateOrderStatus(Request $request, $id)
     {
         $order = Order::findOrFail($id);
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         $userRole = $user->getRole;
         $roleCode = $userRole->role_code ?? '';
@@ -211,25 +217,31 @@ class EmployeeController extends Controller
         // Phân quyền chi tiết cho thao tác cập nhật đơn
         if ($roleCode === 'shipper') {
             if (!$user->hasPermission('shipping.update')) {
-                return response()->json(['error' => 'Bạn không có quyền cập nhật giao hàng'], 403);
+                if ($request->expectsJson()) {
+                    return response()->json(['error' => 'Bạn không có quyền cập nhật giao hàng'], 403);
+                }
+                return redirect()->back()->with('error', 'Bạn không có quyền cập nhật giao hàng');
             }
         } else {
             if (!$user->hasPermission('orders.manage')) {
-                return response()->json(['error' => 'Bạn không có quyền chỉnh sửa đơn hàng'], 403);
+                if ($request->expectsJson()) {
+                    return response()->json(['error' => 'Bạn không có quyền chỉnh sửa đơn hàng'], 403);
+                }
+                return redirect()->back()->with('error', 'Bạn không có quyền chỉnh sửa đơn hàng');
             }
         }
 
         $validated = $request->validate([
-            'status' => 'nullable|in:pending,processing,shipped,delivered',
-            'shipping_status' => 'nullable|in:pending_confirmation,pending_pickup,in_transit,delivered',
+            'status' => 'nullable|in:pending,pending_payment,paid,shipped,completed,canceled',
+            'shipping_status' => 'nullable|in:pending_confirmation,pending_pickup,in_transit,delivered,cancelled,returned',
             'note' => 'nullable|string|max:500',
         ]);
 
         // Phân quyền theo vai trò
         switch ($roleCode) {
             case 'sales':
-                if (isset($validated['status'])) {
-                    $order->update(['status' => $validated['status']]);
+                if (isset($validated['shipping_status'])) {
+                    $order->update(['shipping_status' => $validated['shipping_status']]);
                     if (!$order->assigned_to) {
                         $order->update(['assigned_to' => $user->id]);
                     }
@@ -237,10 +249,21 @@ class EmployeeController extends Controller
                 break;
 
             case 'packer':
-                if (isset($validated['status']) && $validated['status'] == 'shipped') {
+                // Gán packer nếu chưa có
+                if (!$order->assigned_packer) {
+                    $order->update(['assigned_packer' => $user->id]);
+                }
+
+                // Packer chỉ xác nhận đã đóng gói (status=shipped)
+                if (isset($validated['status']) && $validated['status'] === 'shipped') {
+                    $nextShippingStatus = $order->shipping_status;
+                    if ($nextShippingStatus === null || $nextShippingStatus === '' || $nextShippingStatus === 'pending_confirmation') {
+                        $nextShippingStatus = 'pending_pickup';
+                    }
                     $order->update([
                         'status' => 'shipped',
-                        'assigned_packer' => $user->id
+                        // Ensure it enters the shipper queue
+                        'shipping_status' => $nextShippingStatus,
                     ]);
                 }
                 break;
@@ -259,6 +282,50 @@ class EmployeeController extends Controller
         }
 
         return redirect()->back()->with('success', 'Cập nhật trạng thái thành công!');
+    }
+
+    /**
+     * Nhân viên tự nhận/phân công đơn cho mình (sales/packer/shipper)
+     */
+    public function assignOrder(Request $request, $id)
+    {
+        $order = Order::findOrFail($id);
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $userRole = $user->getRole;
+        $roleCode = $userRole->role_code ?? '';
+
+        if (!$user->hasPermission('employee.access')) {
+            return redirect()->back()->with('error', 'Bạn không có quyền truy cập khu vực nhân viên.');
+        }
+
+        switch ($roleCode) {
+            case 'sales':
+                if ($order->assigned_to && $order->assigned_to !== $user->id) {
+                    return redirect()->back()->with('error', 'Đơn này đã được phân công cho nhân viên khác.');
+                }
+                $order->update(['assigned_to' => $user->id]);
+                break;
+
+            case 'packer':
+                if ($order->assigned_packer && $order->assigned_packer !== $user->id) {
+                    return redirect()->back()->with('error', 'Đơn này đã được phân công cho nhân viên khác.');
+                }
+                $order->update(['assigned_packer' => $user->id]);
+                break;
+
+            case 'shipper':
+                if ($order->assigned_shipper && $order->assigned_shipper !== $user->id) {
+                    return redirect()->back()->with('error', 'Đơn này đã được phân công cho nhân viên khác.');
+                }
+                $order->update(['assigned_shipper' => $user->id]);
+                break;
+
+            default:
+                return redirect()->back()->with('error', 'Vai trò không hỗ trợ nhận đơn.');
+        }
+
+        return redirect()->back()->with('success', 'Đã nhận đơn thành công!');
     }
 }
 

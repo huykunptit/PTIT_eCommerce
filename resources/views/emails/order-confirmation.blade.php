@@ -129,17 +129,7 @@
             <div class="info-row">
                 <span class="info-label">Trạng thái:</span>
                 <span class="info-value">
-                    @if($order->status == 'pending')
-                        Chờ xử lý
-                    @elseif($order->status == 'processing')
-                        Đang xử lý
-                    @elseif($order->status == 'shipped')
-                        Đã gửi hàng
-                    @elseif($order->status == 'delivered')
-                        Đã giao hàng
-                    @else
-                        {{ ucfirst($order->status) }}
-                    @endif
+                    {{ \App\Helpers\StatusLabel::orderStatus($order->status) }}
                 </span>
             </div>
             <div class="info-row">

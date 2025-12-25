@@ -32,15 +32,10 @@
             <td>${{$order->shipping->price}}</td>
             <td>${{number_format($order->total_amount,2)}}</td>
             <td>
-                @if($order->status=='new')
-                  <span class="badge badge-primary">{{$order->status}}</span>
-                @elseif($order->status=='process')
-                  <span class="badge badge-warning">{{$order->status}}</span>
-                @elseif($order->status=='delivered')
-                  <span class="badge badge-success">{{$order->status}}</span>
-                @else
-                  <span class="badge badge-danger">{{$order->status}}</span>
-                @endif
+                @php
+                  $badge = $order->status == 'delivered' ? 'success' : ($order->status == 'process' ? 'warning' : ($order->status == 'new' ? 'primary' : 'danger'));
+                @endphp
+                <span class="badge badge-{{ $badge }}">{{ \App\Helpers\StatusLabel::orderStatus($order->status) }}</span>
             </td>
             <td>
                 <form method="POST" action="{{route('order.destroy',[$order->id])}}">
@@ -75,7 +70,7 @@
                     </tr>
                     <tr>
                         <td>Order Status</td>
-                        <td> : {{$order->status}}</td>
+                      <td> : {{ \App\Helpers\StatusLabel::orderStatus($order->status) }}</td>
                     </tr>
                     <tr>
                       @php

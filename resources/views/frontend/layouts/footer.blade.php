@@ -192,16 +192,29 @@
 				const sidebar = $('#mini-cart-sidebar');
 				const itemsList = sidebar.find('.mini-cart-items');
 				const totalEl = sidebar.find('.mini-cart-total');
+				const items = (data && Array.isArray(data.items)) ? data.items : [];
 				
 				itemsList.empty();
 				
 				// Update cart count badge
-				$('.cart-count-badge').text('(' + data.count + ')');
+				$('.cart-count-badge').text('(' + (data && typeof data.count !== 'undefined' ? data.count : 0) + ')');
 				
-				if (data.items.length > 0) {
-					data.items.forEach(function(item) {
-						const variantText = item.variant ? 
-							`<div class="mini-cart-variant">${JSON.parse(item.variant).size || ''} ${JSON.parse(item.variant).option || ''}</div>` : '';
+				function safeVariantText(variant) {
+					if (!variant) return '';
+					let v = variant;
+					if (typeof v === 'string') {
+						try { v = JSON.parse(v); } catch (e) { return ''; }
+					}
+					if (!v || typeof v !== 'object') return '';
+					const size = v.size || v.Size || v.kich_co || '';
+					const option = v.option || v.Option || v.mau_sac || '';
+					const text = [size, option].filter(Boolean).join(' ');
+					return text ? `<div class="mini-cart-variant">${text}</div>` : '';
+				}
+				
+				if (items.length > 0) {
+					items.forEach(function(item) {
+						const variantText = safeVariantText(item.variant);
 						const li = $(`
 							<li class="mini-cart-item">
 								<a class="mini-cart-img" href="/product/${item.product_id}">

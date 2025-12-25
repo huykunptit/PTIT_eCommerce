@@ -138,6 +138,7 @@
                             <div class="form-group">
                                 <label><strong>Trạng thái vận chuyển:</strong></label>
                                 <select name="shipping_status" class="form-control" required>
+                                    <option value="pending_confirmation" {{ ($order->shipping_status ?? '') == 'pending_confirmation' ? 'selected' : '' }}>Chờ xác nhận</option>
                                     <option value="pending_pickup" {{ ($order->shipping_status ?? 'pending_pickup') == 'pending_pickup' ? 'selected' : '' }}>Chờ lấy hàng</option>
                                     <option value="in_transit" {{ ($order->shipping_status ?? '') == 'in_transit' ? 'selected' : '' }}>Đang vận chuyển</option>
                                     <option value="delivered" {{ ($order->shipping_status ?? '') == 'delivered' ? 'selected' : '' }}>Đã nhận hàng</option>
@@ -146,6 +147,74 @@
                                 </select>
                             </div>
                             <button type="submit" class="btn btn-primary btn-block">Cập nhật trạng thái</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Assignment -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6>Phân công nhân viên</h6>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ route('admin.orders.assign', $order->id) }}" method="POST">
+                            @csrf
+                            <div class="form-group">
+                                <label><strong>Nhân viên bán hàng:</strong></label>
+                                <select name="assigned_to" class="form-control">
+                                    <option value="">-- Chưa phân công --</option>
+                                    @foreach(($salesStaff ?? []) as $u)
+                                        <option value="{{ $u->id }}" {{ (int)($order->assigned_to ?? 0) === (int)$u->id ? 'selected' : '' }}>
+                                            {{ $u->name }} ({{ $u->email }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label><strong>Nhân viên đóng hàng:</strong></label>
+                                <select name="assigned_packer" class="form-control">
+                                    <option value="">-- Chưa phân công --</option>
+                                    @foreach(($packerStaff ?? []) as $u)
+                                        <option value="{{ $u->id }}" {{ (int)($order->assigned_packer ?? 0) === (int)$u->id ? 'selected' : '' }}>
+                                            {{ $u->name }} ({{ $u->email }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label><strong>Nhân viên giao hàng:</strong></label>
+                                <select name="assigned_shipper" class="form-control">
+                                    <option value="">-- Chưa phân công --</option>
+                                    @foreach(($shipperStaff ?? []) as $u)
+                                        <option value="{{ $u->id }}" {{ (int)($order->assigned_shipper ?? 0) === (int)$u->id ? 'selected' : '' }}>
+                                            {{ $u->name }} ({{ $u->email }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-success btn-block">Lưu phân công</button>
+                        </form>
+
+                        <hr>
+
+                        <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST">
+                            @csrf
+                            @method('PUT')
+                            <div class="form-group">
+                                <label><strong>Trạng thái xử lý (nội bộ):</strong></label>
+                                <select name="status" class="form-control" required>
+                                    <option value="pending" {{ ($order->status ?? '') == 'pending' ? 'selected' : '' }}>Chờ xác nhận</option>
+                                    <option value="pending_payment" {{ ($order->status ?? '') == 'pending_payment' ? 'selected' : '' }}>Chờ thanh toán</option>
+                                    <option value="paid" {{ ($order->status ?? '') == 'paid' ? 'selected' : '' }}>Đã thanh toán</option>
+                                    <option value="shipped" {{ ($order->status ?? '') == 'shipped' ? 'selected' : '' }}>Đã đóng gói</option>
+                                    <option value="completed" {{ ($order->status ?? '') == 'completed' ? 'selected' : '' }}>Hoàn tất</option>
+                                    <option value="canceled" {{ ($order->status ?? '') == 'canceled' ? 'selected' : '' }}>Đã hủy</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-outline-primary btn-block">Cập nhật trạng thái xử lý</button>
                         </form>
                     </div>
                 </div>

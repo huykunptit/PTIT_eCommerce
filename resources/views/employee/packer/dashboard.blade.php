@@ -74,6 +74,7 @@
                 <th>Số lượng sản phẩm</th>
                 <th>Tổng tiền</th>
                 <th>Trạng thái</th>
+                <th>Phân công</th>
                 <th>Thao tác</th>
               </tr>
             </thead>
@@ -85,28 +86,47 @@
                 <td class="text-center">{{ $order->items->sum('quantity') ?? 0 }}</td>
                 <td class="text-right">{{ number_format($order->total_amount, 0, ',', '.') }}₫</td>
                 <td>
-                  <span class="badge badge-{{ $order->status == 'shipped' ? 'success' : 'warning' }}">
-                    {{ ucfirst($order->status) }}
-                  </span>
+                  @php
+                    $statusClass = match($order->status) {
+                      'shipped' => 'success',
+                      'paid' => 'primary',
+                      'pending_payment' => 'warning',
+                      'pending' => 'warning',
+                      default => 'secondary',
+                    };
+                  @endphp
+                  <span class="badge badge-{{ $statusClass }}">{{ \App\Helpers\StatusLabel::orderStatus($order->status) }}</span>
                 </td>
                 <td>
-                  @if($order->status == 'processing')
-                  <form action="{{ route('employee.orders.update-status', $order->id) }}" method="POST" class="d-inline">
-                    @csrf
-                    @method('PUT')
-                    <input type="hidden" name="status" value="shipped">
-                    <button type="submit" class="btn btn-sm btn-success">
-                      <i class="fa fa-check"></i> Xác nhận đã đóng gói
-                    </button>
-                  </form>
+                  @if($order->assigned_packer)
+                    <span class="badge badge-success">Đã nhận</span>
                   @else
-                  <span class="badge badge-success">Đã đóng gói</span>
+                    <form action="{{ route('employee.orders.assign', $order->id) }}" method="POST" class="d-inline">
+                      @csrf
+                      <button type="submit" class="btn btn-sm btn-outline-primary">
+                        <i class="fa fa-hand-paper"></i> Nhận đơn
+                      </button>
+                    </form>
+                  @endif
+                </td>
+                <td>
+                  @if($order->status === 'shipped')
+                    <span class="badge badge-success">Đã đóng gói</span>
+                  @else
+                    <form action="{{ route('employee.orders.update-status', $order->id) }}" method="POST" class="d-inline">
+                      @csrf
+                      @method('PUT')
+                      <input type="hidden" name="status" value="shipped">
+                      <button type="submit" class="btn btn-sm btn-success">
+                        <i class="fa fa-check"></i> Xác nhận đã đóng gói
+                      </button>
+                    </form>
                   @endif
                 </td>
               </tr>
               @empty
               <tr>
-                <td colspan="6" class="text-center">Chưa có đơn hàng nào</td>
+                <td colspan="7" class="text-center">Chưa có đơn hàng nào</td>
               </tr>
               @endforelse
             </tbody>

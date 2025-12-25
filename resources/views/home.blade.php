@@ -3,6 +3,17 @@
 @section('main-content')
 @php
   use Illuminate\Support\Facades\DB;
+    use Illuminate\Support\Str;
+
+    $fallbackImg = asset('backend/img/thumbnail-default.jpg');
+    $fallbackHero = asset('backend/img/banner.png');
+    $toPublicUrl = function ($value) {
+            $value = trim((string) $value);
+            if ($value === '') return '';
+            if (Str::startsWith($value, ['http://', 'https://', 'data:'])) return $value;
+            if (Str::startsWith($value, ['/'])) return url($value);
+            return asset($value);
+    };
   
   // Load banners from database
   if (!isset($banners) || !count($banners)) {
@@ -60,13 +71,19 @@
         <div class="carousel-inner">
             @foreach($banners as $key=>$banner)
             @php
-                $bSrc = isset($banner->photo) && \Illuminate\Support\Str::startsWith($banner->photo, ['http://','https://'])
-                    ? $banner->photo
-                    : asset($banner->photo ?? 'backend/img/thumbnail-default.jpg');
+                $bSrc = $toPublicUrl($banner->photo ?? '') ?: $fallbackHero;
             @endphp
             <div class="carousel-item {{$key==0 ? 'active' : ''}}">
                 <div class="hero-image">
-                    <img src="{{ $bSrc }}" alt="{{ $banner->title ?? 'Banner' }}" referrerpolicy="no-referrer">
+                    <img
+                        src="{{ $bSrc }}"
+                        alt="{{ $banner->title ?? 'Banner' }}"
+                        referrerpolicy="no-referrer"
+                        loading="{{ $key==0 ? 'eager' : 'lazy' }}"
+                        fetchpriority="{{ $key==0 ? 'high' : 'auto' }}"
+                        decoding="async"
+                        onerror="this.onerror=null;this.src='{{ $fallbackHero }}';"
+                    >
                 </div>
                 <div class="hero-overlay"></div>
                 <div class="container h-100">
@@ -235,10 +252,7 @@
                     @php
                         $photos = explode(',', (string)($product->image_url ?? ''));
                         $img = trim($photos[0] ?? '');
-                        $imgLocal = $img && !\Illuminate\Support\Str::startsWith($img, ['http://','https://']) ? public_path($img) : null;
-                        $imgSrc = $img && \Illuminate\Support\Str::startsWith($img, ['http://','https://'])
-                            ? $img
-                            : (($imgLocal && file_exists($imgLocal)) ? asset($img) : asset('backend/img/thumbnail-default.jpg'));
+                        $imgSrc = $toPublicUrl($img) ?: $fallbackImg;
                         $categoryName = (string)($categoryMap[$product->category_id] ?? '');
                     @endphp
                     <div class="col-lg-3 col-md-4 col-6 mb-4 product-item" 
@@ -254,7 +268,7 @@
                             </div>
                             <div class="product-image">
                                 <a href="{{ url('/product/'.$product->id) }}">
-                                    <img src="{{$imgSrc}}" referrerpolicy="no-referrer" alt="{{$product->name}}">
+                                    <img src="{{$imgSrc}}" referrerpolicy="no-referrer" alt="{{$product->name}}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{{ $fallbackImg }}';">
                                 </a>
                                 <div class="product-overlay">
                                     <div class="overlay-actions">

@@ -90,6 +90,7 @@
                 <th>Địa chỉ giao</th>
                 <th>SĐT</th>
                 <th>Trạng thái</th>
+                <th>Phân công</th>
                 <th>Thao tác</th>
               </tr>
             </thead>
@@ -102,8 +103,20 @@
                 <td>{{ $order->shipping_phone ?? 'N/A' }}</td>
                 <td>
                   <span class="badge badge-{{ $order->shipping_status == 'delivered' ? 'success' : ($order->shipping_status == 'cancelled' ? 'danger' : 'warning') }}">
-                    {{ ucfirst(str_replace('_', ' ', $order->shipping_status)) }}
+                    {{ \App\Helpers\StatusLabel::shippingStatus($order->shipping_status) }}
                   </span>
+                </td>
+                <td>
+                  @if($order->assigned_shipper)
+                    <span class="badge badge-success">Đã nhận</span>
+                  @else
+                    <form action="{{ route('employee.orders.assign', $order->id) }}" method="POST" class="d-inline">
+                      @csrf
+                      <button type="submit" class="btn btn-sm btn-outline-primary">
+                        <i class="fa fa-hand-paper"></i> Nhận đơn
+                      </button>
+                    </form>
+                  @endif
                 </td>
                 <td>
                   <form action="{{ route('employee.orders.update-status', $order->id) }}" method="POST" class="d-inline">
@@ -119,7 +132,7 @@
               </tr>
               @empty
               <tr>
-                <td colspan="6" class="text-center">Chưa có đơn hàng nào</td>
+                <td colspan="7" class="text-center">Chưa có đơn hàng nào</td>
               </tr>
               @endforelse
             </tbody>
