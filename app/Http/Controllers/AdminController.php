@@ -9,6 +9,8 @@ use App\Models\Brand;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\BannerController;
 use App\Mail\OrderStatusUpdateMail;
@@ -23,6 +25,7 @@ class AdminController extends Controller
     // Dashboard Admin
     public function dashboard()
     {
+        /** @var \App\Models\User $user */
         // Basic stats
         $stats = [
             'total_users' => User::count(),
@@ -37,7 +40,7 @@ class AdminController extends Controller
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i)->format('Y-m-d');
             $revenue = Order::whereDate('created_at', $date)
-                ->where('status', '!=', 'cancelled')
+                ->where('status', '!=', 'canceled')
                 ->sum('total_amount');
             $revenueData[] = [
                 'date' => now()->subDays($i)->format('d/m'),
@@ -59,16 +62,19 @@ class AdminController extends Controller
         // Order status distribution
         $orderStatusData = [
             'pending' => Order::where('status', 'pending')->count(),
-            'processing' => Order::where('status', 'processing')->count(),
+            // Keep legacy chart keys but map them to real schema
+            'processing' => Order::whereIn('shipping_status', ['pending_confirmation', 'pending_pickup'])->count(),
             'shipped' => Order::where('status', 'shipped')->count(),
-            'delivered' => Order::where('status', 'delivered')->count(),
-            'cancelled' => Order::where('status', 'cancelled')->count(),
+            'delivered' => Order::where('shipping_status', 'delivered')->count(),
+            'cancelled' => Order::where(function ($q) {
+                $q->where('shipping_status', 'cancelled')->orWhere('status', 'canceled');
+            })->count(),
         ];
 
         // Top selling products
-        $topProducts = \DB::table('order_items')
+        $topProducts = DB::table('order_items')
             ->join('products', 'order_items.product_id', '=', 'products.id')
-            ->select('products.id', 'products.name', \DB::raw('SUM(order_items.quantity) as total_sold'), \DB::raw('SUM(order_items.subtotal) as total_revenue'))
+            ->select('products.id', 'products.name', DB::raw('SUM(order_items.quantity) as total_sold'), DB::raw('SUM(order_items.subtotal) as total_revenue'))
             ->groupBy('products.id', 'products.name')
             ->orderBy('total_sold', 'desc')
             ->take(5)
@@ -80,7 +86,7 @@ class AdminController extends Controller
             $month = now()->subMonths($i)->format('Y-m');
             $revenue = Order::whereYear('created_at', now()->subMonths($i)->year)
                 ->whereMonth('created_at', now()->subMonths($i)->month)
-                ->where('status', '!=', 'cancelled')
+                ->where('status', '!=', 'canceled')
                 ->sum('total_amount');
             $monthlyRevenue[] = [
                 'month' => now()->subMonths($i)->format('M Y'),
@@ -89,13 +95,13 @@ class AdminController extends Controller
         }
 
         // Total revenue
-        $totalRevenue = Order::where('status', '!=', 'cancelled')->sum('total_amount');
+        $totalRevenue = Order::where('status', '!=', 'canceled')->sum('total_amount');
         $todayRevenue = Order::whereDate('created_at', today())
-            ->where('status', '!=', 'cancelled')
+            ->where('status', '!=', 'canceled')
             ->sum('total_amount');
         $monthRevenue = Order::whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
-            ->where('status', '!=', 'cancelled')
+            ->where('status', '!=', 'canceled')
             ->sum('total_amount');
 
         return view('admin.index', compact(
@@ -126,7 +132,64 @@ class AdminController extends Controller
     public function showOrder($id)
     {
         $order = Order::with(['user', 'items.product', 'items.variant', 'payments', 'cancellation', 'return'])->findOrFail($id);
-        return view('admin.order.show', compact('order'));
+
+        $salesStaff = User::whereHas('getRole', function ($q) {
+            $q->where('role_code', 'sales');
+        })->orderBy('name')->get();
+
+        $packerStaff = User::whereHas('getRole', function ($q) {
+            $q->where('role_code', 'packer');
+        })->orderBy('name')->get();
+
+        $shipperStaff = User::whereHas('getRole', function ($q) {
+            $q->where('role_code', 'shipper');
+        })->orderBy('name')->get();
+
+        return view('admin.order.show', compact('order', 'salesStaff', 'packerStaff', 'shipperStaff'));
+    }
+
+    /**
+     * Admin assign order to staff (sales/packer/shipper)
+     */
+    public function assignOrder(Request $request, $id)
+    {
+        $order = Order::findOrFail($id);
+
+        $validated = $request->validate([
+            'assigned_to' => 'nullable|integer|exists:users,id',
+            'assigned_packer' => 'nullable|integer|exists:users,id',
+            'assigned_shipper' => 'nullable|integer|exists:users,id',
+        ]);
+
+        // Validate role correctness (optional but safer)
+        if (!empty($validated['assigned_to'])) {
+            $ok = User::where('id', $validated['assigned_to'])->whereHas('getRole', fn ($q) => $q->where('role_code', 'sales'))->exists();
+            if (!$ok) {
+                return redirect()->back()->with('error', 'Nhân viên bán hàng không hợp lệ.');
+            }
+        }
+
+        if (!empty($validated['assigned_packer'])) {
+            $ok = User::where('id', $validated['assigned_packer'])->whereHas('getRole', fn ($q) => $q->where('role_code', 'packer'))->exists();
+            if (!$ok) {
+                return redirect()->back()->with('error', 'Nhân viên đóng hàng không hợp lệ.');
+            }
+        }
+
+        if (!empty($validated['assigned_shipper'])) {
+            $ok = User::where('id', $validated['assigned_shipper'])->whereHas('getRole', fn ($q) => $q->where('role_code', 'shipper'))->exists();
+            if (!$ok) {
+                return redirect()->back()->with('error', 'Nhân viên giao hàng không hợp lệ.');
+            }
+        }
+
+        $order->update([
+            'assigned_to' => $validated['assigned_to'] ?? null,
+            'assigned_packer' => $validated['assigned_packer'] ?? null,
+            'assigned_shipper' => $validated['assigned_shipper'] ?? null,
+        ]);
+
+        return redirect()->back()->with('success', 'Đã phân công đơn hàng thành công!');
     }
 
     public function updateOrderStatus(Request $request, $id)
@@ -134,7 +197,7 @@ class AdminController extends Controller
         $order = Order::findOrFail($id);
         
         $validated = $request->validate([
-            'status' => 'required|in:pending,processing,shipped,delivered,cancelled',
+            'status' => 'required|in:pending,pending_payment,paid,shipped,completed,canceled',
         ]);
 
         $order->update($validated);
@@ -146,7 +209,7 @@ class AdminController extends Controller
                 Mail::to($email)->queue(new OrderStatusUpdateMail($order, $validated['status']));
             }
         } catch (\Exception $e) {
-            \Log::error('Failed to send order status update email: ' . $e->getMessage());
+            Log::error('Failed to send order status update email: ' . $e->getMessage());
         }
 
         return redirect()->route('admin.orders')->with('success', 'Order status updated successfully!');
@@ -175,7 +238,7 @@ class AdminController extends Controller
                 Mail::to($email)->queue(new OrderStatusUpdateMail($order, 'paid'));
             }
         } catch (\Exception $e) {
-            \Log::error('Failed to send payment confirmed email: ' . $e->getMessage());
+            Log::error('Failed to send payment confirmed email: ' . $e->getMessage());
         }
 
         return redirect()->back()->with('success', 'Đơn hàng đã được đánh dấu là đã thanh toán.');
@@ -189,7 +252,7 @@ class AdminController extends Controller
         $order = Order::findOrFail($id);
         
         $validated = $request->validate([
-            'shipping_status' => 'required|in:pending_pickup,in_transit,delivered,cancelled,returned',
+            'shipping_status' => 'required|in:pending_confirmation,pending_pickup,in_transit,delivered,cancelled,returned',
         ]);
 
         $order->update($validated);
@@ -226,7 +289,7 @@ class AdminController extends Controller
                 'admin_note' => $request->admin_note,
             ]);
             // Khôi phục trạng thái ban đầu
-            $order->update(['shipping_status' => 'pending_pickup']);
+            $order->update(['shipping_status' => 'pending_confirmation']);
         }
 
         return redirect()->back()->with('success', 'Yêu cầu hủy đơn hàng đã được xử lý!');
@@ -268,22 +331,25 @@ class AdminController extends Controller
      */
     public function getNotifications()
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
-        
-        // Get unread notifications (last 10)
-        $notifications = $user->unreadNotifications()
+
+        // Latest notifications (read + unread), limit 10
+        $notifications = $user->notifications()
             ->latest()
             ->take(10)
             ->get()
-            ->map(function($notification) {
+            ->map(function ($notification) {
+                $unread = $notification->read_at === null;
+
                 return [
                     'id' => $notification->id,
                     'title' => $notification->data['title'] ?? 'Thông báo',
                     'message' => $notification->data['message'] ?? null,
                     'type' => $notification->data['type'] ?? 'info',
                     'url' => $notification->data['url'] ?? null,
-                    'unread' => true,
-                    'time' => $notification->created_at->diffForHumans(),
+                    'unread' => $unread,
+                    'time' => $notification->created_at?->diffForHumans(),
                 ];
             });
 
@@ -301,6 +367,7 @@ class AdminController extends Controller
      */
     public function markNotificationAsRead($id)
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         $notification = $user->notifications()->find($id);
         
@@ -309,6 +376,22 @@ class AdminController extends Controller
         }
 
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Mark all notifications as read for current admin
+     */
+    public function markAllNotificationsAsRead()
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        $user->unreadNotifications->markAsRead();
+
+        return response()->json([
+            'success' => true,
+            'unread_count' => $user->unreadNotifications()->count(),
+        ]);
     }
 
     /**
@@ -488,8 +571,10 @@ class AdminController extends Controller
      */
     public function notificationIndex()
     {
-        $notifications = Auth::user()
-            ->notifications()
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        $notifications = $user->notifications()
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 

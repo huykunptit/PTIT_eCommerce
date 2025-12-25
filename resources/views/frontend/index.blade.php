@@ -1,6 +1,17 @@
 @extends('frontend.layouts.master')
 @section('title','PTIT  || HOME PAGE')
 @section('main-content')
+@php
+    use Illuminate\Support\Str;
+    $fallbackImg = asset('backend/img/thumbnail-default.jpg');
+    $toPublicUrl = function ($value) {
+        $value = trim((string) $value);
+        if ($value === '') return '';
+        if (Str::startsWith($value, ['http://', 'https://', 'data:'])) return $value;
+        if (Str::startsWith($value, ['/'])) return url($value);
+        return asset($value);
+    };
+@endphp
 <!-- Slider Area -->
 @if(count($banners)>0)
     <section id="Gslider" class="carousel slide" data-ride="carousel">
@@ -13,7 +24,7 @@
         <div class="carousel-inner" role="listbox">
                 @foreach($banners as $key=>$banner)
                 <div class="carousel-item {{(($key==0)? 'active' : '')}}">
-                    <img class="first-slide" src="{{$banner->photo}}" alt="First slide">
+                    <img class="first-slide" src="{{ $toPublicUrl($banner->photo) }}" alt="{{ $banner->title ?? 'Banner' }}" onerror="this.onerror=null;this.src='{{ $fallbackImg }}';">
                     <div class="carousel-caption d-none d-md-block text-left">
                         <h1 class="wow fadeInDown">{{$banner->title}}</h1>
                         <p>{!! html_entity_decode($banner->description) !!}</p>
@@ -49,7 +60,7 @@
                         <div class="col-lg-4 col-md-6 col-12">
                             <div class="single-banner">
                                 @if($cat->photo)
-                                    <img src="{{$cat->photo}}" alt="{{$cat->photo}}">
+                                    <img src="{{ $toPublicUrl($cat->photo) }}" alt="{{ $cat->name }}" onerror="this.onerror=null;this.src='{{ $fallbackImg }}';">
                                 @else
                                     <img src="https://via.placeholder.com/600x370" alt="#">
                                 @endif
@@ -114,8 +125,8 @@
                                                     $photo=explode(',',$product->photo);
                                                 // dd($photo);
                                                 @endphp
-                                                <img class="default-img" src="{{$photo[0]}}" alt="{{$photo[0]}}">
-                                                <img class="hover-img" src="{{$photo[0]}}" alt="{{$photo[0]}}">
+                                                <img class="default-img" src="{{ $toPublicUrl($photo[0] ?? '') }}" alt="{{ $product->title ?? $product->slug ?? 'Product' }}" onerror="this.onerror=null;this.src='{{ $fallbackImg }}';">
+                                                <img class="hover-img" src="{{ $toPublicUrl($photo[0] ?? '') }}" alt="{{ $product->title ?? $product->slug ?? 'Product' }}" onerror="this.onerror=null;this.src='{{ $fallbackImg }}';">
                                                 @if($product->stock<=0)
                                                     <span class="out-of-stock">Sale out</span>
                                                 @elseif($product->condition=='new')

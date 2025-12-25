@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Order extends Model
 {
@@ -67,5 +68,63 @@ class Order extends Model
     public function assignedPacker()
     {
         return $this->belongsTo(User::class, 'assigned_packer');
+    }
+
+    public function getBuyerStatusAttribute(): string
+    {
+        $shippingStatus = (string) ($this->shipping_status ?? '');
+
+        if ($shippingStatus === '') {
+            // Fallback for legacy rows
+            if (($this->status ?? null) === 'canceled') {
+                return 'cancelled';
+            }
+            return 'pending_confirmation';
+        }
+
+        if (in_array($shippingStatus, ['cancelled', 'returned', 'pending_confirmation', 'pending_pickup', 'in_transit'], true)) {
+            return $shippingStatus;
+        }
+
+        if ($shippingStatus === 'delivered') {
+            return $this->hasAnyProductReviewForThisOrder() ? 'delivered' : 'awaiting_review';
+        }
+
+        return $shippingStatus;
+    }
+
+    public function getBuyerStatusLabelAttribute(): string
+    {
+        return self::buyerStatusLabel($this->buyer_status);
+    }
+
+    public static function buyerStatusLabel(string $buyerStatus): string
+    {
+        return match ($buyerStatus) {
+            'pending_confirmation' => 'Chờ xác nhận',
+            'pending_pickup' => 'Chờ lấy hàng',
+            'in_transit' => 'Đang giao',
+            'awaiting_review' => 'Đánh giá',
+            'delivered' => 'Đã giao',
+            'cancelled' => 'Đã hủy',
+            'returned' => 'Trả hàng',
+            default => ucfirst(str_replace('_', ' ', $buyerStatus)),
+        };
+    }
+
+    private function hasAnyProductReviewForThisOrder(): bool
+    {
+        $userId = $this->user_id;
+        if (!$userId) {
+            return false;
+        }
+
+        return DB::table('order_items as oi')
+            ->join('product_reviews as pr', function ($join) use ($userId) {
+                $join->on('pr.product_id', '=', 'oi.product_id')
+                    ->where('pr.user_id', '=', $userId);
+            })
+            ->where('oi.order_id', '=', $this->id)
+            ->exists();
     }
 } 

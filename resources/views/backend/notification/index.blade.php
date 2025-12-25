@@ -1,5 +1,5 @@
 @extends('backend.layouts.master')
-@section('title','PTIT  || All Notifications')
+@section('title','PTIT  || Thông báo')
 @section('main-content')
 <div class="card">
     <div class="row">
@@ -7,40 +7,64 @@
            @include('backend.layouts.notification')
         </div>
     </div>
-  <h5 class="card-header">Notifications</h5>
+  <h5 class="card-header d-flex justify-content-between align-items-center">
+    <span>Thông báo</span>
+    <form method="POST" action="{{ route('notifications.read-all') }}" class="m-0" id="markAllReadForm">
+      @csrf
+      <button type="submit" class="btn btn-sm btn-outline-primary">Đánh dấu đã đọc tất cả</button>
+    </form>
+  </h5>
   <div class="card-body">
-    @if(count(Auth::user()->Notifications)>0)
-    <table class="table  table-hover admin-table" id="notification-dataTable">
+    @if(($notifications ?? collect())->count() > 0)
+    <table class="table table-hover admin-table" id="notification-dataTable">
       <thead>
         <tr>
           <th scope="col">#</th>
-          <th scope="col">Time</th>
-          <th scope="col">Title</th>
-          <th scope="col">Action</th>
+          <th scope="col">Thời gian</th>
+          <th scope="col">Tiêu đề</th>
+          <th scope="col">Nội dung</th>
+          <th scope="col" class="text-center">Trạng thái</th>
+          <th scope="col" class="text-center">Thao tác</th>
         </tr>
       </thead>
       <tbody>
-        @foreach ( Auth::user()->Notifications as $notification)
+        @foreach (($notifications ?? []) as $notification)
 
-        <tr class="@if($notification->unread()) bg-light border-left-light @else border-left-success @endif">
-          <td scope="row">{{$loop->index +1}}</td>
-          <td>{{$notification->created_at->format('F d, Y h:i A')}}</td>
-          <td>{{$notification->data['title']}}</td>
-          <td>
-            <a href="{{route('admin.notification', $notification->id) }}" class="btn btn-primary btn-sm float-left mr-1" style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" title="view" data-placement="bottom"><i class="fa fa-eye"></i></a>
-            <form method="POST" action="{{ route('notification.delete', $notification->id) }}">
-              @csrf
-              @method('delete')
-                  <button class="btn btn-danger btn-sm dltBtn" data-id={{$notification->id}} style="height:30px; width:30px;border-radius:50%" data-toggle="tooltip" data-placement="bottom" title="Delete"><i class="fa fa-trash-alt"></i></button>
-            </form>
+        @php
+          $unread = $notification->read_at === null;
+        @endphp
+        <tr class="{{ $unread ? 'bg-light' : '' }}">
+          <td scope="row">{{ $loop->index + 1 }}</td>
+          <td>{{ $notification->created_at?->format('d/m/Y H:i') }}</td>
+          <td>{{ $notification->data['title'] ?? 'Thông báo' }}</td>
+          <td>{{ $notification->data['message'] ?? '' }}</td>
+          <td class="text-center">
+            @if($unread)
+              <span class="badge badge-danger">Chưa đọc</span>
+            @else
+              <span class="badge badge-secondary">Đã đọc</span>
+            @endif
+          </td>
+          <td class="text-center">
+            @if($unread)
+              <form method="POST" action="{{ route('notifications.read', $notification->id) }}" class="d-inline">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-outline-success">Đánh dấu đã đọc</button>
+              </form>
+            @else
+              <button type="button" class="btn btn-sm btn-outline-secondary" disabled>Đã đọc</button>
+            @endif
           </td>
         </tr>
 
         @endforeach
       </tbody>
     </table>
+    @if(($notifications ?? null) && $notifications->hasPages())
+      <div class="mt-3">{{ $notifications->links() }}</div>
+    @endif
     @else
-      <h2>Notifications Empty!</h2>
+      <div class="text-center text-muted py-4">Không có thông báo</div>
     @endif
   </div>
 </div>
@@ -59,48 +83,18 @@
   <script src="{{asset('backend/js/demo/datatables-demo.js')}}"></script>
   <script>
 
-      $('#notification-dataTable').DataTable( {
-            "columnDefs":[
-                {
-                    "orderable":false,
-                    "targets":[3]
-                }
-            ]
-        } );
-
-        // Sweet alert
-
-        function deleteData(id){
-
-        }
-  </script>
-  <script>
-    $(document).ready(function(){
-      $.ajaxSetup({
-          headers: {
-              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-          }
-      });
-        $('.dltBtn').click(function(e){
-          var form=$(this).closest('form');
-            var dataID=$(this).data('id');
-            // alert(dataID);
-            e.preventDefault();
-            swal({
-                  title: "Are you sure?",
-                  text: "Once deleted, you will not be able to recover this data!",
-                  icon: "warning",
-                  buttons: true,
-                  dangerMode: true,
-              })
-              .then((willDelete) => {
-                  if (willDelete) {
-                    form.submit();
-                  } else {
-                      swal("Your data is safe!");
-                  }
-              });
-        })
-    })
+      if ($('#notification-dataTable').length) {
+        $('#notification-dataTable').DataTable({
+          paging: false,
+          searching: false,
+          info: false,
+          "columnDefs": [
+            {
+              "orderable": false,
+              "targets": [5]
+            }
+          ]
+        });
+      }
   </script>
 @endpush

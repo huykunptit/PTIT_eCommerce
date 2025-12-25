@@ -297,9 +297,11 @@
                     <td>{{ $order->user->name ?? 'N/A' }}</td>
                     <td class="text-right">{{ number_format($order->total_amount, 0, ',', '.') }}₫</td>
                     <td>
-                      <span class="badge badge-{{ $order->status == 'delivered' ? 'success' : ($order->status == 'cancelled' ? 'danger' : 'warning') }}">
-                        {{ ucfirst($order->status) }}
-                      </span>
+                      @php
+                        $label = \App\Helpers\StatusLabel::orderStatus($order->status);
+                        $badge = in_array($order->status, ['paid', 'completed'], true) ? 'success' : (in_array($order->status, ['canceled', 'cancelled', 'cancel'], true) ? 'danger' : 'warning');
+                      @endphp
+                      <span class="badge badge-{{ $badge }}">{{ $label }}</span>
                     </td>
                   </tr>
                   @empty

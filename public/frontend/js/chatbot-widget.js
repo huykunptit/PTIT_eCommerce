@@ -4,7 +4,19 @@
 
   if (typeof document === 'undefined') return;
 
-  var STORAGE_KEY = 'ptit_ai_chat_history_v1';
+  var STORAGE_KEY_PREFIX = 'ptit_ai_chat_history_v1';
+
+  function getUserId() {
+    var meta = document.querySelector('meta[name="user-id"]');
+    if (!meta) return null;
+    var raw = (meta.getAttribute('content') || '').trim();
+    return raw ? raw : null;
+  }
+
+  function getStorageKey() {
+    var userId = getUserId();
+    return userId ? (STORAGE_KEY_PREFIX + '_user_' + userId) : (STORAGE_KEY_PREFIX + '_guest');
+  }
 
   // Inject minimal CSS (button giống scrollUp, modal riêng)
   function injectStyles() {
@@ -106,6 +118,18 @@
 .ai-chat-message-bot .ai-chat-message-text{
   background:#e5e7eb;color:#111827;border-bottom-left-radius:4px;
 }
+.ai-chat-debug{
+  margin-top:6px;
+  padding:8px 10px;
+  border-radius:12px;
+  background:#111827;
+  color:#f9fafb;
+  font-size:12px;
+  line-height:1.35;
+  white-space:pre-wrap;
+  word-break:break-word;
+  opacity:.95;
+}
 .ai-chat-message-user .ai-chat-message-text{
   background:#4f46e5;color:#fff;border-bottom-right-radius:4px;
 }
@@ -147,15 +171,29 @@
 
   function loadHistory() {
     try {
-      var raw = localStorage.getItem(STORAGE_KEY);
+      var raw = localStorage.getItem(getStorageKey());
       if (!raw) return getEmptyHistory();
       var parsed = JSON.parse(raw);
       if (!parsed || typeof parsed !== 'object') return getEmptyHistory();
       if (!Array.isArray(parsed.messages)) parsed.messages = [];
+      // sanitize messages
+      parsed.messages = parsed.messages
+        .filter(function (m) {
+          return m && typeof m === 'object' && (m.sender === 'user' || m.sender === 'bot') && typeof m.text === 'string';
+        })
+        .map(function (m) {
+          return { sender: m.sender, text: m.text };
+        });
       return parsed;
     } catch (_) {
       return getEmptyHistory();
     }
+  }
+
+  function clearHistory() {
+    try {
+      localStorage.removeItem(getStorageKey());
+    } catch (_) {}
   }
 
   function createWidget() {
@@ -224,11 +262,26 @@
 
     function persistHistory() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+        // keep storage bounded (avoid quota issues on long sessions)
+        var maxMessages = 200;
+        if (history.messages.length > maxMessages) {
+          history.messages = history.messages.slice(history.messages.length - maxMessages);
+        }
+        localStorage.setItem(getStorageKey(), JSON.stringify(history));
       } catch (_) {}
     }
 
-    function appendMessage(text, type) {
+    function normalizeDebugText(debug) {
+      try {
+        if (!debug) return '';
+        if (typeof debug === 'string') return debug;
+        return JSON.stringify(debug, null, 2);
+      } catch (_) {
+        return '';
+      }
+    }
+
+    function appendMessageToDom(text, type, debug) {
       var wrap = document.createElement('div');
       wrap.className = 'ai-chat-message ' + (type === 'user' ? 'ai-chat-message-user' : 'ai-chat-message-bot');
 
@@ -243,18 +296,32 @@
       bubble.textContent = text;
 
       body.appendChild(bubble);
+
+      var debugText = type === 'bot' ? normalizeDebugText(debug) : '';
+      if (debugText) {
+        var dbg = document.createElement('pre');
+        dbg.className = 'ai-chat-debug';
+        dbg.textContent = debugText;
+        body.appendChild(dbg);
+      }
+
       wrap.appendChild(avatar);
       wrap.appendChild(body);
       messages.appendChild(wrap);
       messages.scrollTop = messages.scrollHeight;
+    }
 
-       // cập nhật lịch sử
+    function appendMessage(text, type) {
+      appendMessageToDom(text, type);
+
+      // cập nhật lịch sử
       history.messages.push({ sender: type, text: text });
       history.conversationId = conversationId;
       persistHistory();
     }
 
     function renderHistory() {
+      messages.innerHTML = '';
       if (!history.messages.length) {
         // nếu chưa có lịch sử, tạo 1 lời chào mặc định
         appendMessage(
@@ -263,10 +330,18 @@
         );
         return;
       }
-      messages.innerHTML = '';
       history.messages.forEach(function (m) {
-        appendMessage(m.text, m.sender === 'user' ? 'user' : 'bot');
+        appendMessageToDom(m.text, m.sender === 'user' ? 'user' : 'bot');
       });
+    }
+
+    function isDebugEnabled() {
+      try {
+        var params = new URLSearchParams(window.location.search || '');
+        return params.get('chatbot_debug') === '1' || params.get('debug_chatbot') === '1';
+      } catch (_) {
+        return false;
+      }
     }
 
     function setLoading(is) {
@@ -314,7 +389,9 @@
 
       try {
         var csrf = document.querySelector('meta[name="csrf-token"]');
-        var res = await fetch('/api/chatbot/message', {
+        var debugEnabled = isDebugEnabled();
+        var url = '/api/chatbot/message' + (debugEnabled ? '?debug=1' : '');
+        var res = await fetch(url, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -327,10 +404,15 @@
         });
         var data = await res.json();
         if (!res.ok) {
-          appendMessage(data.message || 'Xin lỗi, có lỗi xảy ra. Vui lòng thử lại sau.', 'bot');
+          appendMessageToDom(data.response || data.message || 'Xin lỗi, có lỗi xảy ra. Vui lòng thử lại sau.', 'bot', data.debug);
         } else {
           conversationId = data.conversation_id || conversationId;
-          appendMessage(data.response || '...', 'bot');
+          appendMessageToDom(data.response || '...', 'bot', data.debug);
+
+          // cập nhật lịch sử (không lưu debug)
+          history.messages.push({ sender: 'bot', text: data.response || '...' });
+          history.conversationId = conversationId;
+          persistHistory();
         }
       } catch (e) {
         appendMessage('Xin lỗi, tôi đang gặp sự cố kết nối. Vui lòng thử lại sau.', 'bot');
@@ -349,6 +431,23 @@
 
     // render history lần đầu
     renderHistory();
+
+    // Clear chat history on logout (persist until logout)
+    (function bindLogoutClear() {
+      var logoutLinks = document.querySelectorAll('a[href*="/auth/logout"]');
+      for (var i = 0; i < logoutLinks.length; i++) {
+        logoutLinks[i].addEventListener('click', function () {
+          clearHistory();
+        });
+      }
+
+      var logoutForm = document.getElementById('logout-form-frontend');
+      if (logoutForm) {
+        logoutForm.addEventListener('submit', function () {
+          clearHistory();
+        });
+      }
+    })();
 
     toggle.addEventListener('click', openModal);
     closeBtn.addEventListener('click', closeModal);

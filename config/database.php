@@ -123,28 +123,43 @@ return [
 
         'client' => env('REDIS_CLIENT', 'phpredis'),
 
+        // Only use TLS when explicitly configured. Our local Docker Redis is plain TCP.
+        'use_tls' => (bool) env('REDIS_USE_TLS', false) || ! empty(env('REDIS_TLS_URL')),
+
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
             'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
         ],
 
-        'default' => [
-            'url' => env('REDIS_URL'),
+        'default' => array_filter([
+            // Prefer TLS URL when explicitly configured, fall back to plain URL
+            'url' => env('REDIS_TLS_URL', env('REDIS_URL')),
             'host' => env('REDIS_HOST', '127.0.0.1'),
             'username' => env('REDIS_USERNAME'),
             'password' => env('REDIS_PASSWORD'),
             'port' => env('REDIS_PORT', '6379'),
             'database' => env('REDIS_DB', '0'),
-        ],
+            'scheme' => ((bool) env('REDIS_USE_TLS', false) || ! empty(env('REDIS_TLS_URL'))) ? 'tls' : 'tcp',
+            'ssl' => ((bool) env('REDIS_USE_TLS', false) || ! empty(env('REDIS_TLS_URL'))) ? [
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+            ] : null,
+        ], fn ($value) => $value !== null),
 
-        'cache' => [
-            'url' => env('REDIS_URL'),
+        'cache' => array_filter([
+            // Prefer TLS URL when explicitly configured, fall back to plain URL
+            'url' => env('REDIS_TLS_URL', env('REDIS_URL')),
             'host' => env('REDIS_HOST', '127.0.0.1'),
             'username' => env('REDIS_USERNAME'),
             'password' => env('REDIS_PASSWORD'),
             'port' => env('REDIS_PORT', '6379'),
             'database' => env('REDIS_CACHE_DB', '1'),
-        ],
+            'scheme' => ((bool) env('REDIS_USE_TLS', false) || ! empty(env('REDIS_TLS_URL'))) ? 'tls' : 'tcp',
+            'ssl' => ((bool) env('REDIS_USE_TLS', false) || ! empty(env('REDIS_TLS_URL'))) ? [
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+            ] : null,
+        ], fn ($value) => $value !== null),
 
     ],
 

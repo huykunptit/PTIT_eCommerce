@@ -68,13 +68,15 @@
                             <span class="value">
                                 @php
                                     $shippingStatusMap = [
+                                        'pending_confirmation' => ['text' => 'Chờ xác nhận', 'class' => 'secondary'],
                                         'pending_pickup' => ['text' => 'Chờ lấy hàng', 'class' => 'warning'],
                                         'in_transit' => ['text' => 'Đang vận chuyển', 'class' => 'info'],
                                         'delivered' => ['text' => 'Đã nhận hàng', 'class' => 'success'],
                                         'cancelled' => ['text' => 'Đã hủy', 'class' => 'danger'],
                                         'returned' => ['text' => 'Đã hoàn trả', 'class' => 'secondary'],
                                     ];
-                                    $shippingStatus = $shippingStatusMap[$order->shipping_status] ?? ['text' => $order->shipping_status, 'class' => 'secondary'];
+                                    $shippingKey = (string)($order->shipping_status ?? 'pending_confirmation');
+                                    $shippingStatus = $shippingStatusMap[$shippingKey] ?? ['text' => \App\Helpers\StatusLabel::shippingStatus($shippingKey), 'class' => 'secondary'];
                                 @endphp
                                 <span class="badge badge-{{ $shippingStatus['class'] }}">{{ $shippingStatus['text'] }}</span>
                             </span>

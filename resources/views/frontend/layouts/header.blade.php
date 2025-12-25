@@ -17,16 +17,24 @@
                     <!-- Top Right -->
                     <div class="right-content">
                         <ul class="list-main">
-                        <li><i class="ti-location-pin"></i> <a href="#">Track Order</a></li>
+                            <li><i class="ti-location-pin"></i> <span>Địa chỉ: PTIT</span></li>
+                            <li><i class="ti-alarm-clock"></i> <span>Giờ làm việc: 08:00 - 17:30</span></li>
                             {{-- <li><i class="ti-alarm-clock"></i> <a href="#">Daily deal</a></li> --}}
                             @auth 
-                                @if(Auth::user()->role=='admin')
-                                    <li><i class="ti-user"></i> <a href="{{ route('admin.dashboard') }}"  target="_blank">Dashboard</a></li>
+                                @php
+                                    $roleCode = optional(Auth::user()->getRole)->role_code;
+                                    $isAdmin = $roleCode === 'admin' || Auth::user()->role === 'admin' || Auth::user()->role_id === 1;
+                                    $isStaff = in_array($roleCode, ['sales', 'shipper', 'packer', 'auditor'], true);
+                                @endphp
+                                @if($isAdmin)
+                                    <li><i class="ti-user"></i> <a href="{{ route('admin.dashboard') }}" target="_blank">Bảng điều khiển</a></li>
+                                @elseif($isStaff)
+                                    <li><i class="ti-user"></i> <a href="{{ route('employee.dashboard') }}" target="_blank">Bảng điều khiển</a></li>
                                 @endif
-                                <li><i class="ti-power-off"></i> <a href="{{ route('auth.logout') }}">Logout</a></li>
+                                <li><i class="ti-power-off"></i> <a href="{{ route('auth.logout') }}">Đăng xuất</a></li>
 
                             @else
-                                <li><i class="ti-power-off"></i><a href="{{ route('auth.login') }}">Login /</a> <a href="{{ route('auth.register') }}">Register</a></li>
+                                <li><i class="ti-power-off"></i><a href="{{ route('auth.login') }}">Đăng nhập /</a> <a href="{{ route('auth.register') }}">Đăng ký</a></li>
                             @endauth
                         </ul>
                     </div>
@@ -42,19 +50,19 @@
                 <div class="col-lg-2 col-md-2 col-12">
                     <!-- Logo -->
                     <div class="logo">
-                        <a href="{{ route('home') }}"><img src="/images/logoden.png" alt="logo"></a>
+                        <a href="{{ route('home') }}" style="display:inline-flex;align-items:center;">
+                            <img src="{{ asset('images/logoden.png') }}" alt="logo" style="max-height:60px;width:auto;object-fit:contain;">
+                        </a>
                     </div>
                     <!--/ End Logo -->
                     <!-- Search Form -->
                     <div class="search-top">
                         <div class="top-search"><a href="#0"><i class="ti-search"></i></a></div>
                         <!-- Search Form -->
-                        <div class="search-top">
-                            <form class="search-form">
-                                <input type="text" placeholder="Search here..." name="search">
-                                <button value="search" type="submit"><i class="ti-search"></i></button>
-                            </form>
-                        </div>
+                        <form class="search-form">
+                            <input type="text" placeholder="Tìm kiếm..." name="search">
+                            <button value="search" type="submit"><i class="ti-search"></i></button>
+                        </form>
                         <!--/ End Search Form -->
                     </div>
                     <!--/ End Search Form -->
@@ -64,16 +72,16 @@
                     <div class="search-bar-top">
                         <div class="search-bar" style="position:relative;">
                             <select id="search-category" style="display:none;">
-                                <option value="">All Category</option>
+                                <option value="">Tất cả danh mục</option>
                                 @php
-                                    $categories = DB::table('categories')->get();
+                                    $categories = DB::table('categories')->select('id','name')->orderBy('name')->get();
                                 @endphp
                                 @foreach($categories as $cat)
                                 <option value="{{$cat->id}}">{{$cat->name}}</option>
                                 @endforeach
                             </select>
                             <form id="search-form" method="GET" action="{{ route('home') }}" style="position:relative;">
-                                <input id="search-input" name="search" placeholder="Search Products Here....." type="search" autocomplete="off">
+                                <input id="search-input" name="search" placeholder="Tìm sản phẩm..." type="search" autocomplete="off">
                                 <button class="btnn" type="submit"><i class="ti-search"></i></button>
                             </form>
                             <div id="search-results" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #ddd;border-radius:4px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:1000;max-height:500px;overflow-y:auto;margin-top:5px;">
@@ -129,7 +137,7 @@
                                         <span>Tổng cộng</span>
                                         <span class="total-amount cart-total">0₫</span>
                                     </div>
-                                    <a href="{{ route('cart.index') }}" class="btn animate">Thanh toán</a>
+                                    <a href="{{ route('checkout.index') }}" class="btn animate">Thanh toán</a>
                                 </div>
                             </div>
                             <!--/ End Shopping Item -->
@@ -226,13 +234,24 @@
                                 <div class="navbar-collapse">	
                                     <div class="nav-inner">	
                                         <ul class="nav main-menu menu navbar-nav">
-                                            <li class="{{Request::path()=='' || Request::path()=='home' ? 'active' : ''}}"><a href="{{ route('home') }}">Home</a></li>
-                                            <li class="{{Request::path()=='about' ? 'active' : ''}}"><a href="{{ route('about') }}">About Us</a></li>
-                                            <li class="@if(Request::path()=='product-grids'||Request::path()=='product-lists'||Request::is('product*'))  active  @endif"><a href="{{ route('home') }}#products">Products</a><span class="new">New</span></li>
-                                            <li class="{{Request::path()=='blog' ? 'active' : ''}}"><a href="{{ route('home') }}#blog">Blog</a></li>
-                                            <li class="{{Request::path()=='contact' ? 'active' : ''}}"><a href="{{ route('contact') }}">Contact Us</a></li>
+                                            <li class="{{Request::path()=='' || Request::path()=='home' ? 'active' : ''}}"><a href="{{ route('home') }}">Trang chủ</a></li>
+                                            @auth
+                                                @php
+                                                    $roleCode = optional(Auth::user()->getRole)->role_code;
+                                                    $isAdmin = $roleCode === 'admin' || Auth::user()->role === 'admin' || Auth::user()->role_id === 1;
+                                                    $isStaff = in_array($roleCode, ['sales', 'shipper', 'packer', 'auditor'], true);
+                                                    $dashboardRoute = $isAdmin ? 'admin.dashboard' : ($isStaff ? 'employee.dashboard' : null);
+                                                @endphp
+                                                @if($dashboardRoute)
+                                                    <li><a href="{{ route($dashboardRoute) }}" target="_blank">Bảng điều khiển</a></li>
+                                                @endif
+                                            @endauth
+                                            <li class="{{Request::path()=='about' ? 'active' : ''}}"><a href="{{ route('about') }}">Giới thiệu</a></li>
+                                            <li class="@if(Request::path()=='product-grids'||Request::path()=='product-lists'||Request::is('product*'))  active  @endif"><a href="{{ route('home') }}#products">Sản phẩm</a><span class="new">Mới</span></li>
+                                            <li class="{{Request::path()=='blog' ? 'active' : ''}}"><a href="{{ route('blog.index') }}">Tin tức</a></li>
+                                            <li class="{{Request::path()=='contact' ? 'active' : ''}}"><a href="{{ route('contact') }}">Liên hệ</a></li>
                                             @guest
-                                            <li><a href="{{ route('auth.login') }}"><i class="ti-user"></i> Login</a></li>
+                                            <li><a href="{{ route('auth.login') }}"><i class="ti-user"></i> Đăng nhập</a></li>
                                             @endguest
                                         </ul>
                                     </div>

@@ -106,8 +106,18 @@
                 <td>{{ $order->user->name ?? 'N/A' }}</td>
                 <td class="text-right">{{ number_format($order->total_amount, 0, ',', '.') }}₫</td>
                 <td>
-                  <span class="badge badge-{{ $order->status == 'delivered' ? 'success' : ($order->status == 'cancelled' ? 'danger' : 'warning') }}">
-                    {{ ucfirst($order->status) }}
+                  @php
+                    $ss = (string)($order->shipping_status ?? 'pending_confirmation');
+                    $badge = match($ss) {
+                      'delivered' => 'success',
+                      'cancelled' => 'danger',
+                      'in_transit' => 'info',
+                      'pending_pickup' => 'primary',
+                      default => 'warning',
+                    };
+                  @endphp
+                  <span class="badge badge-{{ $badge }}">
+                    {{ ucfirst(str_replace('_', ' ', $ss)) }}
                   </span>
                 </td>
                 <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
@@ -115,10 +125,9 @@
                   <form action="{{ route('employee.orders.update-status', $order->id) }}" method="POST" class="d-inline">
                     @csrf
                     @method('PUT')
-                    <select name="status" class="form-control form-control-sm" onchange="this.form.submit()">
-                      <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>Chờ xử lý</option>
-                      <option value="processing" {{ $order->status == 'processing' ? 'selected' : '' }}>Đang xử lý</option>
-                      <option value="shipped" {{ $order->status == 'shipped' ? 'selected' : '' }}>Đã gửi</option>
+                    <select name="shipping_status" class="form-control form-control-sm" onchange="this.form.submit()">
+                      <option value="pending_confirmation" {{ ($order->shipping_status ?? 'pending_confirmation') == 'pending_confirmation' ? 'selected' : '' }}>Chờ xác nhận</option>
+                      <option value="pending_pickup" {{ ($order->shipping_status ?? '') == 'pending_pickup' ? 'selected' : '' }}>Chờ lấy hàng</option>
                     </select>
                   </form>
                 </td>

@@ -2,15 +2,15 @@
     <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         <i class="fa fa-bell fa-fw"></i>
         <!-- Counter - Alerts -->
-        <span class="badge badge-danger badge-counter" id="notificationBadge" style="display: none;">
+        <span class="badge badge-danger badge-counter" id="notificationBadge">
             <span class="count" id="notificationCount">0</span>
         </span>
     </a>
     <!-- Dropdown - Alerts -->
     <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown" style="width: 350px; max-height: 400px; overflow-y: auto;">
         <h6 class="dropdown-header">
-            Notifications Center
-            <a href="{{ route('admin.notification.index') }}" class="float-right small">Xem tất cả</a>
+            Trung tâm thông báo
+            <a href="#" class="float-right small" id="markAllNotificationsRead">Đánh dấu đã đọc</a>
         </h6>
         <div id="notificationsList">
             <div class="text-center p-3">
@@ -19,8 +19,8 @@
                 </div>
             </div>
         </div>
-        <a class="dropdown-item text-center small text-gray-500" href="{{ route('admin.notification.index') ?? '#' }}">
-            Show All Notifications
+        <a class="dropdown-item text-center small text-gray-500" href="{{ route('admin.notification.index') }}">
+            Xem tất cả thông báo
         </a>
     </div>
 </div>
@@ -52,13 +52,12 @@ $(document).ready(function() {
     function updateNotificationBadge(count) {
         const $badge = $('#notificationBadge');
         const $count = $('#notificationCount');
-        
-        if (count > 0) {
-            $count.text(count);
-            $badge.show();
-        } else {
-            $badge.hide();
-        }
+
+        const safe = Number.isFinite(count) ? count : 0;
+        $count.text(safe);
+        // Always show badge; show grey when 0
+        $badge.removeClass('badge-danger badge-secondary');
+        $badge.addClass(safe > 0 ? 'badge-danger' : 'badge-secondary');
     }
     
     function renderNotifications(notifications) {
@@ -105,6 +104,23 @@ $(document).ready(function() {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            complete: function() {
+                // Refresh count + list (non-blocking for navigation)
+                loadNotifications();
+            }
+        });
+    }
+
+    function markAllAsRead() {
+        $.ajax({
+            url: '{{ route('admin.notifications.read-all') }}',
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            success: function() {
+                loadNotifications();
             }
         });
     }
@@ -118,6 +134,11 @@ $(document).ready(function() {
     // Also check when dropdown is opened
     $('#alertsDropdown').on('click', function() {
         loadNotifications();
+    });
+
+    $('#markAllNotificationsRead').on('click', function(e) {
+        e.preventDefault();
+        markAllAsRead();
     });
     
     // Cleanup on page unload

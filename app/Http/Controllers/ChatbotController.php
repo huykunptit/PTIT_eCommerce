@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use App\Models\Product;
 use App\Models\Order;
 use Illuminate\Support\Facades\Auth;
@@ -40,6 +41,10 @@ class ChatbotController extends Controller
             'conversation_id' => 'nullable|string',
         ]);
 
+        $debugRequested = $request->boolean('debug');
+        $debugAllowed = (bool) config('app.debug') || (bool) env('CHATBOT_UI_DEBUG', false);
+        $debugEnabled = $debugRequested && $debugAllowed;
+
         $user = Auth::user();
         $message = $request->input('message');
         $conversationId = $request->input('conversation_id', 'conv_' . uniqid());
@@ -55,16 +60,58 @@ class ChatbotController extends Controller
                 'conversation_id' => $conversationId,
                 'user_id' => $user?->id,
                 'system_data' => $systemData,
+                'debug' => $debugEnabled,
             ]);
 
             if ($response->successful()) {
-                return response()->json([
-                    'response' => $response->json()['response'],
+                $json = $response->json();
+                $payload = [
+                    'response' => $json['response'] ?? '...',
                     'conversation_id' => $conversationId,
-                ]);
+                ];
+                if ($debugEnabled && isset($json['debug'])) {
+                    $payload['debug'] = $json['debug'];
+                }
+                return response()->json($payload);
             }
+
+            // FastAPI có phản hồi nhưng không thành công
+            
+            $detail = null;
+            try {
+                $detail = $response->json();
+            } catch (\Throwable $e) {
+                $detail = $response->body();
+            }
+
+            Log::warning('Chatbot FastAPI non-2xx', [
+                'status' => $response->status(),
+                'detail' => $detail,
+            ]);
+
+            return response()->json([
+                'message' => 'Chatbot service error',
+                'response' => 'Xin lỗi, dịch vụ AI đang gặp sự cố. Vui lòng thử lại sau.',
+                'conversation_id' => $conversationId,
+                'debug' => $debugEnabled ? [
+                    'fastapi_url' => $fastApiUrl,
+                    'status' => $response->status(),
+                    'detail' => $detail,
+                ] : null,
+            ], 502);
         } catch (\Exception $e) {
-            \Log::error('Chatbot error: ' . $e->getMessage());
+            Log::error('Chatbot error: ' . $e->getMessage());
+
+            return response()->json([
+                'message' => 'Chatbot gateway error',
+                'response' => 'Xin lỗi, tôi đang gặp sự cố kết nối đến dịch vụ AI. Vui lòng thử lại sau.',
+                'conversation_id' => $conversationId,
+                'debug' => $debugEnabled ? [
+                    'fastapi_url' => env('FASTAPI_URL', 'http://fastapi:8001'),
+                    'error_type' => get_class($e),
+                    'error' => $e->getMessage(),
+                ] : null,
+            ], 503);
         }
 
         // Fallback response nếu FastAPI không khả dụng

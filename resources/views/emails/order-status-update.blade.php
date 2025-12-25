@@ -84,19 +84,7 @@
             <p>Đơn hàng #{{ $order->id }} của bạn đã được cập nhật trạng thái:</p>
             
             <div class="status-badge status-{{ $status }}">
-                @if($status == 'pending')
-                    Chờ xử lý
-                @elseif($status == 'processing')
-                    Đang xử lý
-                @elseif($status == 'shipped')
-                    Đã gửi hàng
-                @elseif($status == 'delivered')
-                    Đã giao hàng
-                @elseif($status == 'cancelled')
-                    Đã hủy
-                @else
-                    {{ ucfirst($status) }}
-                @endif
+                {{ \App\Helpers\StatusLabel::orderStatus($status) }}
             </div>
         </div>
 

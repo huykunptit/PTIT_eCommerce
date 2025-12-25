@@ -21,6 +21,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\TagController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
+use App\Http\Controllers\BlogController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -36,6 +37,9 @@ use Illuminate\Support\Facades\Redirect;
 Route::get('/', function () {
     return view('home');
 })->name('home');
+
+// Backward-compatible path used by some Laravel defaults
+Route::redirect('/home', '/', 302);
 
 // Dev helper: nhanh chóng mở tài liệu API FastAPI (Swagger)
 Route::get('/fastapi/docs', function () {
@@ -53,6 +57,10 @@ Route::get('/contact', function(){
 })->name('contact');
 
 Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'submit'])->name('contact.submit');
+
+// Blog (public)
+Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/{id}', [BlogController::class, 'show'])->whereNumber('id')->name('blog.show');
 
 // Search
 Route::get('/search', function (\Illuminate\Http\Request $request) {
@@ -80,7 +88,7 @@ Route::get('/search', function (\Illuminate\Http\Request $request) {
 // Product detail
 Route::get('/product/{id}', function ($id) {
     return view('product.show', ['id' => $id]);
-})->name('product.show');
+})->whereNumber('id')->name('product.show');
 
 // Cart Routes
 Route::prefix('cart')->name('cart.')->group(function () {
@@ -208,6 +216,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth', 'a
     // Orders Management
     Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
     Route::get('/orders/{id}', [AdminController::class, 'showOrder'])->name('orders.show');
+    Route::post('/orders/{id}/assign', [AdminController::class, 'assignOrder'])->name('orders.assign');
     Route::put('/orders/{id}/status', [AdminController::class, 'updateOrderStatus'])->name('orders.update-status');
     Route::put('/orders/{id}/shipping-status', [AdminController::class, 'updateShippingStatus'])->name('orders.update-shipping-status');
     Route::post('/orders/{id}/confirm-payment', [AdminController::class, 'confirmPayment'])->name('orders.confirm-payment');
@@ -225,6 +234,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth', 'a
     Route::get('/notifications', [AdminController::class, 'notificationIndex'])->name('notification.index');
     Route::get('/notifications/api', [AdminController::class, 'getNotifications'])->name('notifications.api');
     Route::post('/notifications/{id}/read', [AdminController::class, 'markNotificationAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [AdminController::class, 'markAllNotificationsAsRead'])->name('notifications.read-all');
 
     // Export Data
     Route::get('/export/orders', [AdminController::class, 'exportOrders'])->name('export.orders');
@@ -239,6 +249,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth', 'a
 // Employee Routes
 Route::group(['prefix' => 'employee', 'as' => 'employee.', 'middleware' => ['auth', 'employee']], function () {
     Route::get('/dashboard', [EmployeeController::class, 'dashboard'])->name('dashboard');
+    Route::post('/orders/{id}/assign', [EmployeeController::class, 'assignOrder'])->name('orders.assign');
     Route::put('/orders/{id}/status', [EmployeeController::class, 'updateOrderStatus'])->name('orders.update-status');
 });
 

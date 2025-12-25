@@ -332,7 +332,7 @@
 
             var data = await res.json();
             if (!res.ok) {
-                appendMessage(data.message || 'Xin lỗi, có lỗi xảy ra. Vui lòng thử lại sau.', 'bot');
+                appendMessage(data.response || data.message || 'Xin lỗi, có lỗi xảy ra. Vui lòng thử lại sau.', 'bot');
             } else {
                 conversationId = data.conversation_id || conversationId;
                 appendMessage(data.response || '...', 'bot');

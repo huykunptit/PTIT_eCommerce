@@ -40,13 +40,7 @@
                             <div class="info-row">
                                 <span class="info-label">Trạng thái:</span>
                                 <span class="info-value status-{{ $order->status }}">
-                                    @if($order->status == 'pending')
-                                        Đang chờ xử lý
-                                    @elseif($order->status == 'paid')
-                                        Đã thanh toán
-                                    @else
-                                        {{ $order->status }}
-                                    @endif
+                                    {{ \App\Helpers\StatusLabel::orderStatus($order->status) }}
                                 </span>
                             </div>
                         </div>

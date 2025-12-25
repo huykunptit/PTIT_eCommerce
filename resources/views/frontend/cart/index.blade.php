@@ -85,7 +85,7 @@
                         </table>
                     </div>
                     <div class="cart-actions">
-                        <a href="{{ route('home') }}" class="btn-continue">
+                        <a href="{{ route('home') }}#products" class="btn-continue">
                             <i class="fa fa-arrow-left mr-2"></i>Tiếp tục mua sắm
                         </a>
                         <button type="button" class="btn-clear-cart">
@@ -130,7 +130,7 @@
             </div>
             <h3>Giỏ hàng của bạn đang trống</h3>
             <p>Hãy thêm sản phẩm vào giỏ hàng để tiếp tục mua sắm</p>
-            <a href="{{ route('home') }}" class="btn-shop-now">
+            <a href="{{ route('home') }}#products" class="btn-shop-now">
                 <i class="fa fa-shopping-bag mr-2"></i>Mua sắm ngay
             </a>
         </div>

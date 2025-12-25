@@ -21,7 +21,7 @@ class BannersSeeder extends Seeder
             Banner::firstOrCreate(['title' => $b['title']], [
                 'description' => $b['description'],
                 'slug' => str()->slug($b['title']).'-'.uniqid(),
-                'photo' => 'https://via.placeholder.com/800x300?text='.urlencode($b['title']),
+                'photo' => 'backend/img/banner.png',
                 'status' => 'active',
             ]);
         }

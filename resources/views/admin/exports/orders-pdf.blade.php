@@ -72,7 +72,7 @@
                 <td>{{ $order->shipping_email ?? $order->user->email ?? 'N/A' }}</td>
                 <td>{{ $order->shipping_phone ?? 'N/A' }}</td>
                 <td>{{ number_format($order->total_amount, 0, ',', '.') }}₫</td>
-                <td>{{ ucfirst($order->status) }}</td>
+                <td>{{ \App\Helpers\StatusLabel::orderStatus($order->status) }}</td>
                 <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
             </tr>
             @endforeach

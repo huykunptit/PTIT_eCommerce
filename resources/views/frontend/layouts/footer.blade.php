@@ -124,7 +124,7 @@
     <script src="{{ asset('frontend/js/chatbot-widget.js') }}"></script>
 
 	
-	@stack('scripts')
+	
 	<script>
 		setTimeout(function(){
 		  $('.alert').slideUp();
@@ -192,16 +192,29 @@
 				const sidebar = $('#mini-cart-sidebar');
 				const itemsList = sidebar.find('.mini-cart-items');
 				const totalEl = sidebar.find('.mini-cart-total');
+				const items = (data && Array.isArray(data.items)) ? data.items : [];
 				
 				itemsList.empty();
 				
 				// Update cart count badge
-				$('.cart-count-badge').text('(' + data.count + ')');
+				$('.cart-count-badge').text('(' + (data && typeof data.count !== 'undefined' ? data.count : 0) + ')');
 				
-				if (data.items.length > 0) {
-					data.items.forEach(function(item) {
-						const variantText = item.variant ? 
-							`<div class="mini-cart-variant">${JSON.parse(item.variant).size || ''} ${JSON.parse(item.variant).option || ''}</div>` : '';
+				function safeVariantText(variant) {
+					if (!variant) return '';
+					let v = variant;
+					if (typeof v === 'string') {
+						try { v = JSON.parse(v); } catch (e) { return ''; }
+					}
+					if (!v || typeof v !== 'object') return '';
+					const size = v.size || v.Size || v.kich_co || '';
+					const option = v.option || v.Option || v.mau_sac || '';
+					const text = [size, option].filter(Boolean).join(' ');
+					return text ? `<div class="mini-cart-variant">${text}</div>` : '';
+				}
+				
+				if (items.length > 0) {
+					items.forEach(function(item) {
+						const variantText = safeVariantText(item.variant);
 						const li = $(`
 							<li class="mini-cart-item">
 								<a class="mini-cart-img" href="/product/${item.product_id}">
@@ -303,14 +316,20 @@
 				$('.cart-count').text(data.count);
 				$('.cart-items-count').text(data.count + ' Sản phẩm');
 				$('.cart-total').text(data.total_formatted);
+				const $cartCta = $('.cart-preview .bottom .btn');
 				
 				const list = $('.cart-items-list');
 				list.empty();
 				
 				if (data.items.length > 0) {
+					// CTA: checkout when there are items
+					$cartCta.text('Thanh toán').attr('href', '{{ route("checkout.index") }}');
 					data.items.slice(0, 3).forEach(function(item) {
 						const li = $('<li>');
 						li.html(`
+							<a href="#" class="remove cart-preview-remove" data-key="${item.key}" title="Xóa">
+								<i class="ti-close"></i>
+							</a>
 							<a class="cart-img" href="/product/${item.product_id}">
 								<img src="${item.image}" referrerpolicy="no-referrer" alt="${item.product_name}">
 							</a>
@@ -322,11 +341,33 @@
 					if (data.items.length > 3) {
 						list.append('<li class="text-center"><small>... và ' + (data.items.length - 3) + ' sản phẩm khác</small></li>');
 					}
+
+					$('.cart-preview-remove').off('click').on('click', function(e) {
+						e.preventDefault();
+						const key = $(this).data('key');
+						removeCartItemHeader(key);
+					});
 				} else {
 					list.append('<li class="empty-message">Giỏ hàng trống</li>');
+					// CTA: shopping when empty
+					$cartCta.text('Mua sắm ngay').attr('href', '{{ route("home") }}#products');
 				}
 			}).fail(function() {
 				// Silent fail for header cart
+			});
+		}
+
+		function removeCartItemHeader(key) {
+			$.ajax({
+				url: `{{ url('cart/remove') }}/${key}`,
+				method: 'DELETE',
+				headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+				success: function(response) {
+					if (response.success) {
+						loadCartData();
+						loadMiniCartData();
+					}
+				}
 			});
 		}
 		

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\HomepageController;
+use App\Http\Controllers\Api\PublicProductController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\Api\OrderApiController;
 
@@ -30,6 +31,9 @@ Route::get('/ping', function () {
 
 // Public Homepage config/data
 Route::get('/homepage', [HomepageController::class, 'index']);
+
+// Public products search for chatbot/frontends
+Route::get('/products', [PublicProductController::class, 'index']);
 
 // API Authentication Routes
 Route::group(['prefix' => 'auth', 'as' => 'auth.'], function () {
